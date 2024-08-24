@@ -2,6 +2,8 @@
 
 import {
   useFetchCollectionsQuery,
+  useGetMarketplaceCollectionsQuery,
+  useGetSingleCollectionQuery,
   useUserAuctionQuery,
   useUserListingQuery,
   useUserNFTsQuery,
@@ -51,6 +53,18 @@ export default function Home() {
 
   const { data: userAuction } = useUserAuctionQuery();
   console.log({ userAuction });
+
+  const data = useGetMarketplaceCollectionsQuery();
+  console.log({ data });
+
+  const { data: collectionNFT } = useGetMarketplaceCollectionsQuery();
+  console.log({ collectionNFT });
+
+  const { data: singleCollection } = useGetSingleCollectionQuery(
+    "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    "ERC721"
+  );
+  console.log({ singleCollection });
 
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);

@@ -27,7 +27,6 @@ export function useUserNFTsQuery() {
         `${CROSSFI_API}/token-holders?address=${TEST_ADDRESS}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`
       );
       const userNFTs = response.data.docs;
-      console.log({ userNFTs });
       return userNFTs;
     },
     enabled: !!userAddress,

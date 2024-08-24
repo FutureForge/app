@@ -1,10 +1,11 @@
 // models/Collection.ts
 import mongoose, { Document, Schema } from "mongoose";
 
-interface ICollection extends Document {
+export interface ICollection extends Document {
   collectionContractAddress: string;
   name: string;
   description: string;
+  nftType: string;
 }
 
 const CollectionSchema = new Schema<ICollection>({
@@ -21,6 +22,12 @@ const CollectionSchema = new Schema<ICollection>({
     type: String,
     required: false,
     maxLength: 500,
+  },
+  nftType: {
+    type: String,
+    required: false,
+    enum: ["ERC721", "ERC1155"],
+    default: "ERC721",
   },
 });
 

@@ -1,4 +1,8 @@
-export { useFetchCollectionsQuery } from "./collection";
+export {
+  useFetchCollectionsQuery,
+  useGetMarketplaceCollectionsQuery,
+  useGetSingleCollectionQuery,
+} from "./collection";
 export {
   useUserChainInfo,
   useUserNFTsQuery,

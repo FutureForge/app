@@ -1,26 +1,28 @@
-import mongoose, { MongooseError } from "mongoose";
+import mongoose from "mongoose";
 
 const MONGO_URI = process.env.MONGO_URI!;
 
 interface MongooseGlobal {
-  connection: any;
-  promise: any;
+  mongoose: {
+    connection: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  };
 }
 
-declare const global: MongooseGlobal;
+// Declaration merging to extend the global object
+declare global {
+  var mongoose: MongooseGlobal["mongoose"];
+}
 
-global.mongoose = {
+global.mongoose = global.mongoose || {
   connection: null,
   promise: null,
 };
 
 export async function dbConnect() {
   if (global.mongoose && global.mongoose.connection) {
-    console.log("connected from previous connection");
+    return global.mongoose.connection;
   } else {
-
-    console.log({MongooseError})
-
     const connectionPromise = mongoose.connect(MONGO_URI, {
       autoIndex: true,
     });
@@ -30,7 +32,6 @@ export async function dbConnect() {
       promise: connectionPromise,
     };
 
-    console.log("connected to MongoDB");
-    return await connectionPromise;
+    return connectionPromise;
   }
 }

@@ -8,8 +8,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const db = await dbConnect();
-    console.log({ db });
+    await dbConnect();
 
     if (req.method === "GET") {
       try {
@@ -24,7 +23,6 @@ export default async function handler(
       }
     } else if (req.method === "POST") {
       const { collectionContractAddress, name, description } = req.body;
-      console.log('req body',req.body);
 
       try {
         const newCollection = new Collection({
@@ -44,7 +42,6 @@ export default async function handler(
       res.status(405).json({ success: false, message: "Method not allowed" });
     }
   } catch (error: any) {
-    console.log({ error, message: "connection to db failed" });
     res.status(500).json({ error: error.message });
   }
 }

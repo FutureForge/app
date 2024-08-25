@@ -1,0 +1,108 @@
+/* -------------------------------------------------------------------------------------------------
+ * WRITE FUNCTIONS
+ * -----------------------------------------------------------------------------------------------*/
+
+import {
+  convertToBlockchainTimestamp,
+  getCurrentBlockchainTimestamp,
+} from "@/utils";
+import { CreateAuctionType } from "@/utils/lib/types";
+import { getContractCustom, nativeCurrency } from "../lib";
+import { MARKETPLACE_CONTRACT } from "@/utils/configs";
+import { prepareContractCall, toWei } from "thirdweb";
+
+export async function getCreateAuction({
+  params: _params,
+}: {
+  params: CreateAuctionType;
+}) {
+  const startTimestamp = getCurrentBlockchainTimestamp();
+  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const formattedParams = {
+    assetContract: _params.assetContract,
+    tokenId: BigInt(_params.tokenId),
+    quantity: BigInt(_params.quantity),
+    currency: _params.currency || nativeCurrency,
+    minimumBidAmount: toWei(_params.minimumBidAmount),
+    buyoutBidAmount: toWei(_params.buyoutBidAmount),
+    timeBufferInSeconds: BigInt(_params.timeBufferInSeconds),
+    bidBufferBps: BigInt(_params.bidBufferBps),
+    startTimestamp,
+    endTimestamp,
+  };
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function createAuction((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 minimumBidAmount, uint256 buyoutBidAmount, uint64 timeBufferInSeconds, uint64 bidBufferBps, uint64 startTimestamp, uint64 endTimestamp) _params) returns (uint256 auctionId)",
+    params: [formattedParams],
+  });
+
+  return transaction;
+}
+
+export async function getCancelAuction({ auctionId }: { auctionId: string }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function cancelAuction(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}
+
+export async function getBidInAuction({
+  auctionId,
+  bidAmount,
+}: {
+  auctionId: string;
+  bidAmount: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function bidInAuction(uint256 _auctionId, uint256 _bidAmount) payable",
+    params: [BigInt(auctionId), toWei(bidAmount)],
+  });
+
+  return transaction;
+}
+
+export async function getCollectAuctionPayout({
+  auctionId,
+}: {
+  auctionId: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function collectAuctionPayout(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}
+
+export async function getCollectAuctionTokens({
+  auctionId,
+}: {
+  auctionId: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function collectAuctionTokens(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}

@@ -1,5 +1,6 @@
 export { useAddCollectionMutation } from "./collection";
 export { useCreateListingMutation } from "./listing";
+export { useApprovedForAllMutation } from "./lib";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 // syntax

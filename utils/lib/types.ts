@@ -24,3 +24,12 @@ export type CreateDirectListingType = {
   endTimestamp?: string;
   reserved?: boolean;
 };
+
+export type MakeOfferListingType = {
+  assetContract: string;
+  tokenId: string;
+  quantity: string;
+  currency: string;
+  totalPrice: string;
+  expirationTimestamp?: string;
+};

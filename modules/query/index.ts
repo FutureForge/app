@@ -10,8 +10,8 @@ export {
   useUserListingQuery,
   useUserAuctionQuery,
 } from "./user";
-
 export { useMarketplaceEventQuery } from "./events";
+export { useCheckApprovedForAll } from "./lib";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 

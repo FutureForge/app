@@ -1,11 +1,17 @@
-import { convertToBlockchainTimestamp, getCurrentBlockchainTimestamp } from "@/utils";
+import {
+  convertToBlockchainTimestamp,
+  getCurrentBlockchainTimestamp,
+} from "@/utils";
 import {
   chainInfoV2,
   client,
   MARKETPLACE_CONTRACT,
   rpcRequest,
 } from "@/utils/configs";
-import { CreateDirectListingType } from "@/utils/lib/types";
+import {
+  CreateDirectListingType,
+  MakeOfferListingType,
+} from "@/utils/lib/types";
 import {
   eth_blockNumber,
   getContractEvents,
@@ -41,6 +47,10 @@ export function getContract({ contractAddress }: { contractAddress: string }) {
 export async function getCurrentBlockNumber() {
   return await eth_blockNumber(rpcRequest);
 }
+
+/* -------------------------------------------------------------------------------------------------
+ * READ FUNCTIONS
+ * -----------------------------------------------------------------------------------------------*/
 
 export async function getTotalListings() {
   const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
@@ -115,6 +125,29 @@ export async function getAllAuctions() {
   });
 
   return allAuctions;
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * EVENTS FUNCTIONS
+ * -----------------------------------------------------------------------------------------------*/
+
+export async function getCheckApprovedForAll({
+  walletAddress,
+  collectionContractAddress,
+}: {
+  walletAddress: string;
+  collectionContractAddress: string;
+}) {
+  const contract = getContract({ contractAddress: collectionContractAddress });
+
+  const approved = await readContract({
+    contract,
+    method:
+      "function isApprovedForAll(address owner, address operator) view returns (bool)",
+    params: [walletAddress, MARKETPLACE_CONTRACT],
+  });
+
+  return approved;
 }
 
 export async function getNewListing() {
@@ -245,6 +278,28 @@ export async function getRecentlySold() {
   return response;
 }
 
+/* -------------------------------------------------------------------------------------------------
+ * WRITE FUNCTIONS
+ * -----------------------------------------------------------------------------------------------*/
+
+export async function getSetApprovalForAll({
+  collectionContractAddress,
+  approved = true,
+}: {
+  collectionContractAddress: string;
+  approved?: boolean;
+}) {
+  const contract = getContract({ contractAddress: collectionContractAddress });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function setApprovalForAll(address operator, bool approved)",
+    params: [MARKETPLACE_CONTRACT, approved],
+  });
+
+  return transaction;
+}
+
 export async function getCreateDirectListing({
   params: _params,
 }: {
@@ -270,6 +325,35 @@ export async function getCreateDirectListing({
     contract,
     method:
       "function createListing((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) _params) returns (uint256 listingId)",
+    params: [formattedParams],
+  });
+
+  return transaction;
+}
+
+export async function getMakeOffer({
+  params: _params,
+}: {
+  params: MakeOfferListingType;
+}) {
+  const expirationTimestamp = convertToBlockchainTimestamp(
+    _params.expirationTimestamp
+  );
+  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const formattedParams = {
+    assetContract: _params.assetContract,
+    tokenId: BigInt(_params.tokenId),
+    quantity: BigInt(_params.quantity),
+    currency: _params.currency,
+    totalPrice: toWei(_params.totalPrice),
+    expirationTimestamp,
+  };
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function makeOffer((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 totalPrice, uint256 expirationTimestamp) _params) returns (uint256 _offerId)",
     params: [formattedParams],
   });
 

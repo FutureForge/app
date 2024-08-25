@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCheckApprovedForAll,
   useFetchCollectionsQuery,
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
@@ -12,9 +13,15 @@ import {
 } from "@/modules/query";
 import {
   useAddCollectionMutation,
+  useApprovedForAllMutation,
   useCreateListingMutation,
 } from "@/modules/mutation";
-import { chainInfo, chainInfoV2, client, MARKETPLACE_CONTRACT } from "@/utils/configs";
+import {
+  chainInfo,
+  chainInfoV2,
+  client,
+  MARKETPLACE_CONTRACT,
+} from "@/utils/configs";
 import { ConnectButton } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import {
@@ -27,6 +34,7 @@ export default function Home() {
   const { data: collections, isLoading } = useFetchCollectionsQuery();
   const addCollectionMutation = useAddCollectionMutation();
   const createListingMutation = useCreateListingMutation();
+  const approveForAllMutation = useApprovedForAllMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -72,22 +80,36 @@ export default function Home() {
   console.log({ newListingEvent });
 
   console.log({
-    message: 'create listing console',
+    message: "create listing console",
     isPending: createListingMutation.isPending,
-  })
+  });
+
+  const { data: isApproved } = useCheckApprovedForAll(
+    "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229"
+  );
+  console.log({ isApproved });
+
+  console.log({
+    message: "approved for all console",
+    isPending: approveForAllMutation.isPending,
+  });
 
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
-    createListingMutation.mutate({
-      directListing: {
-        assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-        tokenId: "3",
-        quantity: "1",
-        pricePerToken: "0.01",
-        // startTimestamp: "1724575286588",
-        // endTimestamp: "1724966514213",
-      },
+    // createListingMutation.mutate({
+    //   directListing: {
+    //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    //     tokenId: "3",
+    //     quantity: "1",
+    //     pricePerToken: "0.01",
+    //     // startTimestamp: "1724575286588",
+    //     // endTimestamp: "1724966514213",
+    //   },
+    // });
+
+    approveForAllMutation.mutate({
+      collectionContractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
     });
   };
 

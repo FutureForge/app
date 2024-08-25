@@ -81,7 +81,7 @@ export function useUserAuctionQuery() {
   const userAddress = activeAccount?.address;
 
   return useQuery({
-    queryKey: ["userAuction", "userProfile", "profile"],
+    queryKey: ["userAuction", "userProfile", "profile", "auction"],
     queryFn: async () => {
       const allAuctions = await getAllAuctions();
 

@@ -1,8 +1,13 @@
-import { getCreateDirectListing, getMakeOffer } from "@/modules/blockchain";
+import {
+  getBuyFromDirectListing,
+  getCancelDirectListing,
+  getCreateDirectListing,
+  getUpdateDirectListing,
+} from "@/modules/blockchain";
 import { useUserChainInfo } from "@/modules/query";
 import {
+  BuyFromDirectListingType,
   CreateDirectListingType,
-  MakeOfferListingType,
 } from "@/utils/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { sendAndConfirmTransaction } from "thirdweb";
@@ -56,27 +61,28 @@ export function useCreateListingMutation() {
     },
   });
 }
-
-export function useMakeListingOfferMutation() {
+export function useUpdateListingMutation() {
   const queryClient = useQueryClient();
   const { activeAccount } = useUserChainInfo();
 
   return useMutation({
     mutationFn: async ({
-      makeOffer,
+      listingId,
+      directListing,
     }: {
-      makeOffer: Partial<MakeOfferListingType>;
+      listingId: string;
+      directListing: Partial<CreateDirectListingType>;
     }) => {
       if (!activeAccount) return;
 
-      const transaction = await getMakeOffer({
+      const transaction = await getUpdateDirectListing({
+        listingId,
         params: {
-          assetContract: makeOffer.assetContract ?? "",
-          tokenId: makeOffer.tokenId ?? "",
-          quantity: makeOffer.quantity ?? "",
-          currency: makeOffer.currency ?? "",
-          totalPrice: makeOffer.totalPrice ?? "",
-          expirationTimestamp: makeOffer.expirationTimestamp ?? "",
+          assetContract: directListing.assetContract ?? "",
+          tokenId: directListing.tokenId ?? "",
+          quantity: directListing.quantity ?? "",
+          pricePerToken: directListing.pricePerToken ?? "",
+          endTimestamp: directListing.endTimestamp ?? "",
         },
       });
 
@@ -93,16 +99,107 @@ export function useMakeListingOfferMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["offer", "event"],
+        queryKey: ["userListing"],
       });
     },
     onError: () => {},
     meta: {
       successMessage: {
-        description: "Offer made successfully",
+        description: "Listing updated successfully",
       },
       errorMessage: {
-        description: "Failed to make offer",
+        description: "Failed to update listing",
+      },
+    },
+  });
+}
+
+export function useCancelDirectListingMutation() {
+  const queryClient = useQueryClient();
+  const { activeAccount } = useUserChainInfo();
+
+  return useMutation({
+    mutationFn: async ({ listingId }: { listingId: string }) => {
+      if (!activeAccount) return;
+
+      const transaction = await getCancelDirectListing({
+        listingId,
+      });
+
+      const transactionReceipt = await sendAndConfirmTransaction({
+        transaction,
+        account: activeAccount,
+      });
+
+      if (transactionReceipt.status === "reverted") {
+        throw new Error("Transaction failed");
+      }
+
+      return transactionReceipt;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["userListing"],
+      });
+    },
+    onError: () => {},
+    meta: {
+      successMessage: {
+        description: "Listing cancelled",
+      },
+      errorMessage: {
+        description: "Failed to cancel listing",
+      },
+    },
+  });
+}
+
+export function useBuyFromDirectListingMutation() {
+  const queryClient = useQueryClient();
+  const { activeAccount } = useUserChainInfo();
+
+  return useMutation({
+    mutationFn: async ({
+      buyFromListing,
+    }: {
+      buyFromListing: Partial<BuyFromDirectListingType>;
+    }) => {
+      if (!activeAccount) return;
+
+      const transaction = await getBuyFromDirectListing({
+        params: {
+          buyFor: activeAccount.address,
+          currency: buyFromListing.currency ?? "",
+          listingId: buyFromListing.listingId ?? "",
+          quantity: buyFromListing.quantity ?? "",
+          nativeTokenValue: buyFromListing.nativeTokenValue ?? "",
+          totalPrice: buyFromListing.totalPrice ?? "",
+        },
+      });
+
+      const transactionReceipt = await sendAndConfirmTransaction({
+        transaction,
+        account: activeAccount,
+      });
+
+      if (transactionReceipt.status === "reverted") {
+        throw new Error("Transaction failed");
+      }
+
+      return transactionReceipt;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["userListing"],
+      });
+    },
+    onError: () => {},
+    meta: {
+      successMessage: {
+        description: "Listing bought",
+      },
+      errorMessage: {
+        description: "Failed to buy listing",
       },
     },
   });

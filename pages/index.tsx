@@ -15,6 +15,7 @@ import {
   useAddCollectionMutation,
   useApprovedForAllMutation,
   useCreateListingMutation,
+  useMakeListingOfferMutation,
 } from "@/modules/mutation";
 import {
   chainInfo,
@@ -26,9 +27,9 @@ import { ConnectButton } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import {
   getAllOffers,
-  getContract,
   getTotalListings,
 } from "@/modules/blockchain";
+import { getContractCustom } from "@/modules/blockchain/lib";
 
 export default function Home() {
   const { data: collections, isLoading } = useFetchCollectionsQuery();
@@ -49,7 +50,7 @@ export default function Home() {
   const userNFTs = useUserNFTsQuery();
   console.log({ userNFTs });
 
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   console.log({ contract });
 
   const totalListing = getTotalListings();

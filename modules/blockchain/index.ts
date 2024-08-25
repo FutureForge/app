@@ -2,58 +2,31 @@ import {
   convertToBlockchainTimestamp,
   getCurrentBlockchainTimestamp,
 } from "@/utils";
+import { MARKETPLACE_CONTRACT } from "@/utils/configs";
 import {
-  chainInfoV2,
-  client,
-  MARKETPLACE_CONTRACT,
-  rpcRequest,
-} from "@/utils/configs";
-import {
+  BuyFromDirectListingType,
+  CreateAuctionType,
   CreateDirectListingType,
   MakeOfferListingType,
 } from "@/utils/lib/types";
 import {
-  eth_blockNumber,
   getContractEvents,
-  getContract as getContractThirdweb,
   prepareContractCall,
   prepareEvent,
   readContract,
   toWei,
 } from "thirdweb";
+import { getContractCustom, getCurrentBlockNumber } from "./lib";
 
 const fromBlock = 6543730;
 const nativeCurrency = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
-export function getContract({ contractAddress }: { contractAddress: string }) {
-  // const contract = new ethers.Contract(
-  //   MARKETPLACE_CONTRACT,
-  //   MarketPlaceInterface,
-  //   ethers.getDefaultProvider("sepolia")
-  // );
-  // return contract;
-
-  if (!contractAddress) throw new Error("Please pass in a contract address");
-
-  const contract = getContractThirdweb({
-    client,
-    chain: chainInfoV2,
-    address: contractAddress,
-  });
-
-  return contract;
-}
-
-export async function getCurrentBlockNumber() {
-  return await eth_blockNumber(rpcRequest);
-}
 
 /* -------------------------------------------------------------------------------------------------
  * READ FUNCTIONS
  * -----------------------------------------------------------------------------------------------*/
 
 export async function getTotalListings() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const totalListings = await readContract({
     contract,
     method: "function totalListings() view returns (uint256)",
@@ -64,7 +37,7 @@ export async function getTotalListings() {
 }
 
 export async function getTotalOffers() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const totalOffers = await readContract({
     contract,
     method: "function totalOffers() view returns (uint256)",
@@ -75,7 +48,7 @@ export async function getTotalOffers() {
 }
 
 export async function getTotalAuctions() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const totalAuctions = await readContract({
     contract,
     method: "function totalAuctions() view returns (uint256)",
@@ -86,7 +59,7 @@ export async function getTotalAuctions() {
 }
 
 export async function getAllListing() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const totalListings = await getTotalListings();
 
   const allListings = await readContract({
@@ -100,7 +73,7 @@ export async function getAllListing() {
 }
 
 export async function getAllOffers() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const totalOffers = await getTotalOffers();
 
   const allOffers = await readContract({
@@ -114,7 +87,7 @@ export async function getAllOffers() {
 }
 
 export async function getAllAuctions() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const totalAuctions = await getTotalAuctions();
 
   const allAuctions = await readContract({
@@ -138,7 +111,9 @@ export async function getCheckApprovedForAll({
   walletAddress: string;
   collectionContractAddress: string;
 }) {
-  const contract = getContract({ contractAddress: collectionContractAddress });
+  const contract = getContractCustom({
+    contractAddress: collectionContractAddress,
+  });
 
   const approved = await readContract({
     contract,
@@ -151,7 +126,7 @@ export async function getCheckApprovedForAll({
 }
 
 export async function getNewListing() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
   const preparedEvent = prepareEvent({
@@ -172,7 +147,7 @@ export async function getNewListing() {
 }
 
 export async function getNewSale() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
   const preparedEvent = prepareEvent({
@@ -193,7 +168,7 @@ export async function getNewSale() {
 }
 
 export async function getNewAuction() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
   const preparedEvent = prepareEvent({
@@ -215,7 +190,7 @@ export async function getNewAuction() {
 
 // auction
 export async function getNewBid() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
   const preparedEvent = prepareEvent({
@@ -237,7 +212,7 @@ export async function getNewBid() {
 
 // listing
 export async function getNewOffer() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
   const preparedEvent = prepareEvent({
@@ -258,7 +233,7 @@ export async function getNewOffer() {
 }
 
 export async function getRecentlySold() {
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
   const preparedEvent = prepareEvent({
@@ -289,7 +264,9 @@ export async function getSetApprovalForAll({
   collectionContractAddress: string;
   approved?: boolean;
 }) {
-  const contract = getContract({ contractAddress: collectionContractAddress });
+  const contract = getContractCustom({
+    contractAddress: collectionContractAddress,
+  });
 
   const transaction = await prepareContractCall({
     contract,
@@ -308,13 +285,13 @@ export async function getCreateDirectListing({
   const startTimestamp = getCurrentBlockchainTimestamp();
   const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
 
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
 
   const formattedParams = {
     assetContract: _params.assetContract,
     tokenId: BigInt(_params.tokenId),
     quantity: BigInt(_params.quantity),
-    currency: _params.currency || "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    currency: _params.currency || nativeCurrency,
     pricePerToken: toWei(_params.pricePerToken),
     startTimestamp: startTimestamp,
     endTimestamp: endTimestamp,
@@ -331,6 +308,124 @@ export async function getCreateDirectListing({
   return transaction;
 }
 
+export async function getUpdateDirectListing({
+  listingId,
+  params: _params,
+}: {
+  listingId: string;
+  params: CreateDirectListingType;
+}) {
+  const startTimestamp = getCurrentBlockchainTimestamp();
+  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const formattedParams = {
+    assetContract: _params.assetContract,
+    tokenId: BigInt(_params.tokenId),
+    quantity: BigInt(_params.quantity),
+    currency: _params.currency || nativeCurrency,
+    pricePerToken: toWei(_params.pricePerToken),
+    startTimestamp: startTimestamp,
+    endTimestamp: endTimestamp,
+    reserved: _params.reserved || false,
+  };
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function updateListing(uint256 _listingId, (address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) _params)",
+    params: [BigInt(listingId), formattedParams],
+  });
+
+  return transaction;
+}
+
+export async function getCancelDirectListing({
+  listingId,
+}: {
+  listingId: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function cancelListing(uint256 _listingId)",
+    params: [BigInt(listingId)],
+  });
+
+  return transaction;
+}
+
+export async function getCreateAuction({
+  params: _params,
+}: {
+  params: CreateAuctionType;
+}) {
+  const startTimestamp = getCurrentBlockchainTimestamp();
+  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const formattedParams = {
+    assetContract: _params.assetContract,
+    tokenId: BigInt(_params.tokenId),
+    quantity: BigInt(_params.quantity),
+    currency: _params.currency || nativeCurrency,
+    minimumBidAmount: toWei(_params.minimumBidAmount),
+    buyoutBidAmount: toWei(_params.buyoutBidAmount),
+    timeBufferInSeconds: BigInt(_params.timeBufferInSeconds),
+    bidBufferBps: BigInt(_params.bidBufferBps),
+    startTimestamp,
+    endTimestamp,
+  };
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function createAuction((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 minimumBidAmount, uint256 buyoutBidAmount, uint64 timeBufferInSeconds, uint64 bidBufferBps, uint64 startTimestamp, uint64 endTimestamp) _params) returns (uint256 auctionId)",
+    params: [formattedParams],
+  });
+
+  return transaction;
+}
+
+export async function getCancelAuction({ auctionId }: { auctionId: string }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function cancelAuction(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}
+
+export async function getBuyFromDirectListing({
+  params: _params,
+}: {
+  params: BuyFromDirectListingType;
+}) {
+  const currency = _params.currency || nativeCurrency;
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function buyFromListing(uint256 _listingId, address _buyFor, uint256 _quantity, address _currency, uint256 _expectedTotalPrice) payable",
+    params: [
+      BigInt(_params.listingId),
+      _params.buyFor,
+      BigInt(_params.quantity),
+      currency,
+      toWei(_params.totalPrice),
+    ],
+  });
+
+  return transaction;
+}
+
 export async function getMakeOffer({
   params: _params,
 }: {
@@ -339,7 +434,7 @@ export async function getMakeOffer({
   const expirationTimestamp = convertToBlockchainTimestamp(
     _params.expirationTimestamp
   );
-  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
 
   const formattedParams = {
     assetContract: _params.assetContract,
@@ -355,6 +450,81 @@ export async function getMakeOffer({
     method:
       "function makeOffer((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 totalPrice, uint256 expirationTimestamp) _params) returns (uint256 _offerId)",
     params: [formattedParams],
+  });
+
+  return transaction;
+}
+
+export async function getAcceptOffer({ offerId }: { offerId: string }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function acceptOffer(uint256 _offerId)",
+    params: [BigInt(offerId)],
+  });
+
+  return transaction;
+}
+
+export async function getCancelOffer({ offerId }: { offerId: string }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function cancelOffer(uint256 _offerId)",
+    params: [BigInt(offerId)],
+  });
+
+  return transaction;
+}
+
+export async function getBidInAuction({
+  auctionId,
+  bidAmount,
+}: {
+  auctionId: string;
+  bidAmount: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function bidInAuction(uint256 _auctionId, uint256 _bidAmount) payable",
+    params: [BigInt(auctionId), toWei(bidAmount)],
+  });
+
+  return transaction;
+}
+
+export async function getCollectAuctionPayout({
+  auctionId,
+}: {
+  auctionId: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function collectAuctionPayout(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}
+
+export async function getCollectAuctionTokens({
+  auctionId,
+}: {
+  auctionId: string;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await prepareContractCall({
+    contract,
+    method: "function collectAuctionTokens(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
   });
 
   return transaction;

@@ -33,3 +33,25 @@ export type MakeOfferListingType = {
   totalPrice: string;
   expirationTimestamp?: string;
 };
+
+export type BuyFromDirectListingType = {
+  listingId: string;
+  buyFor: string;
+  quantity: string;
+  currency: string;
+  totalPrice: string;
+  nativeTokenValue: string;
+};
+
+export type CreateAuctionType = {
+  assetContract: string;
+  tokenId: string;
+  quantity: string;
+  currency: string;
+  minimumBidAmount: string;
+  buyoutBidAmount: string;
+  timeBufferInSeconds: string;
+  bidBufferBps: string;
+  startTimestamp?: string;
+  endTimestamp?: string;
+};

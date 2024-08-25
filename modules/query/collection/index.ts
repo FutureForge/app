@@ -3,11 +3,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getNFTs as getERC721NFTs } from "thirdweb/extensions/erc721";
 import { decimals } from "thirdweb/extensions/erc20";
 import { getNFTs as getERC1155NFTs } from "thirdweb/extensions/erc1155";
-import { getAllListing, getAllOffers, getContract } from "@/modules/blockchain";
+import { getAllListing, getAllOffers } from "@/modules/blockchain";
 import { ICollection } from "@/utils/models";
 import { StatusType } from "@/utils/lib/types";
 import { NFT } from "thirdweb";
 import { ethers } from "ethers";
+import { getContractCustom } from "@/modules/blockchain/lib";
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -30,7 +31,7 @@ export function useGetMarketplaceCollectionsQuery() {
       if (!collections || collections.length === 0) return [];
 
       const nftPromises = collections.map(async (collection: ICollection) => {
-        const contract = await getContract({
+        const contract = await getContractCustom({
           contractAddress: collection.collectionContractAddress,
         });
 
@@ -62,14 +63,14 @@ export function useGetSingleCollectionQuery(
   const { data: collections } = useFetchCollectionsQuery();
 
   return useQuery({
-    queryKey: ["collection", contractAddress, nftType],
+    queryKey: ["collection", "auction", contractAddress, nftType],
     queryFn: async () => {
       const [allListing, allOffers] = await Promise.all([
         getAllListing(),
         getAllOffers(),
       ]);
 
-      const contract = await getContract({
+      const contract = await getContractCustom({
         contractAddress,
       });
 
@@ -116,7 +117,7 @@ export function useGetSingleCollectionQuery(
             "ether"
           );
         } else {
-          const tokenContract = await getContract({
+          const tokenContract = await getContractCustom({
             contractAddress: listing.currency,
           });
           const tokenDecimals = await decimals({ contract: tokenContract });

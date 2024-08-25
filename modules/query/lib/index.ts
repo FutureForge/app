@@ -15,7 +15,6 @@ export function useCheckApprovedForAll(collectionContractAddress: string) {
         walletAddress: activeAccount?.address,
       });
 
-      console.log("isApproved", isApproved);
       return isApproved;
     },
     enabled: !!activeAccount && !!collectionContractAddress,

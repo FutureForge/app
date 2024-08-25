@@ -1,13 +1,23 @@
-import { chainInfoV2, client, MARKETPLACE_CONTRACT, rpcRequest } from "@/utils";
+import { convertToBlockchainTimestamp, getCurrentBlockchainTimestamp } from "@/utils";
+import {
+  chainInfoV2,
+  client,
+  MARKETPLACE_CONTRACT,
+  rpcRequest,
+} from "@/utils/configs";
+import { CreateDirectListingType } from "@/utils/lib/types";
 import {
   eth_blockNumber,
   getContractEvents,
   getContract as getContractThirdweb,
+  prepareContractCall,
   prepareEvent,
   readContract,
+  toWei,
 } from "thirdweb";
 
 const fromBlock = 6543730;
+const nativeCurrency = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 export function getContract({ contractAddress }: { contractAddress: string }) {
   // const contract = new ethers.Contract(
@@ -233,4 +243,35 @@ export async function getRecentlySold() {
   const response = recentlySoldEvent.map((event) => event.args);
 
   return response;
+}
+
+export async function getCreateDirectListing({
+  params: _params,
+}: {
+  params: CreateDirectListingType;
+}) {
+  const startTimestamp = getCurrentBlockchainTimestamp();
+  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+
+  const contract = getContract({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const formattedParams = {
+    assetContract: _params.assetContract,
+    tokenId: BigInt(_params.tokenId),
+    quantity: BigInt(_params.quantity),
+    currency: _params.currency || "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    pricePerToken: toWei(_params.pricePerToken),
+    startTimestamp: startTimestamp,
+    endTimestamp: endTimestamp,
+    reserved: _params.reserved || false,
+  };
+
+  const transaction = await prepareContractCall({
+    contract,
+    method:
+      "function createListing((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) _params) returns (uint256 listingId)",
+    params: [formattedParams],
+  });
+
+  return transaction;
 }

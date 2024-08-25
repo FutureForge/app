@@ -11,13 +11,12 @@ import { useQuery } from "@tanstack/react-query";
 export function useMarketplaceEventQuery() {
   return useQuery({
     queryKey: [
-      "newlyListedEvents",
-      "listed",
       "newly",
       "auction",
       "bid",
       "offer",
       "sale",
+      "event",
     ],
     queryFn: async () => {
       const [newListing, newAuction, newBid, newOffer, recentlySold, newSale] =

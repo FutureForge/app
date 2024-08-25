@@ -10,4 +10,17 @@ export const StatusType = {
   CREATED: 1,
   COMPLETED: 2,
   CANCELLED: 3,
+  ACTIVE: 4,
+  EXPIRED: 5,
+};
+
+export type CreateDirectListingType = {
+  assetContract: string;
+  tokenId: string;
+  quantity: string;
+  currency?: string;
+  pricePerToken: string;
+  startTimestamp?: string;
+  endTimestamp?: string;
+  reserved?: boolean;
 };

@@ -1,5 +1,5 @@
 import { useActiveAccount, useActiveWallet } from "thirdweb/react";
-import { CROSSFI_API, TEST_ADDRESS } from "@/utils";
+import { CROSSFI_API, TEST_ADDRESS } from "@/utils/configs";
 import { StatusType } from "@/utils/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";

@@ -1,32 +1,23 @@
-import { createThirdwebClient, getRpcClient } from "thirdweb";
-import { defineChain, sepolia } from "thirdweb/chains";
+export function convertToBlockchainTimestamp(dateTimeString?: string): bigint {
+  let date: Date;
 
-export const CROSSFI_API = "https://test.xfiscan.com/api/1.0";
-export const TEST_ADDRESS = "0xf58941e4258320d76bdab72c5ed8d47c25604e94";
-export const MARKETPLACE_CONTRACT =
-  "0x693a19b40Cb34dDC2605E60a6261dA891be9a60D"; //sepolia chain
-export const TEST_ASSET_ADDRESS = "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229";
+  if (dateTimeString) {
+    const dateTimeParts = dateTimeString.split(", ");
+    const datePart = dateTimeParts[0].split("/").reverse().join("-");
+    const timePart = dateTimeParts[1].split(" ")[0];
+    const timezone = dateTimeParts[1].split(" ")[1];
 
-const clientId = "21c145464870191d752d334f06abcb73";
+    const isoString = `${datePart}T${timePart}${timezone}`;
 
-export const client = createThirdwebClient({
-  clientId,
-});
+    date = new Date(isoString);
+  } else {
+    date = new Date();
+    date.setDate(date.getDate() + 7);
+  }
 
-export const chainInfo = defineChain({
-  id: 4157,
-  rpc: "https://rpc.testnet.ms",
-  nativeCurrency: {
-    decimals: 18,
-    name: "XFI",
-    symbol: "XFI",
-  },
-  testnet: true,
-  blockExplorers: [
-    { name: "Testnet Explorer", url: "https://test.xfiscan.com/" },
-  ],
-});
+  return BigInt(date.getTime());
+}
 
-export const chainInfoV2 = sepolia;
-
-export const rpcRequest = getRpcClient({ client, chain: chainInfoV2 });
+export function getCurrentBlockchainTimestamp(): bigint {
+  return BigInt(Date.now());
+}

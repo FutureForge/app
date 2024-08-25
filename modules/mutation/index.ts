@@ -1,4 +1,5 @@
 export { useAddCollectionMutation } from "./collection";
+export { useCreateListingMutation } from "./listing";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 // syntax

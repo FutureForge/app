@@ -11,6 +11,8 @@ export {
   useUserAuctionQuery,
 } from "./user";
 
+export { useMarketplaceEventQuery } from "./events";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // syntax

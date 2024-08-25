@@ -4,6 +4,7 @@ import {
   useFetchCollectionsQuery,
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
+  useMarketplaceEventQuery,
   useUserAuctionQuery,
   useUserListingQuery,
   useUserNFTsQuery,
@@ -65,6 +66,9 @@ export default function Home() {
     "ERC721"
   );
   console.log({ singleCollection });
+
+  const { data: newListingEvent } = useMarketplaceEventQuery();
+  console.log({ newListingEvent });
 
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);

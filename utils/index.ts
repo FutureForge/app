@@ -1,10 +1,11 @@
-import { createThirdwebClient } from "thirdweb";
+import { createThirdwebClient, getRpcClient } from "thirdweb";
 import { defineChain, sepolia } from "thirdweb/chains";
 
-export const CROSSFI_API = 'https://test.xfiscan.com/api/1.0'
-export const TEST_ADDRESS = '0xf58941e4258320d76bdab72c5ed8d47c25604e94'
-export const MARKETPLACE_CONTRACT = '0x693a19b40Cb34dDC2605E60a6261dA891be9a60D' //sepolia chain
-export const TEST_ASSET_ADDRESS = '0x7b26dA758df7A5E101c9ac0DBA8267B95175F229'
+export const CROSSFI_API = "https://test.xfiscan.com/api/1.0";
+export const TEST_ADDRESS = "0xf58941e4258320d76bdab72c5ed8d47c25604e94";
+export const MARKETPLACE_CONTRACT =
+  "0x693a19b40Cb34dDC2605E60a6261dA891be9a60D"; //sepolia chain
+export const TEST_ASSET_ADDRESS = "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229";
 
 const clientId = "21c145464870191d752d334f06abcb73";
 
@@ -26,4 +27,6 @@ export const chainInfo = defineChain({
   ],
 });
 
-export const chainInfoV2 = sepolia
+export const chainInfoV2 = sepolia;
+
+export const rpcRequest = getRpcClient({ client, chain: chainInfoV2 });

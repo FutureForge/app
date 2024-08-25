@@ -167,6 +167,5 @@ export function useGetSingleCollectionQuery(
     },
     enabled: !!collections && !!contractAddress && !!nftType,
     refetchInterval: 60000 * 5,
-    staleTime: 5000,
   });
 }

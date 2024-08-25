@@ -39,14 +39,19 @@ export function useCreateListingMutation() {
 
       return transactionReceipt;
     },
-    onSuccess: (data, variables, context) => {
-      // console.log("Listing created successfully:", data);
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey:  ['newly', 'event'],
+        queryKey: ["newly", "event"],
       });
     },
-    onError: (error, variables, context) => {
-      // console.log("Error creating listing:", error);
+    onError: () => {},
+    meta: {
+      successMessage: {
+        description: "Listing created successfully",
+      },
+      errorMessage: {
+        description: "Failed to create listing",
+      },
     },
   });
 }

@@ -74,9 +74,6 @@ export default function Home() {
   console.log({
     message: 'create listing console',
     isPending: createListingMutation.isPending,
-    isError: createListingMutation.isError,
-    isSuccess: createListingMutation.isSuccess,
-    error: createListingMutation.error,
   })
 
   const handleAddCollection = async () => {

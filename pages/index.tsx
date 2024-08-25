@@ -5,6 +5,7 @@ import {
   useFetchCollectionsQuery,
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
+  useGetSingleNFTQuery,
   useMarketplaceEventQuery,
   useUserAuctionQuery,
   useUserListingQuery,
@@ -25,10 +26,7 @@ import {
 } from "@/utils/configs";
 import { ConnectButton } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
-import {
-  getAllOffers,
-  getTotalListings,
-} from "@/modules/blockchain";
+import { getAllOffers, getTotalListings } from "@/modules/blockchain";
 import { getContractCustom } from "@/modules/blockchain/lib";
 
 export default function Home() {
@@ -94,6 +92,13 @@ export default function Home() {
     message: "approved for all console",
     isPending: approveForAllMutation.isPending,
   });
+
+  const { data: singleNFTQuery } = useGetSingleNFTQuery({
+    contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    nftType: "ERC721",
+    tokenId: "2",
+  });
+  console.log({ singleNFTQuery });
 
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);

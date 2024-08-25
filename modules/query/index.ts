@@ -2,6 +2,7 @@ export {
   useFetchCollectionsQuery,
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
+  useGetSingleNFTQuery,
 } from "./collection";
 export {
   useUserChainInfo,

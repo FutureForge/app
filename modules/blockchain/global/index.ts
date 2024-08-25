@@ -1,6 +1,7 @@
 import { MARKETPLACE_CONTRACT } from "@/utils/configs";
 import { prepareContractCall, readContract } from "thirdweb";
 import { getContractCustom } from "../lib";
+import { EnglishAuction } from "thirdweb/extensions/marketplace";
 
 /* -------------------------------------------------------------------------------------------------
  * READ FUNCTIONS

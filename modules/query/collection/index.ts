@@ -1,14 +1,28 @@
 import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getNFTs as getERC721NFTs } from "thirdweb/extensions/erc721";
+import {
+  getNFTs as getERC721NFTs,
+  getNFT as getERC721NFT,
+} from "thirdweb/extensions/erc721";
 import { decimals } from "thirdweb/extensions/erc20";
-import { getNFTs as getERC1155NFTs } from "thirdweb/extensions/erc1155";
-import { getAllListing, getAllOffers } from "@/modules/blockchain";
+import {
+  getNFTs as getERC1155NFTs,
+  getNFT as getERC1155NFT,
+} from "thirdweb/extensions/erc1155";
+import {
+  getAllAuctions,
+  getAllListing,
+  getAllOffers,
+} from "@/modules/blockchain";
 import { ICollection } from "@/utils/models";
-import { StatusType } from "@/utils/lib/types";
+import { NFTType, StatusType } from "@/utils/lib/types";
 import { NFT } from "thirdweb";
 import { ethers } from "ethers";
 import { getContractCustom } from "@/modules/blockchain/lib";
+import {
+  getIsAuctionExpired,
+  getWinningBid,
+} from "@/modules/blockchain/auction";
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -56,9 +70,93 @@ export function useGetMarketplaceCollectionsQuery() {
   });
 }
 
+export function useGetSingleNFTQuery({
+  contractAddress,
+  nftType,
+  tokenId,
+}: {
+  contractAddress: string;
+  nftType: NFTType;
+  tokenId: string;
+}) {
+  return useQuery({
+    queryKey: ["nft", "auction", "listing", "offers"],
+    queryFn: async () => {
+      const contract = await getContractCustom({ contractAddress });
+
+      let nftList: NFT;
+      if (nftType === "ERC721") {
+        nftList = await getERC721NFT({ contract, tokenId: BigInt(tokenId) });
+      } else if (nftType === "ERC1155") {
+        nftList = await getERC1155NFT({ contract, tokenId: BigInt(tokenId) });
+      }
+
+      const allAuctions = await getAllAuctions();
+      const allListing = await getAllListing();
+
+      const nftAuctionList = allAuctions.find(
+        (auction) =>
+          auction.assetContract === contractAddress &&
+          auction.tokenId === BigInt(tokenId) &&
+          auction.status === StatusType.CREATED
+      );
+
+      const nftListingList = allListing.find(
+        (listing) =>
+          listing.assetContract === contractAddress &&
+          listing.tokenId === BigInt(tokenId) &&
+          listing.status === StatusType.CREATED
+      );
+
+      let result: any = {};
+
+      if (nftAuctionList) {
+        const winningBid = await getWinningBid({
+          auctionId: nftAuctionList.auctionId,
+        });
+
+        const isAuctionActive = await getIsAuctionExpired({
+          auctionId: nftAuctionList.auctionId,
+        });
+
+        // Due to a naming mismatch in the contract, `getIsAuctionExpired` returns `true` when the auction is active and `false` when it's expired.
+        // To correct this, we invert the result.
+        const isAuctionExpired = !isAuctionActive;
+
+        const winningBidBody = {
+          bidder: winningBid[0],
+          currency: winningBid[1],
+          bidAmount: winningBid[2],
+        };
+
+        result = {
+          id: "auction",
+          nftAuctionList,
+          isAuctionExpired,
+          winningBid: winningBidBody,
+        };
+      } else if (nftListingList) {
+        result = {
+          id: "listing",
+          nftListingList,
+        };
+      } else {
+        result = {
+          id: "none",
+          message: "No auction or listing found for the given token ID.",
+        };
+      }
+
+      return result;
+    },
+    enabled: !!contractAddress && !!nftType && !!tokenId,
+    refetchInterval: 60000 * 5,
+  });
+}
+
 export function useGetSingleCollectionQuery(
   contractAddress: string,
-  nftType: "ERC721" | "ERC1155"
+  nftType: NFTType
 ) {
   const { data: collections } = useFetchCollectionsQuery();
 

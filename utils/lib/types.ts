@@ -5,6 +5,13 @@ export enum Status {
   CANCELLED,
 }
 
+export type NFTType = "ERC721" | "ERC1155";
+
+export const TokenType = {
+  ERC721: 0,
+  ERC1155: 1,
+};
+
 export const StatusType = {
   UNSET: 0,
   CREATED: 1,
@@ -13,7 +20,6 @@ export const StatusType = {
   ACTIVE: 4,
   EXPIRED: 5,
 };
-
 export type CreateDirectListingType = {
   assetContract: string;
   tokenId: string;
@@ -43,7 +49,7 @@ export type BuyFromDirectListingType = {
   nativeTokenValue: string;
 };
 
-export type CreateAuctionType = {
+export type AuctionBaseType = {
   assetContract: string;
   tokenId: string;
   quantity: string;
@@ -54,4 +60,13 @@ export type CreateAuctionType = {
   bidBufferBps: string;
   startTimestamp?: string;
   endTimestamp?: string;
+};
+
+export type CreateAuctionType = AuctionBaseType;
+
+export type GetAllAuctionType = AuctionBaseType & {
+  auctionId: string;
+  auctionCreator: string;
+  tokenType: keyof typeof TokenType;
+  status: keyof typeof StatusType;
 };

@@ -9,7 +9,7 @@ import {
 import { CreateAuctionType } from "@/utils/lib/types";
 import { getContractCustom, nativeCurrency } from "../lib";
 import { MARKETPLACE_CONTRACT } from "@/utils/configs";
-import { prepareContractCall, toWei } from "thirdweb";
+import { prepareContractCall, readContract, toWei } from "thirdweb";
 
 export async function getCreateAuction({
   params: _params,
@@ -101,6 +101,35 @@ export async function getCollectAuctionTokens({
   const transaction = await prepareContractCall({
     contract,
     method: "function collectAuctionTokens(uint256 _auctionId)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}
+
+export async function getWinningBid({ auctionId }: { auctionId: bigint }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await readContract({
+    contract,
+    method:
+      "function getWinningBid(uint256 _auctionId) view returns (address _bidder, address _currency, uint256 _bidAmount)",
+    params: [BigInt(auctionId)],
+  });
+
+  return transaction;
+}
+
+export async function getIsAuctionExpired({
+  auctionId,
+}: {
+  auctionId: bigint;
+}) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const transaction = await readContract({
+    contract,
+    method: "function isAuctionExpired(uint256 _auctionId) view returns (bool)",
     params: [BigInt(auctionId)],
   });
 

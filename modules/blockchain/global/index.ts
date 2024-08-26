@@ -122,3 +122,29 @@ export async function getSetApprovalForAll({
 
   return transaction;
 }
+
+export async function getOffer({ offerId }: { offerId: bigint }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const offer = await readContract({
+    contract,
+    method:
+      "function getOffer(uint256 _offerId) view returns ((uint256 offerId, uint256 tokenId, uint256 quantity, uint256 totalPrice, uint256 expirationTimestamp, address offeror, address assetContract, address currency, uint8 tokenType, uint8 status) _offer)",
+    params: [offerId],
+  });
+
+  return offer;
+}
+
+export async function getListing({ listingId }: { listingId: bigint }) {
+  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+
+  const offer = await readContract({
+    contract,
+    method:
+      "function getOffer(uint256 _offerId) view returns ((uint256 offerId, uint256 tokenId, uint256 quantity, uint256 totalPrice, uint256 expirationTimestamp, address offeror, address assetContract, address currency, uint8 tokenType, uint8 status) _offer)",
+    params: [listingId],
+  });
+
+  return offer;
+}

@@ -12,7 +12,11 @@ export {
   useUserAuctionQuery,
 } from "./user";
 export { useMarketplaceEventQuery } from "./events";
-export { useCheckApprovedForAll } from "./lib";
+export { useCheckApprovedForAllQuery } from "./lib";
+export {
+  useCheckApprovedForAllStakingQuery,
+  useGetUserStakingInfoQuery,
+} from "./staking";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 

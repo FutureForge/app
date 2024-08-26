@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useUserChainInfo } from "../user";
 import { getCheckApprovedForAll } from "@/modules/blockchain";
 
-export function useCheckApprovedForAll(collectionContractAddress: string) {
+export function useCheckApprovedForAllQuery(collectionContractAddress: string) {
   const { activeAccount } = useUserChainInfo();
 
   return useQuery({

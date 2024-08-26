@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  useCheckApprovedForAll,
+  useCheckApprovedForAllQuery,
   useFetchCollectionsQuery,
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
@@ -11,12 +11,18 @@ import {
   useUserListingQuery,
   useUserNFTsQuery,
   useUserOffersMadeQuery,
+  useCheckApprovedForAllStakingQuery,
+  useGetUserStakingInfoQuery,
 } from "@/modules/query";
 import {
   useAddCollectionMutation,
   useApprovedForAllMutation,
   useCreateListingMutation,
   useMakeListingOfferMutation,
+  useApprovedForAllStakingMutation,
+  useClaimStakingRewardMutation,
+  useStakingMutation,
+  useWithdrawStakingMutation,
 } from "@/modules/mutation";
 import {
   chainInfo,
@@ -34,6 +40,10 @@ export default function Home() {
   const addCollectionMutation = useAddCollectionMutation();
   const createListingMutation = useCreateListingMutation();
   const approveForAllMutation = useApprovedForAllMutation();
+  const approvedForStakingMutation = useApprovedForAllStakingMutation();
+  const claimStakingRewardMutation = useClaimStakingRewardMutation();
+  const stakingMutation = useStakingMutation();
+  const withdrawStakingMutation = useWithdrawStakingMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -42,8 +52,6 @@ export default function Home() {
   };
 
   console.log({ collections });
-
-  // if (isLoading) return <p>Loading...</p>;
 
   const userNFTs = useUserNFTsQuery();
   console.log({ userNFTs });
@@ -83,7 +91,7 @@ export default function Home() {
     isPending: createListingMutation.isPending,
   });
 
-  const { data: isApproved } = useCheckApprovedForAll(
+  const { data: isApproved } = useCheckApprovedForAllQuery(
     "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229"
   );
   console.log({ isApproved });
@@ -100,6 +108,32 @@ export default function Home() {
   });
   console.log({ singleNFTQuery });
 
+  const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
+  console.log({ approvedStaking });
+
+  const { data: stakingInfo } = useGetUserStakingInfoQuery();
+  console.log({ stakingInfo });
+
+  console.log({
+    message: "approved for all staking console",
+    isPending: approvedForStakingMutation.isPending,
+  });
+
+  console.log({
+    message: "claim staking console",
+    isPending: claimStakingRewardMutation.isPending,
+  });
+
+  console.log({
+    message: "stake console",
+    isPending: stakingMutation.isPending,
+  });
+
+  console.log({
+    message: "withdraw stake console",
+    isPending: withdrawStakingMutation.isPending,
+  });
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -114,9 +148,17 @@ export default function Home() {
     //   },
     // });
 
-    approveForAllMutation.mutate({
-      collectionContractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    });
+    // approveForAllMutation.mutate({
+    //   collectionContractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    // });
+
+    // approvedForStakingMutation.mutate();
+
+    // claimStakingRewardMutation.mutate({ tokenId: "5" });
+
+    // stakingMutation.mutate({ tokenId: "5" });
+
+    // withdrawStakingMutation.mutate({ tokenId: "5" });
   };
 
   return (

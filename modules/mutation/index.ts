@@ -15,6 +15,12 @@ export {
   useCollectAuctionTokensMutation,
 } from "./offers";
 export { useCreateAuctionMutation, useCancelAuctionMutation } from "./auction";
+export {
+  useApprovedForAllStakingMutation,
+  useClaimStakingRewardMutation,
+  useStakingMutation,
+  useWithdrawStakingMutation,
+} from "./staking";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 // syntax

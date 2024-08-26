@@ -28,7 +28,7 @@ export async function getNewListing() {
 }
 
 // listing
-export async function getNewSale() {
+export async function getNewSaleListing() {
   const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 
@@ -115,7 +115,7 @@ export async function getNewOffer() {
 }
 
 // auction
-export async function getRecentlySold() {
+export async function getRecentlySoldAuction() {
   const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
   const currentBlockNumber = await getCurrentBlockNumber();
 

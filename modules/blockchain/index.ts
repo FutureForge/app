@@ -10,8 +10,8 @@ export {
   getNewBid,
   getNewListing,
   getNewOffer,
-  getNewSale,
-  getRecentlySold,
+  getNewSaleListing,
+  getRecentlySoldAuction,
 } from "./events";
 export {
   decimalOffChain,

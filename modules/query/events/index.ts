@@ -3,8 +3,8 @@ import {
   getNewAuction,
   getNewBid,
   getNewOffer,
-  getRecentlySold,
-  getNewSale,
+  getRecentlySoldAuction,
+  getNewSaleListing,
   getContractCustom,
 } from "@/modules/blockchain";
 import { useQuery } from "@tanstack/react-query";
@@ -18,14 +18,14 @@ export function useMarketplaceEventQuery() {
   return useQuery({
     queryKey: ["newly", "auction", "bid", "offer", "sale", "event"],
     queryFn: async () => {
-      const [newListing, newAuction, newBid, newOffer, recentlySold, newSale] =
+      const [newListing, newAuction, newBid, newOffer, recentlySoldAuction, newSaleListing] =
         await Promise.all([
           getNewListing(),
           getNewAuction(),
           getNewBid(),
           getNewOffer(),
-          getRecentlySold(),
-          getNewSale(),
+          getRecentlySoldAuction(),
+          getNewSaleListing(),
         ]);
 
       const newListingWithNFTs = await Promise.all(
@@ -123,7 +123,7 @@ export function useMarketplaceEventQuery() {
       );
 
       const recentlySoldWithNFTs = await Promise.all(
-        recentlySold.map(async (sold) => {
+        recentlySoldAuction.map(async (sold) => {
           const contract = await getContractCustom({
             contractAddress: sold.assetContract,
           });
@@ -151,7 +151,7 @@ export function useMarketplaceEventQuery() {
       );
 
       const newSaleWithNFTs = await Promise.all(
-        newSale.map(async (sale) => {
+        newSaleListing.map(async (sale) => {
           const contract = await getContractCustom({
             contractAddress: sale.assetContract,
           });
@@ -181,8 +181,8 @@ export function useMarketplaceEventQuery() {
         newAuction: newAuctionWithNFTs,
         newBid: newBidWithNFTs,
         newOffer: newOfferWithNFTs,
-        recentlySold: recentlySoldWithNFTs,
-        newSale: newSaleWithNFTs,
+        recentlySoldAuction: recentlySoldWithNFTs,
+        newSaleListing: newSaleWithNFTs,
       };
     },
     initialData: {
@@ -190,8 +190,8 @@ export function useMarketplaceEventQuery() {
       newAuction: [],
       newBid: [],
       newOffer: [],
-      recentlySold: [],
-      newSale: [],
+      recentlySoldAuction: [],
+      newSaleListing: [],
     },
     refetchInterval: 60000 * 5,
   });

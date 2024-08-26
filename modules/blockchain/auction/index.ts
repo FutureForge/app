@@ -70,6 +70,7 @@ export async function getBidInAuction({
     method:
       "function bidInAuction(uint256 _auctionId, uint256 _bidAmount) payable",
     params: [BigInt(auctionId), toWei(bidAmount)],
+    value: toWei(bidAmount),
   });
 
   return transaction;

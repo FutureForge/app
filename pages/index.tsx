@@ -96,7 +96,7 @@ export default function Home() {
   const { data: singleNFTQuery } = useGetSingleNFTQuery({
     contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
     nftType: "ERC721",
-    tokenId: "2",
+    tokenId: "1",
   });
   console.log({ singleNFTQuery });
 
@@ -130,3 +130,18 @@ export default function Home() {
     </>
   );
 }
+
+// create auction
+
+// {
+//   assetContract
+//   tokenId
+//   quality
+//   currency
+//   minimumBidAmount
+//   buyOutBidAmount
+//   timeBuffer
+//   bidBuffer
+//   startTimestamp
+//   endTimestamp
+// }

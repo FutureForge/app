@@ -114,6 +114,7 @@ export async function getBuyFromDirectListing({
       currency,
       toWei(_params.totalPrice),
     ],
+    value: toWei(_params.totalPrice)
   });
 
   return transaction;

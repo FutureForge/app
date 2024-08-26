@@ -18,15 +18,21 @@ export function useMarketplaceEventQuery() {
   return useQuery({
     queryKey: ["newly", "auction", "bid", "offer", "sale", "event"],
     queryFn: async () => {
-      const [newListing, newAuction, newBid, newOffer, recentlySoldAuction, newSaleListing] =
-        await Promise.all([
-          getNewListing(),
-          getNewAuction(),
-          getNewBid(),
-          getNewOffer(),
-          getRecentlySoldAuction(),
-          getNewSaleListing(),
-        ]);
+      const [
+        newListing,
+        newAuction,
+        newBid,
+        newOffer,
+        recentlySoldAuction,
+        newSaleListing,
+      ] = await Promise.all([
+        getNewListing(),
+        getNewAuction(),
+        getNewBid(),
+        getNewOffer(),
+        getRecentlySoldAuction(),
+        getNewSaleListing(),
+      ]);
 
       const newListingWithNFTs = await Promise.all(
         newListing.map(async (listing) => {
@@ -173,6 +179,8 @@ export function useMarketplaceEventQuery() {
               tokenId: BigInt(listingInfo.tokenId),
             });
           }
+
+          return { ...sale, nft: nftData };
         })
       );
 

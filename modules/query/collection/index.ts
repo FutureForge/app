@@ -136,9 +136,19 @@ export function useGetSingleNFTQuery({
           winningBid: winningBidBody,
         };
       } else if (nftListingList) {
+        const allOffers = await getAllOffers();
+
+        const filteredOffers = allOffers.filter((offers) => {
+          return (
+            offers.assetContract === contractAddress &&
+            offers.tokenId === BigInt(tokenId)
+          );
+        });
+
         result = {
           id: "listing",
           nftListingList,
+          offers: filteredOffers,
         };
       } else {
         result = {

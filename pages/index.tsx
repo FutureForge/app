@@ -56,6 +56,7 @@ export default function Home() {
   const withdrawStakingMutation = useWithdrawStakingMutation();
   const makeListingOfferMutation = useMakeListingOfferMutation();
   const acceptOfferMutation = useAcceptOfferMutation();
+  const cancelOfferMutation = useCancelOfferMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -156,6 +157,11 @@ export default function Home() {
     isPending: acceptOfferMutation.isPending,
   });
 
+  console.log({
+    message: "cancel offer console",
+    isPending: cancelOfferMutation.isPending,
+  });
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -193,7 +199,9 @@ export default function Home() {
     //   },
     // });
 
-    acceptOfferMutation.mutate({ offerId: "1" });
+    // acceptOfferMutation.mutate({ offerId: "1" });
+
+    cancelOfferMutation.mutate({ offerId: "1" });
   };
 
   return (

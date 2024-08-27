@@ -23,6 +23,16 @@ import {
   useClaimStakingRewardMutation,
   useStakingMutation,
   useWithdrawStakingMutation,
+  useAcceptOfferMutation,
+  useBitInAuctionMutation,
+  useBuyFromDirectListingMutation,
+  useCancelAuctionMutation,
+  useCancelDirectListingMutation,
+  useCancelOfferMutation,
+  useCollectAuctionPayoutMutation,
+  useCollectAuctionTokensMutation,
+  useCreateAuctionMutation,
+  useUpdateListingMutation,
 } from "@/modules/mutation";
 import {
   chainInfo,
@@ -44,6 +54,7 @@ export default function Home() {
   const claimStakingRewardMutation = useClaimStakingRewardMutation();
   const stakingMutation = useStakingMutation();
   const withdrawStakingMutation = useWithdrawStakingMutation();
+  const makeListingOfferMutation = useMakeListingOfferMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -134,6 +145,11 @@ export default function Home() {
     isPending: withdrawStakingMutation.isPending,
   });
 
+  console.log({
+    message: "make listing offer console",
+    isPending: makeListingOfferMutation.isPending,
+  });
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -159,6 +175,17 @@ export default function Home() {
     // stakingMutation.mutate({ tokenId: "5" });
 
     // withdrawStakingMutation.mutate({ tokenId: "5" });
+
+    makeListingOfferMutation.mutate({
+      makeOffer: {
+        assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+        tokenId: "0",
+        quantity: "1",
+        // currency: '',
+        totalPrice: "0.001",
+        // expirationTimestamp: ''
+      },
+    });
   };
 
   return (
@@ -186,4 +213,13 @@ export default function Home() {
 //   bidBuffer
 //   startTimestamp
 //   endTimestamp
+// }
+
+// {
+//   "assetContract": "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+//   "tokenId": "0",
+//   "quantity": "1",
+//   "currency": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+//   "totalPrice": "10000000000000000",
+//   "expirationTimestamp": "1724966514213"
 // }

@@ -114,7 +114,7 @@ export async function getBuyFromDirectListing({
       currency,
       toWei(_params.totalPrice),
     ],
-    value: toWei(_params.totalPrice)
+    value: toWei(_params.totalPrice),
   });
 
   return transaction;
@@ -125,6 +125,8 @@ export async function getMakeOffer({
 }: {
   params: MakeOfferListingType;
 }) {
+  console.log('make offer', _params);
+
   const expirationTimestamp = convertToBlockchainTimestamp(
     _params.expirationTimestamp
   );
@@ -134,16 +136,19 @@ export async function getMakeOffer({
     assetContract: _params.assetContract,
     tokenId: BigInt(_params.tokenId),
     quantity: BigInt(_params.quantity),
-    currency: _params.currency,
+    currency: _params.currency || nativeCurrency,
     totalPrice: toWei(_params.totalPrice),
     expirationTimestamp,
   };
+
+  console.log('make offer', formattedParams);
 
   const transaction = await prepareContractCall({
     contract,
     method:
       "function makeOffer((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 totalPrice, uint256 expirationTimestamp) _params) returns (uint256 _offerId)",
     params: [formattedParams],
+    value: toWei(_params.totalPrice)
   });
 
   return transaction;

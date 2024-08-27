@@ -23,6 +23,8 @@ export function useMakeListingOfferMutation() {
     }) => {
       if (!activeAccount) return;
 
+      console.log('make offer', makeOffer);
+
       const transaction = await getMakeOffer({
         params: {
           assetContract: makeOffer.assetContract ?? "",
@@ -33,6 +35,8 @@ export function useMakeListingOfferMutation() {
           expirationTimestamp: makeOffer.expirationTimestamp ?? "",
         },
       });
+
+      console.log('make offer', transaction);
 
       const transactionReceipt = await sendAndConfirmTransaction({
         transaction,

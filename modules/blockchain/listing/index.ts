@@ -148,7 +148,7 @@ export async function getMakeOffer({
     method:
       "function makeOffer((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 totalPrice, uint256 expirationTimestamp) _params) returns (uint256 _offerId)",
     params: [formattedParams],
-    value: toWei(_params.totalPrice)
+    // value: toWei(_params.totalPrice)
   });
 
   return transaction;

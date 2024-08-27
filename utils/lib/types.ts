@@ -20,6 +20,7 @@ export const StatusType = {
   ACTIVE: 4,
   EXPIRED: 5,
 };
+
 export type CreateDirectListingType = {
   assetContract: string;
   tokenId: string;

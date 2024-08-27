@@ -65,6 +65,9 @@ export default function Home() {
   // auction
   const bidInAuctionMutation = useBitInAuctionMutation();
   const cancelAuctionMutation = useCancelAuctionMutation();
+  const collectAuctionPayOutMutation = useCollectAuctionPayoutMutation(); // seller
+  const collectAuctionTokenMutation = useCollectAuctionTokensMutation(); // buy
+  const createAuctionMutation = useCreateAuctionMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -184,6 +187,21 @@ export default function Home() {
     isPending: cancelAuctionMutation.isPending,
   });
 
+  console.log({
+    message: "collect payout auction console",
+    isPending: collectAuctionPayOutMutation.isPending,
+  });
+
+  console.log({
+    message: "collect payout auction console",
+    isPending: collectAuctionTokenMutation.isPending,
+  });
+
+  console.log({
+    message: "create auction console",
+    isPending: createAuctionMutation.isPending,
+  });
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -215,8 +233,8 @@ export default function Home() {
     //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
     //     tokenId: "0",
     //     quantity: "1",
-    //     // currency: '',
-    //     totalPrice: "0.001",
+    //     currency: "0x99a08a9AA59434cA893aE1A2E771Cf26b1B92E7A", // native currency should be the wrapped token but treat it as the native currency
+    //     totalPrice: "100",
     //     // expirationTimestamp: ''
     //   },
     // });
@@ -254,7 +272,20 @@ export default function Home() {
 
     // bidInAuctionMutation.mutate({ auctionId, bidAmount });
 
-    cancelAuctionMutation.mutate({ auctionId });
+    // cancelAuctionMutation.mutate({ auctionId });
+
+    // collectAuctionPayOutMutation.mutate({ auctionId });
+    // collectAuctionTokenMutation.mutate({ auctionId });
+
+    createAuctionMutation.mutate({
+      auctionDetails: {
+        assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+        tokenId: "0",
+        quantity: "1",
+        minimumBidAmount: "0.001",
+        buyoutBidAmount: "0.001",
+      },
+    });
   };
 
   return (
@@ -291,4 +322,13 @@ export default function Home() {
 //   "currency": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
 //   "totalPrice": "10000000000000000",
 //   "expirationTimestamp": "1724966514213"
+// }
+
+// {
+//   listingId: 1,
+//   buyFor: '',
+//   quality: '',
+//   currency: '',
+//   expectedTotalPrice,
+//   value
 // }

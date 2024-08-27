@@ -28,11 +28,13 @@ export async function getCreateAuction({
     currency: _params.currency || nativeCurrency,
     minimumBidAmount: toWei(_params.minimumBidAmount),
     buyoutBidAmount: toWei(_params.buyoutBidAmount),
-    timeBufferInSeconds: BigInt(_params.timeBufferInSeconds),
-    bidBufferBps: BigInt(_params.bidBufferBps),
+    timeBufferInSeconds: BigInt(_params.timeBufferInSeconds || 60 * 5),
+    bidBufferBps: BigInt(_params.bidBufferBps || 5),
     startTimestamp,
     endTimestamp,
   };
+
+  console.log("auction", formattedParams);
 
   const transaction = await prepareContractCall({
     contract,

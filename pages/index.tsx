@@ -64,6 +64,7 @@ export default function Home() {
 
   // auction
   const bidInAuctionMutation = useBitInAuctionMutation();
+  const cancelAuctionMutation = useCancelAuctionMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -178,6 +179,11 @@ export default function Home() {
     isPending: bidInAuctionMutation.isPending,
   });
 
+  console.log({
+    message: "cancel in auction console",
+    isPending: cancelAuctionMutation.isPending,
+  });
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -220,33 +226,35 @@ export default function Home() {
     // cancelOfferMutation.mutate({ offerId: "1" });
 
     const auctionId = "0";
-    const bidAmount = "0.008";
-    const percentageIncrease = 1;
+    // const bidAmount = "0.008";
+    // const percentageIncrease = 1;
 
-    if (!allAuction) return;
-    const auction = allAuction.find(
-      (auction) => auction.auctionId === BigInt("0")
-    );
-    console.log({ auction });
-    if (!auction) {
-      alert("Auction not found");
-      return;
-    }
+    // if (!allAuction) return;
+    // const auction = allAuction.find(
+    //   (auction) => auction.auctionId === BigInt("0")
+    // );
+    // console.log({ auction });
+    // if (!auction) {
+    //   alert("Auction not found");
+    //   return;
+    // }
 
-    const isValidBid = isBidAmountValid({
-      currentBid: Number(decimalOffChain(Number(auction.winningBid.bidAmount))),
-      newBidAmount: Number(bidAmount),
-      percentageIncrease,
-    });
+    // const isValidBid = isBidAmountValid({
+    //   currentBid: Number(decimalOffChain(Number(auction.winningBid.bidAmount))),
+    //   newBidAmount: Number(bidAmount),
+    //   percentageIncrease,
+    // });
 
-    if (!isValidBid) {
-      alert(
-        `Bid amount should be higher than the current winning bid by ${percentageIncrease}`
-      );
-      return;
-    }
+    // if (!isValidBid) {
+    //   alert(
+    //     `Bid amount should be higher than the current winning bid by ${percentageIncrease}`
+    //   );
+    //   return;
+    // }
 
-    bidInAuctionMutation.mutate({ auctionId, bidAmount });
+    // bidInAuctionMutation.mutate({ auctionId, bidAmount });
+
+    cancelAuctionMutation.mutate({ auctionId });
   };
 
   return (

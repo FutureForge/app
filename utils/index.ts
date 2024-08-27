@@ -1,16 +1,23 @@
 export function convertToBlockchainTimestamp(dateTimeString?: string): bigint {
+  console.log({ dateTimeString });
+
   let date: Date;
 
-  if (dateTimeString) {
+  // Check if the input is a timestamp (numeric string)
+  if (dateTimeString && !isNaN(Number(dateTimeString))) {
+    date = new Date(Number(dateTimeString));
+  } else if (dateTimeString) {
+    // Handle date string in expected format (e.g., 'dd/mm/yyyy, hh:mm AM/PM')
     const dateTimeParts = dateTimeString.split(", ");
-    const datePart = dateTimeParts[0].split("/").reverse().join("-");
-    const timePart = dateTimeParts[1].split(" ")[0];
-    const timezone = dateTimeParts[1].split(" ")[1];
+    const datePart = dateTimeParts[0]?.split("/")?.reverse()?.join("-");
+    const timePart = dateTimeParts[1]?.split(" ")[0];
+    const timezone = dateTimeParts[1]?.split(" ")[1];
 
     const isoString = `${datePart}T${timePart}${timezone}`;
 
     date = new Date(isoString);
   } else {
+    // If no input is provided, set the date to the current time plus 7 days
     date = new Date();
     date.setDate(date.getDate() + 7);
   }

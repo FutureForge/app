@@ -14,6 +14,7 @@ import {
   useCheckApprovedForAllStakingQuery,
   useGetUserStakingInfoQuery,
   useGetGlobalListingOrAuctionQuery,
+  useUserChainInfo,
 } from "@/modules/query";
 import {
   useAddCollectionMutation,
@@ -48,6 +49,7 @@ import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
 import { isBidAmountValid } from "@/utils";
 
 export default function Home() {
+  const { activeAccount } = useUserChainInfo();
   const { data: collections, isLoading } = useFetchCollectionsQuery();
   const addCollectionMutation = useAddCollectionMutation();
   const createListingMutation = useCreateListingMutation();
@@ -61,6 +63,9 @@ export default function Home() {
   const makeListingOfferMutation = useMakeListingOfferMutation();
   const acceptOfferMutation = useAcceptOfferMutation();
   const cancelOfferMutation = useCancelOfferMutation();
+  const updateListingMutation = useUpdateListingMutation();
+  const buyFromDirectListingMutation = useBuyFromDirectListingMutation();
+  const cancelDirectListingMutation = useCancelDirectListingMutation();
 
   // auction
   const bidInAuctionMutation = useBitInAuctionMutation();
@@ -202,15 +207,43 @@ export default function Home() {
     isPending: createAuctionMutation.isPending,
   });
 
+  console.log({
+    message: "cancel listing console",
+    isPending: cancelDirectListingMutation.isPending,
+  });
+
+  console.log({
+    message: "update direct console",
+    isPending: updateListingMutation.isPending,
+  });
+
+  console.log({
+    message: "buyfor direct listing console",
+    isPending: buyFromDirectListingMutation.isPending,
+  });
+
+  console.log('address', activeAccount?.address)
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
+
+    const params = {
+      assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+      tokenId: "0",
+      quantity: "1",
+      currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      pricePerToken: "10000000000000000000",
+      startTimestamp: "1724371517950",
+      endTimestamp: "1724966514213",
+      reserved: false,
+    };
 
     // createListingMutation.mutate({
     //   directListing: {
     //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    //     tokenId: "3",
+    //     tokenId: "1",
     //     quantity: "1",
-    //     pricePerToken: "0.01",
+    //     pricePerToken: "0.001",
     //     // startTimestamp: "1724575286588",
     //     // endTimestamp: "1724966514213",
     //   },
@@ -277,13 +310,36 @@ export default function Home() {
     // collectAuctionPayOutMutation.mutate({ auctionId });
     // collectAuctionTokenMutation.mutate({ auctionId });
 
-    createAuctionMutation.mutate({
-      auctionDetails: {
-        assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-        tokenId: "0",
+    // createAuctionMutation.mutate({
+    //   auctionDetails: {
+    //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    //     tokenId: "0",
+    //     quantity: "1",
+    //     minimumBidAmount: "0.001",
+    //     buyoutBidAmount: "0.001",
+    //   },
+    // });
+
+    // cancelDirectListingMutation.mutate({ listingId: "6" });
+
+    // updateListingMutation.mutate({
+    //   listingId: "12",
+    //   directListing: {
+    //     assetContract: '0x7b26dA758df7A5E101c9ac0DBA8267B95175F229',
+    //     pricePerToken: "0.01",
+    //     endTimestamp: "1724966514213",
+    //     quantity: '1',
+    //     tokenId: '0',
+    //   },
+    // });
+
+    buyFromDirectListingMutation.mutate({
+      buyFromListing: {
+        listingId: "12",
+        buyFor: activeAccount?.address,
         quantity: "1",
-        minimumBidAmount: "0.001",
-        buyoutBidAmount: "0.001",
+        currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        totalPrice: "0.01",
       },
     });
   };
@@ -331,4 +387,15 @@ export default function Home() {
 //   currency: '',
 //   expectedTotalPrice,
 //   value
+// }
+
+// {
+//   "assetContract": "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+//   "tokenId": "0",
+//   "quantity": "1",
+//   "currency": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+//   "pricePerToken": "10000000000000000000",
+//   "startTimestamp": "1724371517950",
+//   "endTimestamp": "1724966514213",
+//   "reserved": false
 // }

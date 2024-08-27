@@ -125,7 +125,7 @@ export async function getMakeOffer({
 }: {
   params: MakeOfferListingType;
 }) {
-  console.log('make offer', _params);
+  console.log("make offer", _params);
 
   const expirationTimestamp = convertToBlockchainTimestamp(
     _params.expirationTimestamp
@@ -141,7 +141,7 @@ export async function getMakeOffer({
     expirationTimestamp,
   };
 
-  console.log('make offer', formattedParams);
+  console.log("make offer", formattedParams);
 
   const transaction = await prepareContractCall({
     contract,

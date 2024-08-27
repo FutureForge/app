@@ -13,6 +13,7 @@ import {
   useUserOffersMadeQuery,
   useCheckApprovedForAllStakingQuery,
   useGetUserStakingInfoQuery,
+  useGetGlobalListingOrAuctionQuery,
 } from "@/modules/query";
 import {
   useAddCollectionMutation,
@@ -43,7 +44,8 @@ import {
 import { ConnectButton } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import { getAllOffers, getTotalListings } from "@/modules/blockchain";
-import { getContractCustom } from "@/modules/blockchain/lib";
+import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
+import { isBidAmountValid } from "@/utils";
 
 export default function Home() {
   const { data: collections, isLoading } = useFetchCollectionsQuery();
@@ -54,9 +56,14 @@ export default function Home() {
   const claimStakingRewardMutation = useClaimStakingRewardMutation();
   const stakingMutation = useStakingMutation();
   const withdrawStakingMutation = useWithdrawStakingMutation();
+
+  // direct listing
   const makeListingOfferMutation = useMakeListingOfferMutation();
   const acceptOfferMutation = useAcceptOfferMutation();
   const cancelOfferMutation = useCancelOfferMutation();
+
+  // auction
+  const bidInAuctionMutation = useBitInAuctionMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -127,6 +134,10 @@ export default function Home() {
   const { data: stakingInfo } = useGetUserStakingInfoQuery();
   console.log({ stakingInfo });
 
+  const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery();
+  console.log({ globalListingOrAuction });
+  const allAuction = globalListingOrAuction?.allAuction;
+
   console.log({
     message: "approved for all staking console",
     isPending: approvedForStakingMutation.isPending,
@@ -160,6 +171,11 @@ export default function Home() {
   console.log({
     message: "cancel offer console",
     isPending: cancelOfferMutation.isPending,
+  });
+
+  console.log({
+    message: "bid in auction console",
+    isPending: bidInAuctionMutation.isPending,
   });
 
   const handleAddCollection = async () => {
@@ -201,7 +217,36 @@ export default function Home() {
 
     // acceptOfferMutation.mutate({ offerId: "1" });
 
-    cancelOfferMutation.mutate({ offerId: "1" });
+    // cancelOfferMutation.mutate({ offerId: "1" });
+
+    const auctionId = "0";
+    const bidAmount = "0.008";
+    const percentageIncrease = 1;
+
+    if (!allAuction) return;
+    const auction = allAuction.find(
+      (auction) => auction.auctionId === BigInt("0")
+    );
+    console.log({ auction });
+    if (!auction) {
+      alert("Auction not found");
+      return;
+    }
+
+    const isValidBid = isBidAmountValid({
+      currentBid: Number(decimalOffChain(Number(auction.winningBid.bidAmount))),
+      newBidAmount: Number(bidAmount),
+      percentageIncrease,
+    });
+
+    if (!isValidBid) {
+      alert(
+        `Bid amount should be higher than the current winning bid by ${percentageIncrease}`
+      );
+      return;
+    }
+
+    bidInAuctionMutation.mutate({ auctionId, bidAmount });
   };
 
   return (

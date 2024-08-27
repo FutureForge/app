@@ -17,6 +17,7 @@ export {
   useCheckApprovedForAllStakingQuery,
   useGetUserStakingInfoQuery,
 } from "./staking";
+export { useGetGlobalListingOrAuctionQuery } from "./global";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 

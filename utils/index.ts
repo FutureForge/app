@@ -21,3 +21,16 @@ export function convertToBlockchainTimestamp(dateTimeString?: string): bigint {
 export function getCurrentBlockchainTimestamp(): bigint {
   return BigInt(Date.now());
 }
+
+export function isBidAmountValid({
+  currentBid,
+  newBidAmount,
+  percentageIncrease,
+}: {
+  currentBid: number;
+  newBidAmount: number;
+  percentageIncrease: number;
+}): boolean {
+  const requiredBid = currentBid * (1 + percentageIncrease / 100);
+  return newBidAmount >= requiredBid;
+}

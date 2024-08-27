@@ -36,7 +36,7 @@ export function decimalOffChain(
   number: number,
   decimalPlaces: string = "ethers"
 ) {
-  const value = ethers.utils.formatUnits(number, decimalPlaces);
+  const value = ethers.utils.formatEther(number);
 
   return value;
 }

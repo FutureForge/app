@@ -2,20 +2,22 @@
  * WRITE FUNCTIONS
  * -----------------------------------------------------------------------------------------------*/
 
-import { getBlockchainTimeStamp } from "@/utils";
 import { CreateAuctionType } from "@/utils/lib/types";
 import { getContractCustom, nativeCurrency } from "../lib";
 import { MARKETPLACE_CONTRACT } from "@/utils/configs";
 import { prepareContractCall, readContract, toWei } from "thirdweb";
+import {
+  convertToBlockchainTimestamp,
+  getCurrentBlockchainTimestamp,
+} from "@/utils";
 
 export async function getCreateAuction({
   params: _params,
 }: {
   params: CreateAuctionType;
 }) {
-  const { endTimestamp, startTimestamp } = getBlockchainTimeStamp({
-    endDateTimestamp: _params.endTimestamp,
-  });
+  const startTimestamp = getCurrentBlockchainTimestamp();
+  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
 
   const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
 
@@ -31,8 +33,6 @@ export async function getCreateAuction({
     startTimestamp,
     endTimestamp,
   };
-
-  console.log("auction", formattedParams);
 
   const transaction = await prepareContractCall({
     contract,

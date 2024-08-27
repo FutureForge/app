@@ -28,11 +28,11 @@ export function useCreateListingMutation() {
         params: {
           assetContract: directListing.assetContract ?? "",
           tokenId: directListing.tokenId ?? "",
-          quantity: directListing.quantity ?? "",
           pricePerToken: directListing.pricePerToken ?? "",
-          endTimestamp: directListing.endTimestamp ?? "",
         },
       });
+
+      if (!transaction) throw new Error("Failed to create listing");
 
       const transactionReceipt = await sendAndConfirmTransaction({
         transaction,

@@ -2,10 +2,7 @@
  * WRITE FUNCTIONS
  * -----------------------------------------------------------------------------------------------*/
 
-import {
-  convertToBlockchainTimestamp,
-  getCurrentBlockchainTimestamp,
-} from "@/utils";
+import { getBlockchainTimeStamp } from "@/utils";
 import { CreateAuctionType } from "@/utils/lib/types";
 import { getContractCustom, nativeCurrency } from "../lib";
 import { MARKETPLACE_CONTRACT } from "@/utils/configs";
@@ -16,8 +13,9 @@ export async function getCreateAuction({
 }: {
   params: CreateAuctionType;
 }) {
-  const startTimestamp = getCurrentBlockchainTimestamp();
-  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+  const { endTimestamp, startTimestamp } = getBlockchainTimeStamp({
+    endDateTimestamp: _params.endTimestamp,
+  });
 
   const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
 

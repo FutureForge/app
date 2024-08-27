@@ -10,6 +10,7 @@ import {
   MakeOfferListingType,
 } from "@/utils/lib/types";
 import { prepareContractCall, toWei } from "thirdweb";
+import { createListing } from "thirdweb/extensions/marketplace";
 
 /* -------------------------------------------------------------------------------------------------
  * WRITE FUNCTIONS
@@ -18,29 +19,40 @@ import { prepareContractCall, toWei } from "thirdweb";
 export async function getCreateDirectListing({
   params: _params,
 }: {
-  params: CreateDirectListingType;
+  params: Partial<CreateDirectListingType>;
 }) {
-  const startTimestamp = getCurrentBlockchainTimestamp();
-  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+  // const startTimestamp = getCurrentBlockchainTimestamp();
+  // const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
 
   const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
 
-  const formattedParams = {
-    assetContract: _params.assetContract,
-    tokenId: BigInt(_params.tokenId),
-    quantity: BigInt(_params.quantity),
-    currency: _params.currency || nativeCurrency,
-    pricePerToken: toWei(_params.pricePerToken),
-    startTimestamp: startTimestamp,
-    endTimestamp: endTimestamp,
-    reserved: _params.reserved || false,
-  };
+  // const formattedParams = {
+  //   assetContract: _params.assetContract,
+  //   tokenId: BigInt(_params.tokenId),
+  //   quantity: BigInt(_params.quantity),
+  //   currency: _params.currency || nativeCurrency,
+  //   pricePerToken: toWei(_params.pricePerToken),
+  //   startTimestamp: startTimestamp,
+  //   endTimestamp: endTimestamp,
+  //   reserved: _params.reserved || false,
+  // };
 
-  const transaction = await prepareContractCall({
+  // const transaction = await prepareContractCall({
+  //   contract,
+  //   method:
+  //     "function createListing((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) _params) returns (uint256 listingId)",
+  //   params: [formattedParams],
+  // });
+
+  if (!_params.assetContract || !_params.tokenId || !_params.pricePerToken) {
+    return;
+  }
+
+  const transaction = createListing({
     contract,
-    method:
-      "function createListing((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) _params) returns (uint256 listingId)",
-    params: [formattedParams],
+    assetContractAddress: _params.assetContract,
+    tokenId: BigInt(_params.tokenId),
+    pricePerToken: _params.pricePerToken,
   });
 
   return transaction;

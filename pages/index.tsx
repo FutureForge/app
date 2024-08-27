@@ -222,28 +222,26 @@ export default function Home() {
     isPending: buyFromDirectListingMutation.isPending,
   });
 
-  console.log('address', activeAccount?.address)
-
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
-    const params = {
-      assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-      tokenId: "0",
-      quantity: "1",
-      currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-      pricePerToken: "10000000000000000000",
-      startTimestamp: "1724371517950",
-      endTimestamp: "1724966514213",
-      reserved: false,
-    };
+    // const params = {
+    //   assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    //   tokenId: "0",
+    //   quantity: "1",
+    //   currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    //   pricePerToken: "10000000000000000000",
+    //   startTimestamp: "1724371517950",
+    //   endTimestamp: "1724966514213",
+    //   reserved: false,
+    // };
 
     // createListingMutation.mutate({
     //   directListing: {
     //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
     //     tokenId: "1",
     //     quantity: "1",
-    //     pricePerToken: "0.001",
+    //     pricePerToken: "0.0001",
     //     // startTimestamp: "1724575286588",
     //     // endTimestamp: "1724966514213",
     //   },
@@ -320,28 +318,28 @@ export default function Home() {
     //   },
     // });
 
-    // cancelDirectListingMutation.mutate({ listingId: "6" });
+    // cancelDirectListingMutation.mutate({ listingId: "12" });
 
     // updateListingMutation.mutate({
     //   listingId: "12",
     //   directListing: {
     //     assetContract: '0x7b26dA758df7A5E101c9ac0DBA8267B95175F229',
     //     pricePerToken: "0.01",
-    //     endTimestamp: "1724966514213",
+    //     endTimestamp: "1724966514213",4880451148 //
     //     quantity: '1',
     //     tokenId: '0',
     //   },
     // });
 
-    buyFromDirectListingMutation.mutate({
-      buyFromListing: {
-        listingId: "12",
-        buyFor: activeAccount?.address,
-        quantity: "1",
-        currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        totalPrice: "0.01",
-      },
-    });
+    // buyFromDirectListingMutation.mutate({
+    //   buyFromListing: {
+    //     listingId: "17",
+    //     buyFor: activeAccount?.address,
+    //     quantity: "1",
+    //     currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    //     totalPrice: "0.0001",
+    //   },
+    // });
   };
 
   return (

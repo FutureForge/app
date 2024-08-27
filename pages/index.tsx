@@ -55,6 +55,7 @@ export default function Home() {
   const stakingMutation = useStakingMutation();
   const withdrawStakingMutation = useWithdrawStakingMutation();
   const makeListingOfferMutation = useMakeListingOfferMutation();
+  const acceptOfferMutation = useAcceptOfferMutation();
 
   const newCollection = {
     collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
@@ -150,6 +151,11 @@ export default function Home() {
     isPending: makeListingOfferMutation.isPending,
   });
 
+  console.log({
+    message: "accept listing offer console",
+    isPending: acceptOfferMutation.isPending,
+  });
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -176,16 +182,18 @@ export default function Home() {
 
     // withdrawStakingMutation.mutate({ tokenId: "5" });
 
-    makeListingOfferMutation.mutate({
-      makeOffer: {
-        assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-        tokenId: "0",
-        quantity: "1",
-        // currency: '',
-        totalPrice: "0.001",
-        // expirationTimestamp: ''
-      },
-    });
+    // makeListingOfferMutation.mutate({
+    //   makeOffer: {
+    //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    //     tokenId: "0",
+    //     quantity: "1",
+    //     // currency: '',
+    //     totalPrice: "0.001",
+    //     // expirationTimestamp: ''
+    //   },
+    // });
+
+    acceptOfferMutation.mutate({ offerId: "1" });
   };
 
   return (

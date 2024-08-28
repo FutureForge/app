@@ -18,7 +18,7 @@ import { ICollection } from "@/utils/models";
 import { NFTType, StatusType } from "@/utils/lib/types";
 import { NFT } from "thirdweb";
 import { ethers } from "ethers";
-import { getContractCustom } from "@/modules/blockchain/lib";
+import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
 import {
   getIsAuctionExpired,
   getWinningBid,
@@ -195,6 +195,15 @@ export function useGetSingleCollectionQuery(
           listing.status === StatusType.CREATED
       );
 
+      const totalVolumeCollection = allListing.filter(
+        (listing) => listing.status === StatusType.COMPLETED
+      );
+
+      const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
+        const price = parseFloat(decimalOffChain(listing.pricePerToken));
+        return acc + price;
+      }, 0);
+
       const collectionOffers = allOffers.filter(
         (offer) =>
           offer.assetContract === contractAddress &&
@@ -260,6 +269,7 @@ export function useGetSingleCollectionQuery(
         collectionListing,
         collectionOffers,
         updatedNFTs,
+        totalVolume,
         floorPrice,
         listedNFTs,
         percentageOfListed,
@@ -270,6 +280,7 @@ export function useGetSingleCollectionQuery(
       collectionListing: [],
       collectionOffers: [],
       updatedNFTs: [],
+      totalVolume: 0,
       floorPrice: "0",
       listedNFTs: 0,
       percentageOfListed: 0,

@@ -33,7 +33,7 @@ export async function getCurrentBlockNumber() {
 }
 
 export function decimalOffChain(
-  number: number,
+  number: bigint | string | number,
   decimalPlaces: string = "ethers"
 ) {
   const value = ethers.utils.formatEther(number);

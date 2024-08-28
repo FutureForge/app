@@ -47,6 +47,7 @@ import { createWallet } from "thirdweb/wallets";
 import { getAllOffers, getTotalListings } from "@/modules/blockchain";
 import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
 import { isBidAmountValid } from "@/utils";
+import React, { useRef, useState } from "react";
 
 export default function Home() {
   const { activeAccount } = useUserChainInfo();
@@ -79,6 +80,11 @@ export default function Home() {
     name: "My Collection",
     description: "This is my collection",
   };
+
+  const [nftName, setNftName] = useState("");
+  const [nftDescription, setNftDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   console.log({ collections });
 
@@ -222,6 +228,14 @@ export default function Home() {
     isPending: buyFromDirectListingMutation.isPending,
   });
 
+  const processFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
 
@@ -342,6 +356,21 @@ export default function Home() {
     // });
   };
 
+  const handleMintNFT = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      processFile(files[0]);
+    }
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const reset = () => {
+    setImageUrl(null);
+  };
+
   return (
     <>
       <ConnectButton
@@ -349,6 +378,30 @@ export default function Home() {
         chain={chainInfoV2}
         wallets={[createWallet("io.metamask")]}
       />
+      <input
+        type="text"
+        value={nftName}
+        placeholder="Enter NFT Name"
+        onChange={(e) => setNftName(e.target.value)}
+      />
+      <input
+        type="text"
+        value={nftDescription}
+        placeholder="Set NFT Description"
+        onChange={(e) => setNftDescription(e.target.value)}
+      />
+      <input
+        onChange={handleMintNFT}
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+      />
+      {imageUrl && (
+        <>
+          <img height="100px" width="100px" src={imageUrl} alt="NFT" />
+          <button onClick={reset}>reset</button>
+        </>
+      )}
       <button onClick={handleAddCollection}>Click Me</button>
     </>
   );

@@ -7,12 +7,18 @@ export const MARKETPLACE_CONTRACT =
   "0x693a19b40Cb34dDC2605E60a6261dA891be9a60D"; //sepolia chain
 export const TEST_ASSET_ADDRESS = "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229";
 export const STAKING_CONTRACT = "0x03D159b0393183023cc9C790BFc45b82a23612ef";
-export const STAKING_CONTRACT_TOKEN = '0x99a08a9AA59434cA893aE1A2E771Cf26b1B92E7A'
+export const STAKING_CONTRACT_TOKEN =
+  "0x99a08a9AA59434cA893aE1A2E771Cf26b1B92E7A";
 
-const clientId = "21c145464870191d752d334f06abcb73";
+const CLIENT_ID = "21c145464870191d752d334f06abcb73";
+export const SECRET_KEY =
+  "OyGuPbPM5sY4r8S2QqhZzowcQ87Ht8wvACAny43O1nc8csLM3HYGX8YbqLPZ3r5foKZgifnxr_QFD62DvOH11w";
+export const ENGINE_URL = "";
+export const BACKEND_WALLET = "";
+export const TW_SECRET_KEY = "";
 
 export const client = createThirdwebClient({
-  clientId,
+  clientId: CLIENT_ID,
 });
 
 export const chainInfo = defineChain({

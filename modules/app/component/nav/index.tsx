@@ -7,24 +7,29 @@ import { IoIosMenu } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { useDisableScroll } from '../../hooks/useDisableScroll'
 import { cn } from '../../utils'
+import { ConnectButton } from 'thirdweb/react'
+import { createWallet } from 'thirdweb/wallets'
+import { chainInfoV2, client } from '@/utils/configs'
+import { usePathname } from 'next/navigation'
 
 const Nav_Links = [
   {
     name: 'Create',
-    link: '/',
+    link: '/create',
   },
   {
     name: 'NFT Staking',
-    link: '/',
+    link: '/staking',
   },
   {
     name: 'Collections',
-    link: '/',
+    link: '/collections',
   },
 ]
 export function Nav() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const pathname = usePathname()
   useDisableScroll(isMobileNavOpen)
 
   const { value, setValue } = useSearchStore((state) => ({
@@ -56,16 +61,20 @@ export function Nav() {
       <div className="flex items-center justify-between w-1/3 gap-10">
         <Link href={'/'} className="text-white font-medium flex-1 flex gap-1 items-center">
           <Icon iconType={'logo'} />
-          <span className='hidden sm:block'>MintMingle</span>
+          <span className="hidden sm:block">MintMingle</span>
         </Link>
 
         <ul className="min-[1170px]:flex hidden items-center justify-between gap-5 w-full">
           {Nav_Links.map((item) => {
             const { name, link } = item
+            const isActive = pathname === link
 
             return (
               <li key={name} className="flex items-center justify-between">
-                <Link href={link} className="text-muted-foreground whitespace-nowrap">
+                <Link
+                  href={link}
+                  className={cn("text-muted-foreground whitespace-nowrap hover:text-foreground duration-300 ease-in-out transition", {'text-foreground': isActive})}
+                >
                   {name}
                 </Link>
               </li>
@@ -85,10 +94,21 @@ export function Nav() {
         />
       </div>
       <div className="lg:w-1/6 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
-        <Icon iconType={'profile'} className="w-6 text-muted-foreground max-sm:hidden" />
-        <Button className="lg:w-36 w-[75%] max-sm:w-full  h-10 text-base font-inter rounded-xl">
-          Connect Wallet
-        </Button>
+        <Icon
+          iconType={'profile'}
+          className="w-6 text-muted-foreground max-sm:hidden cursor-pointer flex-1 hover:text-foreground duration-300 ease-in-out transition"
+        />
+
+        <ConnectButton
+          client={client}
+          chain={chainInfoV2}
+          wallets={[createWallet('io.metamask')]}
+          connectButton={{
+            label: 'Connect Wallet',
+            className:
+              '!font-inter !rounded-xl lg:!w-36 !w-[75%] max-sm:!w-full !flex !items-center !justify-center hover:!bg-primary/65 hover:!text-foreground !duration-300 !ease-in-out !transition !bg-primary !text-muted-foreground !h-10',
+          }}
+        />
       </div>
       <div className="min-[1170px]:hidden flex items-center gap-8">
         {isMobileNavOpen ? (

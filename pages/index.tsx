@@ -50,183 +50,183 @@ import { isBidAmountValid } from "@/utils";
 import React, { useRef, useState } from "react";
 
 export default function Home() {
-  const { activeAccount } = useUserChainInfo();
-  const { data: collections, isLoading } = useFetchCollectionsQuery();
-  const addCollectionMutation = useAddCollectionMutation();
-  const createListingMutation = useCreateListingMutation();
-  const approveForAllMutation = useApprovedForAllMutation();
-  const approvedForStakingMutation = useApprovedForAllStakingMutation();
-  const claimStakingRewardMutation = useClaimStakingRewardMutation();
-  const stakingMutation = useStakingMutation();
-  const withdrawStakingMutation = useWithdrawStakingMutation();
+  // const { activeAccount } = useUserChainInfo();
+  // const { data: collections, isLoading } = useFetchCollectionsQuery();
+  // const addCollectionMutation = useAddCollectionMutation();
+  // const createListingMutation = useCreateListingMutation();
+  // const approveForAllMutation = useApprovedForAllMutation();
+  // const approvedForStakingMutation = useApprovedForAllStakingMutation();
+  // const claimStakingRewardMutation = useClaimStakingRewardMutation();
+  // const stakingMutation = useStakingMutation();
+  // const withdrawStakingMutation = useWithdrawStakingMutation();
 
-  // direct listing
-  const makeListingOfferMutation = useMakeListingOfferMutation();
-  const acceptOfferMutation = useAcceptOfferMutation();
-  const cancelOfferMutation = useCancelOfferMutation();
-  const updateListingMutation = useUpdateListingMutation();
-  const buyFromDirectListingMutation = useBuyFromDirectListingMutation();
-  const cancelDirectListingMutation = useCancelDirectListingMutation();
+  // // direct listing
+  // const makeListingOfferMutation = useMakeListingOfferMutation();
+  // const acceptOfferMutation = useAcceptOfferMutation();
+  // const cancelOfferMutation = useCancelOfferMutation();
+  // const updateListingMutation = useUpdateListingMutation();
+  // const buyFromDirectListingMutation = useBuyFromDirectListingMutation();
+  // const cancelDirectListingMutation = useCancelDirectListingMutation();
 
-  // auction
-  const bidInAuctionMutation = useBitInAuctionMutation();
-  const cancelAuctionMutation = useCancelAuctionMutation();
-  const collectAuctionPayOutMutation = useCollectAuctionPayoutMutation(); // seller
-  const collectAuctionTokenMutation = useCollectAuctionTokensMutation(); // buy
-  const createAuctionMutation = useCreateAuctionMutation();
+  // // auction
+  // const bidInAuctionMutation = useBitInAuctionMutation();
+  // const cancelAuctionMutation = useCancelAuctionMutation();
+  // const collectAuctionPayOutMutation = useCollectAuctionPayoutMutation(); // seller
+  // const collectAuctionTokenMutation = useCollectAuctionTokensMutation(); // buy
+  // const createAuctionMutation = useCreateAuctionMutation();
 
-  const newCollection = {
-    collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
-    name: "My Collection",
-    description: "This is my collection",
-  };
+  // const newCollection = {
+  //   collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
+  //   name: "My Collection",
+  //   description: "This is my collection",
+  // };
 
   const [nftName, setNftName] = useState("");
   const [nftDescription, setNftDescription] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log({ collections });
+  // console.log({ collections });
 
   const userNFTs = useUserNFTsQuery();
   console.log({ userNFTs });
 
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
-  console.log({ contract });
+  // const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  // console.log({ contract });
 
-  const totalListing = getTotalListings();
-  console.log({ totalListing });
+  // const totalListing = getTotalListings();
+  // console.log({ totalListing });
 
-  const offers = getAllOffers();
-  console.log({ offers });
+  // const offers = getAllOffers();
+  // console.log({ offers });
 
-  const { data: offersMade } = useUserOffersMadeQuery();
-  console.log({ offersMade });
+  // const { data: offersMade } = useUserOffersMadeQuery();
+  // console.log({ offersMade });
 
-  const { data: userListing } = useUserListingQuery();
-  console.log({ userListing });
+  // const { data: userListing } = useUserListingQuery();
+  // console.log({ userListing });
 
-  const { data: userAuction } = useUserAuctionQuery();
-  console.log({ userAuction });
+  // const { data: userAuction } = useUserAuctionQuery();
+  // console.log({ userAuction });
 
-  const { data: collectionNFT } = useGetMarketplaceCollectionsQuery();
-  console.log({ collectionNFT });
+  // const { data: collectionNFT } = useGetMarketplaceCollectionsQuery();
+  // console.log({ collectionNFT });
 
-  const { data: singleCollection } = useGetSingleCollectionQuery(
-    "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    "ERC721"
-  );
-  console.log({ singleCollection });
+  // const { data: singleCollection } = useGetSingleCollectionQuery(
+  //   "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+  //   "ERC721"
+  // );
+  // console.log({ singleCollection });
 
-  const { data: newListingEvent } = useMarketplaceEventQuery();
-  console.log({ newListingEvent });
+  // const { data: newListingEvent } = useMarketplaceEventQuery();
+  // console.log({ newListingEvent });
 
-  console.log({
-    message: "create listing console",
-    isPending: createListingMutation.isPending,
-  });
+  // console.log({
+  //   message: "create listing console",
+  //   isPending: createListingMutation.isPending,
+  // });
 
-  const { data: isApproved } = useCheckApprovedForAllQuery(
-    "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229"
-  );
-  console.log({ isApproved });
+  // const { data: isApproved } = useCheckApprovedForAllQuery(
+  //   "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229"
+  // );
+  // console.log({ isApproved });
 
-  console.log({
-    message: "approved for all console",
-    isPending: approveForAllMutation.isPending,
-  });
+  // console.log({
+  //   message: "approved for all console",
+  //   isPending: approveForAllMutation.isPending,
+  // });
 
-  const { data: singleNFTQuery } = useGetSingleNFTQuery({
-    contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    nftType: "ERC721",
-    tokenId: "1",
-  });
-  console.log({ singleNFTQuery });
+  // const { data: singleNFTQuery } = useGetSingleNFTQuery({
+  //   contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+  //   nftType: "ERC721",
+  //   tokenId: "1",
+  // });
+  // console.log({ singleNFTQuery });
 
-  const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
-  console.log({ approvedStaking });
+  // const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
+  // console.log({ approvedStaking });
 
-  const { data: stakingInfo } = useGetUserStakingInfoQuery();
-  console.log({ stakingInfo });
+  // const { data: stakingInfo } = useGetUserStakingInfoQuery();
+  // console.log({ stakingInfo });
 
-  const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery();
-  console.log({ globalListingOrAuction });
-  const allAuction = globalListingOrAuction?.allAuction;
+  // const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery();
+  // console.log({ globalListingOrAuction });
+  // const allAuction = globalListingOrAuction?.allAuction;
 
-  console.log({
-    message: "approved for all staking console",
-    isPending: approvedForStakingMutation.isPending,
-  });
+  // console.log({
+  //   message: "approved for all staking console",
+  //   isPending: approvedForStakingMutation.isPending,
+  // });
 
-  console.log({
-    message: "claim staking console",
-    isPending: claimStakingRewardMutation.isPending,
-  });
+  // console.log({
+  //   message: "claim staking console",
+  //   isPending: claimStakingRewardMutation.isPending,
+  // });
 
-  console.log({
-    message: "stake console",
-    isPending: stakingMutation.isPending,
-  });
+  // console.log({
+  //   message: "stake console",
+  //   isPending: stakingMutation.isPending,
+  // });
 
-  console.log({
-    message: "withdraw stake console",
-    isPending: withdrawStakingMutation.isPending,
-  });
+  // console.log({
+  //   message: "withdraw stake console",
+  //   isPending: withdrawStakingMutation.isPending,
+  // });
 
-  console.log({
-    message: "make listing offer console",
-    isPending: makeListingOfferMutation.isPending,
-  });
+  // console.log({
+  //   message: "make listing offer console",
+  //   isPending: makeListingOfferMutation.isPending,
+  // });
 
-  console.log({
-    message: "accept listing offer console",
-    isPending: acceptOfferMutation.isPending,
-  });
+  // console.log({
+  //   message: "accept listing offer console",
+  //   isPending: acceptOfferMutation.isPending,
+  // });
 
-  console.log({
-    message: "cancel offer console",
-    isPending: cancelOfferMutation.isPending,
-  });
+  // console.log({
+  //   message: "cancel offer console",
+  //   isPending: cancelOfferMutation.isPending,
+  // });
 
-  console.log({
-    message: "bid in auction console",
-    isPending: bidInAuctionMutation.isPending,
-  });
+  // console.log({
+  //   message: "bid in auction console",
+  //   isPending: bidInAuctionMutation.isPending,
+  // });
 
-  console.log({
-    message: "cancel in auction console",
-    isPending: cancelAuctionMutation.isPending,
-  });
+  // console.log({
+  //   message: "cancel in auction console",
+  //   isPending: cancelAuctionMutation.isPending,
+  // });
 
-  console.log({
-    message: "collect payout auction console",
-    isPending: collectAuctionPayOutMutation.isPending,
-  });
+  // console.log({
+  //   message: "collect payout auction console",
+  //   isPending: collectAuctionPayOutMutation.isPending,
+  // });
 
-  console.log({
-    message: "collect payout auction console",
-    isPending: collectAuctionTokenMutation.isPending,
-  });
+  // console.log({
+  //   message: "collect payout auction console",
+  //   isPending: collectAuctionTokenMutation.isPending,
+  // });
 
-  console.log({
-    message: "create auction console",
-    isPending: createAuctionMutation.isPending,
-  });
+  // console.log({
+  //   message: "create auction console",
+  //   isPending: createAuctionMutation.isPending,
+  // });
 
-  console.log({
-    message: "cancel listing console",
-    isPending: cancelDirectListingMutation.isPending,
-  });
+  // console.log({
+  //   message: "cancel listing console",
+  //   isPending: cancelDirectListingMutation.isPending,
+  // });
 
-  console.log({
-    message: "update direct console",
-    isPending: updateListingMutation.isPending,
-  });
+  // console.log({
+  //   message: "update direct console",
+  //   isPending: updateListingMutation.isPending,
+  // });
 
-  console.log({
-    message: "buyfor direct listing console",
-    isPending: buyFromDirectListingMutation.isPending,
-  });
+  // console.log({
+  //   message: "buyfor direct listing console",
+  //   isPending: buyFromDirectListingMutation.isPending,
+  // });
 
   const processFile = (file: File) => {
     const reader = new FileReader();
@@ -375,7 +375,7 @@ export default function Home() {
     <>
       <ConnectButton
         client={client}
-        chain={chainInfoV2}
+        chain={chainInfo}
         wallets={[createWallet("io.metamask")]}
       />
       <input

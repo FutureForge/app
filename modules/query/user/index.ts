@@ -1,12 +1,14 @@
+import { getNFT as getCFC721NFT } from "thirdweb/extensions/erc721";
 import { useActiveAccount, useActiveWallet } from "thirdweb/react";
-import { CROSSFI_API, TEST_ADDRESS } from "@/utils/configs";
-import { StatusType } from "@/utils/lib/types";
+import { CROSSFI_API, TEST_WALLET_ADDRESS } from "@/utils/configs";
+import { NFTResponse, StatusType } from "@/utils/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
   getAllOffers,
   getAllListing,
   getAllAuctions,
+  getContractCustom,
 } from "@/modules/blockchain";
 
 export function useUserChainInfo() {
@@ -23,11 +25,28 @@ export function useUserNFTsQuery() {
   return useQuery({
     queryKey: ["userNFTs", "userProfile", "profile"],
     queryFn: async () => {
-      const response = await axios.get(
-        `${CROSSFI_API}/token-holders?address=${TEST_ADDRESS}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`
+      const response = await axios.get<NFTResponse>(
+        `${CROSSFI_API}/token-holders?address=${TEST_WALLET_ADDRESS}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`
       );
       const userNFTs = response.data.docs;
-      return userNFTs;
+
+      const updatedNFTs = userNFTs.map(async (nfts) => {
+        const tokenIds = nfts.tokenIds;
+
+        const contract = await getContractCustom({
+          contractAddress: nfts.contractAddress,
+        });
+
+        const tokenIdNFTs = tokenIds.map(async (ids) => {
+          const nft = await getCFC721NFT({ contract, tokenId: BigInt(ids) });
+
+          return { ...nfts, nft };
+        });
+
+        return await Promise.all(tokenIdNFTs);
+      });
+
+      return await Promise.all(updatedNFTs);
     },
     enabled: !!userAddress,
   });

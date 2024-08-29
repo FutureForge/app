@@ -6,6 +6,7 @@ export enum Status {
 }
 
 export type NFTType = "ERC721" | "ERC1155";
+export type NFTTypeV2 = "CFC-20" | "CFC-721";
 
 export const TokenType = {
   ERC721: 0,
@@ -71,3 +72,23 @@ export type GetAllAuctionType = AuctionBaseType & {
   tokenType: keyof typeof TokenType;
   status: keyof typeof StatusType;
 };
+
+interface NFTData {
+  address: string;
+  balance: string;
+  blockNumber: number;
+  contractAddress: string;
+  decimals: string | null;
+  timestamp: string;
+  tokenIds: string[];
+  tokenName: string;
+  tokenSymbol: string;
+  tokenType: string;
+}
+
+export interface NFTResponse {
+  docs: NFTData[];
+  hasNext: boolean;
+  limit: number;
+  page: number;
+}

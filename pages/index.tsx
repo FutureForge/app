@@ -52,7 +52,7 @@ import Head from "next/head";
 
 export default function Home() {
   // const { activeAccount, activeWallet } = useUserChainInfo();
-  const { data: collections, isLoading } = useFetchCollectionsQuery();
+  const { data: collections, isLoading } = useFetchCollectionsQuery()
   // const addCollectionMutation = useAddCollectionMutation();
   // const createListingMutation = useCreateListingMutation();
   // const approveForAllMutation = useApprovedForAllMutation();
@@ -82,15 +82,15 @@ export default function Home() {
   //   description: "This is my collection",
   // };
 
-  const [nftName, setNftName] = useState("");
-  const [nftDescription, setNftDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [nftName, setNftName] = useState('')
+  const [nftDescription, setNftDescription] = useState('')
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  console.log({ collections });
+  console.log({ collections })
 
-  const userNFTs = useUserNFTsQuery();
-  console.log({ userNFTs });
+  const userNFTs = useUserNFTsQuery()
+  console.log({ userNFTs })
 
   // const { data: offersMade } = useUserOffersMadeQuery();
   // console.log({ offersMade });
@@ -101,8 +101,8 @@ export default function Home() {
   // const { data: userAuction } = useUserAuctionQuery();
   // console.log({ userAuction });
 
-  const { data: collectionNFT } = useGetMarketplaceCollectionsQuery();
-  console.log({ collectionNFT });
+  const { data: collectionNFT } = useGetMarketplaceCollectionsQuery()
+  console.log({ collectionNFT })
 
   // const { data: singleCollection } = useGetSingleCollectionQuery(
   //   "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
@@ -110,9 +110,28 @@ export default function Home() {
   // );
   // console.log({ singleCollection });
 
-  // const { data: newListingEvent } = useMarketplaceEventQuery();
-  // console.log({ newListingEvent });
+  const { data: newListingEvent } = useMarketplaceEventQuery()
+  const { newListing, newAuction, newSaleListing } = newListingEvent
+  console.log({ newListingEvent })
 
+  const [filter, setFilter] = useState<
+    'All' | 'Recently Listed' | 'Recently Sold' | 'Recent Auctioned'
+  >('All')
+
+  // Filtering logic
+  const filteredData = (() => {
+    switch (filter) {
+      case 'Recently Listed':
+        return newListing
+      case 'Recently Sold':
+        return newSaleListing
+      case 'Recent Auctioned':
+        return newAuction
+      case 'All':
+      default:
+        return [...(newListing || []), ...(newSaleListing || []), ...(newAuction || [])]
+    }
+  })()
   // console.log({
   //   message: "create listing console",
   //   isPending: createListingMutation.isPending,
@@ -129,20 +148,20 @@ export default function Home() {
   // });
 
   const { data: singleNFTQuery } = useGetSingleNFTQuery({
-    contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    nftType: "ERC721",
-    tokenId: "0",
-  });
-  console.log({ singleNFTQuery });
+    contractAddress: '0x7b26dA758df7A5E101c9ac0DBA8267B95175F229',
+    nftType: 'ERC721',
+    tokenId: '0',
+  })
+  console.log({ singleNFTQuery })
 
   // const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
   // console.log({ approvedStaking });
 
-  const { data: stakingInfo } = useGetUserStakingInfoQuery();
-  console.log({ stakingInfo });
+  const { data: stakingInfo } = useGetUserStakingInfoQuery()
+  console.log({ stakingInfo })
 
-  const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery();
-  console.log({ globalListingOrAuction });
+  const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery()
+  console.log({ globalListingOrAuction })
   // const allAuction = globalListingOrAuction?.allAuction;
 
   // console.log({
@@ -221,12 +240,12 @@ export default function Home() {
   // });
 
   const processFile = (file: File) => {
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onloadend = () => {
-      setImageUrl(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
+      setImageUrl(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleAddCollection = async () => {
     // addCollectionMutation.mutate(newCollection);
@@ -280,7 +299,7 @@ export default function Home() {
 
     // cancelOfferMutation.mutate({ offerId: "1" });
 
-    const auctionId = "0";
+    const auctionId = '0'
     // const bidAmount = "0.008";
     // const percentageIncrease = 1;
 
@@ -346,25 +365,25 @@ export default function Home() {
     //     totalPrice: "0.0001",
     //   },
     // });
-  };
+  }
 
   const handleMintNFT = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    const files = e.target.files
     if (files && files.length > 0) {
-      processFile(files[0]);
+      processFile(files[0])
     }
-  };
+  }
 
   const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
+    fileInputRef.current?.click()
+  }
 
   const reset = () => {
-    setImageUrl(null);
-  };
+    setImageUrl(null)
+  }
 
   return (
-    <div className="h-screen">
+    <div className="h-screen md:px-14">
       <Head>
         <title>MintMingle, marketplace for NFTs</title>
         <meta
@@ -373,7 +392,19 @@ export default function Home() {
         />
       </Head>
 
-      <ConnectButton client={client} chain={chainInfoV2} wallets={[createWallet('io.metamask')]} />
+      <div className="flex items-center gap-3">
+        {['All', 'Recently Listed', 'Recently Sold', 'Recently Auctioned'].map((f) => (
+          <button
+            key={f}
+            className={`px-4 py-1 m-2 rounded-xl hover:text-foreground ${
+              filter === f ? 'bg-sec-bg text-foreground' : 'text-muted-foreground'
+            } transition ease-in-out duration-200`}
+            onClick={() => setFilter(f as any)}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
       <input
         type="text"
         value={nftName}

@@ -55,7 +55,7 @@ export function Nav() {
     <nav
       className={cn(
         'flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 justify-between px-4 items-center font-inter',
-        isScrolled ? 'bg-sec-bg' : 'bg-transparent',
+        isScrolled ? 'bg-[#0F0F0F] border-b border-sec-bg' : 'bg-transparent',
       )}
     >
       <div className="flex items-center justify-between w-1/3 gap-10">
@@ -73,7 +73,10 @@ export function Nav() {
               <li key={name} className="flex items-center justify-between">
                 <Link
                   href={link}
-                  className={cn("text-muted-foreground whitespace-nowrap hover:text-foreground duration-300 ease-in-out transition", {'text-foreground': isActive})}
+                  className={cn(
+                    'text-muted-foreground whitespace-nowrap hover:text-foreground duration-300 ease-in-out transition',
+                    { 'text-foreground': isActive },
+                  )}
                 >
                   {name}
                 </Link>
@@ -96,7 +99,7 @@ export function Nav() {
       <div className="lg:w-1/6 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
         <Icon
           iconType={'profile'}
-          className="w-6 text-muted-foreground max-sm:hidden cursor-pointer flex-1 hover:text-foreground duration-300 ease-in-out transition"
+          className="w-6 text-muted-foreground max-sm:hidden cursor-pointer hover:text-foreground duration-300 ease-in-out transition"
         />
 
         <ConnectButton

@@ -10,7 +10,7 @@ export const RootLayout = ({ children, scrollToTop }: RootLayoutProps) => {
     <div className="flex isolate flex-col h-screen relative bg-background">
       <Nav />
       <div
-        className="w-full min-h-screen z-10"
+        className="w-full min-h-screen z-10 py-6"
         ref={(node) => {
           if (node && scrollToTop) {
             node.scroll(0, 0)

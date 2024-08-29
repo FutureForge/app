@@ -48,6 +48,7 @@ import { getAllOffers, getTotalListings } from "@/modules/blockchain";
 import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
 import { isBidAmountValid } from "@/utils";
 import React, { useRef, useState } from "react";
+import Head from "next/head";
 
 export default function Home() {
   const { activeAccount } = useUserChainInfo();
@@ -372,12 +373,16 @@ export default function Home() {
   };
 
   return (
-    <>
-      <ConnectButton
-        client={client}
-        chain={chainInfoV2}
-        wallets={[createWallet("io.metamask")]}
-      />
+    <div className="h-screen">
+      <Head>
+        <title>MintMingle, marketplace for NFTs</title>
+        <meta
+          name="description"
+          content="A community driven token that comes with additional warm gesture, rewards and credit back hampers."
+        />
+      </Head>
+
+      <ConnectButton client={client} chain={chainInfoV2} wallets={[createWallet('io.metamask')]} />
       <input
         type="text"
         value={nftName}
@@ -390,12 +395,7 @@ export default function Home() {
         placeholder="Set NFT Description"
         onChange={(e) => setNftDescription(e.target.value)}
       />
-      <input
-        onChange={handleMintNFT}
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-      />
+      <input onChange={handleMintNFT} type="file" accept="image/*" ref={fileInputRef} />
       {imageUrl && (
         <>
           <img height="100px" width="100px" src={imageUrl} alt="NFT" />
@@ -403,8 +403,8 @@ export default function Home() {
         </>
       )}
       <button onClick={handleAddCollection}>Click Me</button>
-    </>
-  );
+    </div>
+  )
 }
 
 // create auction

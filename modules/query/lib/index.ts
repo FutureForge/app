@@ -18,6 +18,6 @@ export function useCheckApprovedForAllQuery(collectionContractAddress: string) {
       return isApproved;
     },
     enabled: !!activeAccount && !!collectionContractAddress,
-    refetchInterval: 60000,
+    refetchInterval: 6000,
   });
 }

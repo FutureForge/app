@@ -43,6 +43,6 @@ export function useGetGlobalListingOrAuctionQuery() {
     },
     initialData: null,
     enabled: true,
-    refetchInterval: 60000,
+    refetchInterval: 6000,
   });
 }

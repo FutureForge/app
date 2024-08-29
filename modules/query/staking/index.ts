@@ -23,7 +23,7 @@ export function useCheckApprovedForAllStakingQuery() {
       return isApproved;
     },
     enabled: !!activeAccount,
-    refetchInterval: 60000,
+    refetchInterval: 6000,
   });
 }
 
@@ -62,7 +62,7 @@ export function useGetUserStakingInfoQuery() {
 
       return { tokensStaked, rewards, nftsTokenStaked };
     },
-    enabled: !!activeAccount?.address, // Only enable if there's an active account with an address
-    refetchInterval: 60000,
+    enabled: !!activeAccount?.address,
+    refetchInterval: 6000,
   });
 }

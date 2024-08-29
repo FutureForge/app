@@ -44,29 +44,80 @@ export function useGetMarketplaceCollectionsQuery() {
     queryFn: async () => {
       if (!collections || collections.length === 0) return [];
 
-      const nftPromises = collections.map(async (collection: ICollection) => {
-        const contract = await getContractCustom({
-          contractAddress: collection.collectionContractAddress,
-        });
+      const collectionPromises = collections.map(
+        async (collection: ICollection) => {
+          const contract = await getContractCustom({
+            contractAddress: collection.collectionContractAddress,
+          });
 
-        let nftList: NFT[] = [];
-        if (collection.nftType === "ERC721") {
-          nftList = await getERC721NFTs({ contract });
-        } else if (collection.nftType === "ERC1155") {
-          nftList = await getERC1155NFTs({ contract });
+          let nfts: NFT[] = [];
+          if (collection.nftType === "ERC721") {
+            nfts = await getERC721NFTs({ contract });
+          } else if (collection.nftType === "ERC1155") {
+            nfts = await getERC1155NFTs({ contract });
+          }
+
+          const allListing = await getAllListing();
+
+          const collectionListing = allListing.filter(
+            (listing) =>
+              listing.assetContract === collection.collectionContractAddress &&
+              listing.status === StatusType.CREATED
+          );
+
+          const totalVolumeCollection = allListing.filter(
+            (listing) =>
+              listing.assetContract === collection.collectionContractAddress &&
+              listing.status === StatusType.COMPLETED
+          );
+
+          const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
+            const price = parseFloat(decimalOffChain(listing.pricePerToken));
+            return acc + price;
+          }, 0);
+
+          const formattedPrices = await Promise.all(
+            collectionListing.map(async (listing) => {
+              if (
+                listing.currency ===
+                "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+              ) {
+                return ethers.utils.formatUnits(listing.pricePerToken, "ether");
+              } else {
+                const tokenContract = await getContractCustom({
+                  contractAddress: listing.currency,
+                });
+                const tokenDecimals = await decimals({
+                  contract: tokenContract,
+                });
+                return ethers.utils.formatUnits(
+                  listing.pricePerToken,
+                  tokenDecimals
+                );
+              }
+            })
+          );
+
+          const floorPrice =
+            formattedPrices.length > 0
+              ? Math.min(...formattedPrices.map((price) => parseFloat(price)))
+              : 0;
+
+          return {
+            collection,
+            nfts,
+            totalVolume,
+            floorPrice: floorPrice.toString(),
+          };
         }
-        return nftList;
-      });
+      );
 
-      const nftsSettled = await Promise.allSettled(nftPromises);
-      const nfts = nftsSettled
-        .filter((result) => result.status === "fulfilled")
-        .map((result) => (result as PromiseFulfilledResult<any[]>).value);
+      const collectionsData = await Promise.all(collectionPromises);
 
-      return nfts;
+      return collectionsData;
     },
     enabled: !!collections,
-    refetchInterval: 60000 * 5,
+    refetchInterval: 6000,
   });
 }
 
@@ -84,12 +135,14 @@ export function useGetSingleNFTQuery({
     queryFn: async () => {
       const contract = await getContractCustom({ contractAddress });
 
-      let nftList: NFT;
+      let nftList: NFT | null = null;
       if (nftType === "ERC721") {
         nftList = await getERC721NFT({ contract, tokenId: BigInt(tokenId) });
       } else if (nftType === "ERC1155") {
         nftList = await getERC1155NFT({ contract, tokenId: BigInt(tokenId) });
       }
+
+      console.log("single nft list", nftList);
 
       const allAuctions = await getAllAuctions();
       const allListing = await getAllListing();
@@ -131,6 +184,7 @@ export function useGetSingleNFTQuery({
 
         result = {
           id: "auction",
+          nft: nftList,
           nftAuctionList,
           isAuctionExpired,
           winningBid: winningBidBody,
@@ -148,11 +202,13 @@ export function useGetSingleNFTQuery({
         result = {
           id: "listing",
           nftListingList,
+          nft: nftList,
           offers: filteredOffers,
         };
       } else {
         result = {
           id: "none",
+          nft: nftList,
           message: "No auction or listing found for the given token ID.",
         };
       }
@@ -160,7 +216,7 @@ export function useGetSingleNFTQuery({
       return result;
     },
     enabled: !!contractAddress && !!nftType && !!tokenId,
-    refetchInterval: 60000 * 5,
+    refetchInterval: 6000,
   });
 }
 
@@ -286,6 +342,6 @@ export function useGetSingleCollectionQuery(
       percentageOfListed: 0,
     },
     enabled: !!collections && !!contractAddress && !!nftType,
-    refetchInterval: 60000 * 5,
+    refetchInterval: 6000,
   });
 }

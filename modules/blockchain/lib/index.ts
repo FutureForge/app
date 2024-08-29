@@ -1,4 +1,4 @@
-import { chainInfoV2, client, rpcRequest } from "@/utils/configs";
+import { chainInfoV2, client, rpcRequest, chainInfo } from "@/utils/configs";
 import { ethers } from "ethers";
 import { eth_blockNumber, getContract as getContractThirdweb } from "thirdweb";
 

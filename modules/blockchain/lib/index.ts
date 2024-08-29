@@ -2,6 +2,7 @@ import { chainInfoV2, client, rpcRequest, chainInfo } from "@/utils/configs";
 import { ethers } from "ethers";
 import { eth_blockNumber, getContract as getContractThirdweb } from "thirdweb";
 
+export const includeNFTOwner = true;
 export const fromBlock = 6543730;
 export const nativeCurrency = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 

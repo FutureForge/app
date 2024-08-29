@@ -7,6 +7,7 @@ import {
 } from "@/modules/blockchain";
 import { getNFT as getERC721NFT } from "thirdweb/extensions/erc721";
 import { TEST_ASSET_ADDRESS } from "@/utils/configs";
+import { includeNFTOwner } from "@/modules/blockchain/lib";
 
 export function useCheckApprovedForAllStakingQuery() {
   const { activeAccount } = useUserChainInfo();
@@ -53,6 +54,7 @@ export function useGetUserStakingInfoQuery() {
           const nft = await getERC721NFT({
             contract,
             tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
           });
           return nft;
         })

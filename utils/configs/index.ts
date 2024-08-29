@@ -37,4 +37,4 @@ export const chainInfo = defineChain({
 
 export const chainInfoV2 = sepolia;
 
-export const rpcRequest = getRpcClient({ client, chain: chainInfo });
+export const rpcRequest = getRpcClient({ client, chain: chainInfoV2 });

@@ -50,8 +50,8 @@ import { isBidAmountValid } from "@/utils";
 import React, { useRef, useState } from "react";
 
 export default function Home() {
-  // const { activeAccount } = useUserChainInfo();
-  // const { data: collections, isLoading } = useFetchCollectionsQuery();
+  // const { activeAccount, activeWallet } = useUserChainInfo();
+  const { data: collections, isLoading } = useFetchCollectionsQuery();
   // const addCollectionMutation = useAddCollectionMutation();
   // const createListingMutation = useCreateListingMutation();
   // const approveForAllMutation = useApprovedForAllMutation();
@@ -86,19 +86,10 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // console.log({ collections });
+  console.log({ collections });
 
   const userNFTs = useUserNFTsQuery();
   console.log({ userNFTs });
-
-  // const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
-  // console.log({ contract });
-
-  // const totalListing = getTotalListings();
-  // console.log({ totalListing });
-
-  // const offers = getAllOffers();
-  // console.log({ offers });
 
   // const { data: offersMade } = useUserOffersMadeQuery();
   // console.log({ offersMade });
@@ -109,8 +100,8 @@ export default function Home() {
   // const { data: userAuction } = useUserAuctionQuery();
   // console.log({ userAuction });
 
-  // const { data: collectionNFT } = useGetMarketplaceCollectionsQuery();
-  // console.log({ collectionNFT });
+  const { data: collectionNFT } = useGetMarketplaceCollectionsQuery();
+  console.log({ collectionNFT });
 
   // const { data: singleCollection } = useGetSingleCollectionQuery(
   //   "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
@@ -136,21 +127,21 @@ export default function Home() {
   //   isPending: approveForAllMutation.isPending,
   // });
 
-  // const { data: singleNFTQuery } = useGetSingleNFTQuery({
-  //   contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-  //   nftType: "ERC721",
-  //   tokenId: "1",
-  // });
-  // console.log({ singleNFTQuery });
+  const { data: singleNFTQuery } = useGetSingleNFTQuery({
+    contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    nftType: "ERC721",
+    tokenId: "0",
+  });
+  console.log({ singleNFTQuery });
 
   // const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
   // console.log({ approvedStaking });
 
-  // const { data: stakingInfo } = useGetUserStakingInfoQuery();
-  // console.log({ stakingInfo });
+  const { data: stakingInfo } = useGetUserStakingInfoQuery();
+  console.log({ stakingInfo });
 
-  // const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery();
-  // console.log({ globalListingOrAuction });
+  const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery();
+  console.log({ globalListingOrAuction });
   // const allAuction = globalListingOrAuction?.allAuction;
 
   // console.log({
@@ -375,7 +366,7 @@ export default function Home() {
     <>
       <ConnectButton
         client={client}
-        chain={chainInfo}
+        chain={chainInfoV2}
         wallets={[createWallet("io.metamask")]}
       />
       <input

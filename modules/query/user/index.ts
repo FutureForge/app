@@ -68,7 +68,7 @@ export function useUserOffersMadeQuery() {
 
       return userOffers;
     },
-    refetchInterval: 60000,
+    refetchInterval: 6000,
     enabled: !!userAddress,
   });
 }
@@ -90,7 +90,7 @@ export function useUserListingQuery() {
 
       return userListings;
     },
-    refetchInterval: 60000,
+    refetchInterval: 6000,
     enabled: !!userAddress,
   });
 }
@@ -112,7 +112,7 @@ export function useUserAuctionQuery() {
 
       return userAuctions;
     },
-    refetchInterval: 60000,
+    refetchInterval: 6000,
     enabled: !!userAddress,
   });
 }

@@ -201,6 +201,6 @@ export function useMarketplaceEventQuery() {
       recentlySoldAuction: [],
       newSaleListing: [],
     },
-    refetchInterval: 60000 * 5,
+    refetchInterval: 6000,
   });
 }

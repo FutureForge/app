@@ -21,7 +21,7 @@ export function getContractCustom({
 
   const contract = getContractThirdweb({
     client,
-    chain: chainInfo,
+    chain: chainInfoV2,
     address: contractAddress,
   });
 

@@ -13,6 +13,7 @@ import { getNFT as getERC721NFT } from "thirdweb/extensions/erc721";
 import { getNFT as getERC1155NFT } from "thirdweb/extensions/erc1155";
 import { TokenType } from "@/utils/lib/types";
 import { getListing, getOffer } from "@/modules/blockchain/global";
+import { includeNFTOwner } from "@/modules/blockchain/lib";
 
 export function useMarketplaceEventQuery() {
   return useQuery({
@@ -46,6 +47,7 @@ export function useMarketplaceEventQuery() {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(listing.listing.tokenId),
+              includeOwner: includeNFTOwner,
             });
           } else if (listing.listing.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
@@ -70,6 +72,7 @@ export function useMarketplaceEventQuery() {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(auction.auction.tokenId),
+              includeOwner: includeNFTOwner,
             });
           } else if (auction.auction.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
@@ -93,6 +96,7 @@ export function useMarketplaceEventQuery() {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(bidNFT.auction.tokenId),
+              includeOwner: includeNFTOwner,
             });
           } else if (bidNFT.auction.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
@@ -117,6 +121,7 @@ export function useMarketplaceEventQuery() {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(offer.offer.tokenId),
+              includeOwner: includeNFTOwner,
             });
           } else if (offer.offer.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
@@ -144,6 +149,7 @@ export function useMarketplaceEventQuery() {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(offerInfo.tokenId),
+              includeOwner: includeNFTOwner,
             });
           } else if (offerInfo.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
@@ -172,6 +178,7 @@ export function useMarketplaceEventQuery() {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(listingInfo.tokenId),
+              includeOwner: includeNFTOwner,
             });
           } else if (listingInfo.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({

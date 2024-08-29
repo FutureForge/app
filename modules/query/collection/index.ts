@@ -18,7 +18,11 @@ import { ICollection } from "@/utils/models";
 import { NFTType, StatusType } from "@/utils/lib/types";
 import { NFT } from "thirdweb";
 import { ethers } from "ethers";
-import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
+import {
+  decimalOffChain,
+  getContractCustom,
+  includeNFTOwner,
+} from "@/modules/blockchain/lib";
 import {
   getIsAuctionExpired,
   getWinningBid,
@@ -137,9 +141,16 @@ export function useGetSingleNFTQuery({
 
       let nftList: NFT | null = null;
       if (nftType === "ERC721") {
-        nftList = await getERC721NFT({ contract, tokenId: BigInt(tokenId) });
+        nftList = await getERC721NFT({
+          contract,
+          tokenId: BigInt(tokenId),
+          includeOwner: includeNFTOwner,
+        });
       } else if (nftType === "ERC1155") {
-        nftList = await getERC1155NFT({ contract, tokenId: BigInt(tokenId) });
+        nftList = await getERC1155NFT({
+          contract,
+          tokenId: BigInt(tokenId),
+        });
       }
 
       console.log("single nft list", nftList);
@@ -240,7 +251,10 @@ export function useGetSingleCollectionQuery(
 
       let nfts: NFT[] = [];
       if (nftType === "ERC721") {
-        nfts = await getERC721NFTs({ contract });
+        nfts = await getERC721NFTs({
+          contract,
+          includeOwners: includeNFTOwner,
+        });
       } else if (nftType === "ERC1155") {
         nfts = await getERC1155NFTs({ contract });
       }

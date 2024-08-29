@@ -148,11 +148,12 @@ export default function Home() {
   // });
 
   const { data: singleNFTQuery } = useGetSingleNFTQuery({
-    contractAddress: '0x7b26dA758df7A5E101c9ac0DBA8267B95175F229',
-    nftType: 'ERC721',
-    tokenId: '0',
-  })
-  console.log({ singleNFTQuery })
+    // contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
+    contractAddress: "0xf99a92477F75569BD0F1a6624425C92F73E755Dd",
+    nftType: "ERC721",
+    tokenId: "4",
+  });
+  console.log({ singleNFTQuery });
 
   // const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
   // console.log({ approvedStaking });

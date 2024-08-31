@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   useCheckApprovedForAllQuery,
@@ -15,7 +15,7 @@ import {
   useGetUserStakingInfoQuery,
   useGetGlobalListingOrAuctionQuery,
   useUserChainInfo,
-} from "@/modules/query";
+} from '@/modules/query'
 import {
   useAddCollectionMutation,
   useApprovedForAllMutation,
@@ -35,20 +35,17 @@ import {
   useCollectAuctionTokensMutation,
   useCreateAuctionMutation,
   useUpdateListingMutation,
-} from "@/modules/mutation";
-import {
-  chainInfo,
-  chainInfoV2,
-  client,
-  MARKETPLACE_CONTRACT,
-} from "@/utils/configs";
-import { ConnectButton } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
-import { getAllOffers, getTotalListings } from "@/modules/blockchain";
-import { decimalOffChain, getContractCustom } from "@/modules/blockchain/lib";
-import { isBidAmountValid } from "@/utils";
-import React, { useRef, useState } from "react";
-import Head from "next/head";
+} from '@/modules/mutation'
+import { chainInfo, chainInfoV2, client, MARKETPLACE_CONTRACT } from '@/utils/configs'
+import { ConnectButton } from 'thirdweb/react'
+import { createWallet } from 'thirdweb/wallets'
+import { getAllOffers, getTotalListings } from '@/modules/blockchain'
+import { decimalOffChain, getContractCustom } from '@/modules/blockchain/lib'
+import { isBidAmountValid } from '@/utils'
+import React, { useRef, useState } from 'react'
+import Head from 'next/head'
+import Image from 'next/image'
+import Header from '@/modules/components/header/header'
 
 export default function Home() {
   // const { activeAccount, activeWallet } = useUserChainInfo();
@@ -110,28 +107,8 @@ export default function Home() {
   // );
   // console.log({ singleCollection });
 
-  const { data: newListingEvent } = useMarketplaceEventQuery()
-  const { newListing, newAuction, newSaleListing } = newListingEvent
-  console.log({ newListingEvent })
 
-  const [filter, setFilter] = useState<
-    'All' | 'Recently Listed' | 'Recently Sold' | 'Recent Auctioned'
-  >('All')
 
-  // Filtering logic
-  const filteredData = (() => {
-    switch (filter) {
-      case 'Recently Listed':
-        return newListing
-      case 'Recently Sold':
-        return newSaleListing
-      case 'Recent Auctioned':
-        return newAuction
-      case 'All':
-      default:
-        return [...(newListing || []), ...(newSaleListing || []), ...(newAuction || [])]
-    }
-  })()
   // console.log({
   //   message: "create listing console",
   //   isPending: createListingMutation.isPending,
@@ -149,11 +126,11 @@ export default function Home() {
 
   const { data: singleNFTQuery } = useGetSingleNFTQuery({
     // contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    contractAddress: "0xf99a92477F75569BD0F1a6624425C92F73E755Dd",
-    nftType: "ERC721",
-    tokenId: "4",
-  });
-  console.log({ singleNFTQuery });
+    contractAddress: '0xf99a92477F75569BD0F1a6624425C92F73E755Dd',
+    nftType: 'ERC721',
+    tokenId: '4',
+  })
+  console.log({ singleNFTQuery })
 
   // const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
   // console.log({ approvedStaking });
@@ -368,6 +345,34 @@ export default function Home() {
     // });
   }
 
+    const { data: newListingEvent } = useMarketplaceEventQuery()
+    const { newListing, newAuction, newSaleListing, recentlySoldAuction } = newListingEvent
+
+    console.log('====================================');
+    console.log(newListingEvent, 'Look at me');
+    console.log('====================================');
+
+    const [filter, setFilter] = useState<
+      'All' | 'Recently Listed' | 'Recently Sold' | 'Recent Auctioned'
+    >('All')
+
+
+
+  // Filtering logic
+  const filteredData = (() => {
+    switch (filter) {
+      case 'Recently Listed':
+        return newListing
+      case 'Recently Sold':
+        return newSaleListing
+      case 'Recent Auctioned':
+        return newAuction
+      case 'All':
+      default:
+        return [...(newListing || []), ...(newSaleListing || []), ...(newAuction || [])]
+    }
+  })()
+
   const handleMintNFT = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files && files.length > 0) {
@@ -382,18 +387,18 @@ export default function Home() {
   const reset = () => {
     setImageUrl(null)
   }
-
+const filteredDataWithNft = filteredData.filter((item) => item.nft !== undefined)
   return (
     <div className="h-screen md:px-14">
       <Head>
         <title>MintMingle, marketplace for NFTs</title>
-        <meta
+        {/* <meta
           name="description"
           content="A community driven token that comes with additional warm gesture, rewards and credit back hampers."
-        />
+        /> */}
       </Head>
 
-      <div className="flex items-center gap-3">
+      {/* <div className="flex items-center gap-3">
         {['All', 'Recently Listed', 'Recently Sold', 'Recently Auctioned'].map((f) => (
           <button
             key={f}
@@ -405,7 +410,73 @@ export default function Home() {
             {f}
           </button>
         ))}
+      </div> */}
+      <div className='h-screen'>
+        <Header />
       </div>
+
+      {/* <div>
+        {filteredData?.length ? (
+          filteredData.map((listingItem, index) => {
+            const nft = listingItem.nft
+            const listings = listingItem.listing
+            const imageUrl = nft?.metadata.image
+            console.log('====================================')
+            console.log(filteredData, 'looku')
+            console.log('====================================')
+
+            return (
+              <div key={index}>
+                <Image
+                  src={
+                    imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/assets/webp/1.webp'
+                  }
+                  alt={nft?.metadata.name || 'NFT'}
+                  width={300}
+                  height={300}
+                />
+                <p className="text-foreground">{nft?.metadata.name}</p>
+                <p className="text-foreground">{nft?.metadata.description}</p>
+              </div>
+            )
+          })
+        ) : (
+          <p>No data available</p>
+        )}
+      </div> */}
+      {/* <div>
+        {filteredData.map((item, index) => {
+          // Extracting the NFT and listing data from the filtered item
+          const nft = item.nft
+          const listing = item.listing || item.auction // Depending on the type of the filtered item
+          const imageUrl = nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/')
+
+          return (
+            <div key={index} className="listing-card">
+              <Image
+                src={imageUrl || '/default-placeholder.png'}
+                alt={nft?.metadata?.name || 'NFT Image'}
+                width={500}
+                height={500}
+                className="nft-image"
+              />
+              <div className="nft-details">
+                <h3>{nft?.metadata?.name || 'Unnamed NFT'}</h3>
+                <p>{nft?.metadata?.description || 'No description available.'}</p>
+                {listing && (
+                  <>
+                    <p>
+                      Price: {listing.pricePerToken?.toString() || listing.startingBid?.toString()}{' '}
+                      wei
+                    </p>
+                    <p>Quantity: {listing.quantity?.toString() || 'N/A'}</p>
+                  </>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div> */}
       <input
         type="text"
         value={nftName}

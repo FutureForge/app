@@ -26,7 +26,7 @@ export function useUserNFTsQuery() {
     queryKey: ["userNFTs", "userProfile", "profile"],
     queryFn: async () => {
       const response = await axios.get<NFTResponse>(
-        `${CROSSFI_API}/token-holders?address=${TEST_WALLET_ADDRESS}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`
+        `${CROSSFI_API}/token-holders?address=${userAddress}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`
       );
       const userNFTs = response.data.docs;
 

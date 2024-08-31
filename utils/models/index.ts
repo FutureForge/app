@@ -5,7 +5,6 @@ export interface ICollection extends Document {
   collectionContractAddress: string;
   name: string;
   description: string;
-  image: string;
   nftType: string;
 }
 
@@ -18,10 +17,6 @@ const CollectionSchema = new Schema<ICollection>({
     type: String,
     required: true,
     maxLength: 100,
-  },
-  image: {
-    type: String,
-    required: true,
   },
   description: {
     type: String,

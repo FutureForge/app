@@ -20,7 +20,7 @@ export function useCreateAuctionMutation() {
         params: {
           assetContract: auctionDetails.assetContract ?? "",
           tokenId: auctionDetails.tokenId ?? "",
-          quantity: auctionDetails.quantity ?? "",
+          quantity: auctionDetails.quantity ?? "1",
           bidBufferBps: auctionDetails.bidBufferBps ?? "",
           buyoutBidAmount: auctionDetails.buyoutBidAmount ?? "",
           minimumBidAmount: auctionDetails.minimumBidAmount ?? "",

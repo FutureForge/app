@@ -41,8 +41,8 @@ export function useGetGlobalListingOrAuctionQuery() {
         allListing: updatedListing,
       };
     },
-    initialData: null,
+    // initialData: null,
     enabled: true,
-    refetchInterval: 6000,
+    refetchInterval: 60000,
   });
 }

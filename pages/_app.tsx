@@ -1,6 +1,6 @@
 import { RootLayout } from '@/modules/app/layout'
 import { QueryProvider } from '@/modules/provider'
-import '@/styles/globals.css'
+// import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { ThirdwebProvider } from 'thirdweb/react'
 import { Inter } from 'next/font/google'
@@ -20,9 +20,9 @@ export default function App({ Component, pageProps }: AppProps) {
         }}
       />
       <QueryProvider>
-        <RootLayout>
+        {/* <RootLayout> */}
           <Component {...pageProps} />
-        </RootLayout>
+        {/* </RootLayout> */}
       </QueryProvider>
     </ThirdwebProvider>
   )

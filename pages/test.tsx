@@ -6,7 +6,6 @@ import {
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
   useGetSingleNFTQuery,
-  useMarketplaceEventQuery,
   useUserAuctionQuery,
   useUserListingQuery,
   useUserNFTsQuery,
@@ -15,6 +14,7 @@ import {
   useGetUserStakingInfoQuery,
   useGetGlobalListingOrAuctionQuery,
   useUserChainInfo,
+  useMarketplaceEventQuery,
 } from '@/modules/query'
 import {
   useAddCollectionMutation,
@@ -36,355 +36,127 @@ import {
   useCreateAuctionMutation,
   useUpdateListingMutation,
 } from '@/modules/mutation'
-import { chainInfo, chainInfoV2, client, MARKETPLACE_CONTRACT } from '@/utils/configs'
+import {
+  chainInfo,
+  client,
+  CROSSFI_MARKETPLACE_CONTRACT,
+  CROSSFI_TEST_ASSET_ADDRESS,
+} from '@/utils/configs'
+import { getContractCustom, getCurrentBlockNumber, ETHERS_CONTRACT } from '@/modules/blockchain/lib'
 import { ConnectButton } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
-import { getAllOffers, getTotalListings } from '@/modules/blockchain'
-import { decimalOffChain, getContractCustom } from '@/modules/blockchain/lib'
-import { isBidAmountValid } from '@/utils'
-import React, { useRef, useState } from 'react'
-import Head from 'next/head'
+import { getAllListing, getAllOffers, getTotalListings, getTotalOffers } from '@/modules/blockchain'
+import { ethers } from 'ethers'
+import { StatusType } from '@/utils/lib/types'
 
-export default function Home() {
-  // const { activeAccount, activeWallet } = useUserChainInfo();
-  const { data: collections, isLoading } = useFetchCollectionsQuery()
-  // const addCollectionMutation = useAddCollectionMutation();
-  // const createListingMutation = useCreateListingMutation();
-  // const approveForAllMutation = useApprovedForAllMutation();
-  // const approvedForStakingMutation = useApprovedForAllStakingMutation();
-  // const claimStakingRewardMutation = useClaimStakingRewardMutation();
-  // const stakingMutation = useStakingMutation();
-  // const withdrawStakingMutation = useWithdrawStakingMutation();
+export default function TestPage() {
+  //  mutation
+  //   const approveAllMutation = useApprovedForAllMutation()
+  const createListingMutation = useCreateListingMutation()
+  const createAuctionMutation = useCreateAuctionMutation()
+  const addCollectionMutation = useAddCollectionMutation()
 
-  // // direct listing
-  // const makeListingOfferMutation = useMakeListingOfferMutation();
-  // const acceptOfferMutation = useAcceptOfferMutation();
-  // const cancelOfferMutation = useCancelOfferMutation();
-  // const updateListingMutation = useUpdateListingMutation();
-  // const buyFromDirectListingMutation = useBuyFromDirectListingMutation();
-  // const cancelDirectListingMutation = useCancelDirectListingMutation();
+  //   const { data: fetchCollection } = useFetchCollectionsQuery()
+  //   const { data: getMarketplaceCollection } = useGetMarketplaceCollectionsQuery()
+  //   const { data: getSingleCollection } = useGetSingleCollectionQuery({
+  //     contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+  //     nftType: 'ERC721',
+  //   })
 
-  // // auction
-  // const bidInAuctionMutation = useBitInAuctionMutation();
-  // const cancelAuctionMutation = useCancelAuctionMutation();
-  // const collectAuctionPayOutMutation = useCollectAuctionPayoutMutation(); // seller
-  // const collectAuctionTokenMutation = useCollectAuctionTokensMutation(); // buy
-  // const createAuctionMutation = useCreateAuctionMutation();
+  //   const { data: getSingleNFT } = useGetSingleNFTQuery({
+  //     contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+  //     nftType: 'ERC721',
+  //     tokenId: '0',
+  //   })
 
-  // const newCollection = {
-  //   collectionContractAddress: "0x1234567890abcdef1234567890abcdef123456789",
-  //   name: "My Collection",
-  //   description: "This is my collection",
-  // };
+  //   const datagetSingleNFT = useGetSingleNFTQuery({
+  //     contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+  //     nftType: 'ERC721',
+  //     tokenId: '0',
+  //   })
+  //   const { data: userAuction } = useUserAuctionQuery()
 
-  const [nftName, setNftName] = useState('')
-  const [nftDescription, setNftDescription] = useState('')
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  //   console.log({ fetchCollection })
+  //   console.log({ getMarketplaceCollection })
+  //   console.log({ getSingleCollection })
+  //   console.log({ getSingleNFT })
+  //   console.log({ datagetSingleNFT })
+  //   console.log({ userAuction })
 
-  console.log({ collections })
+  //   const { data: userListing } = useUserListingQuery()
+  //   console.log({ userListing })
 
-  const userNFTs = useUserNFTsQuery()
-  console.log({ userNFTs })
+    const { data: approved } = useCheckApprovedForAllQuery({
+      collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
+    })
+    const approvedData = useCheckApprovedForAllQuery({
+      collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
+    })
 
-  // const { data: offersMade } = useUserOffersMadeQuery();
-  // console.log({ offersMade });
+    console.log({ approved })
+    console.log({ approvedData })
 
-  // const { data: userListing } = useUserListingQuery();
-  // console.log({ userListing });
+  //   const { data: global } = useGetGlobalListingOrAuctionQuery()
+  //   console.log({ global })
 
-  // const { data: userAuction } = useUserAuctionQuery();
-  // console.log({ userAuction });
+  //   const recentlyListed = global?.allListing
+  //     .filter((item) => item.status === StatusType.CREATED)
+  //     .reverse()
+  //     .slice(0, 20)
+  //   const recentlySold = global?.allListing
+  //     .filter((item) => item.status === StatusType.COMPLETED)
+  //     .reverse()
+  //     .slice(0, 20)
+  //   const recentlyAuctioned = global?.allAuction
+  //     .filter((item) => item.status === StatusType.CREATED)
+  //     .reverse()
+  //     .slice(0, 20)
 
-  const { data: collectionNFT } = useGetMarketplaceCollectionsQuery()
-  console.log({ collectionNFT })
+  //   console.log({ recentlyListed })
+  //   console.log({ recentlySold })
+  //   console.log({ recentlyAuctioned })
 
-  // const { data: singleCollection } = useGetSingleCollectionQuery(
-  //   "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-  //   "ERC721"
-  // );
-  // console.log({ singleCollection });
+  const userNFT = useUserNFTsQuery()
+  console.log([userNFT])
 
-  const { data: newListingEvent } = useMarketplaceEventQuery()
-  const { newListing, newAuction, newSaleListing } = newListingEvent
-  console.log({ newListingEvent })
+  const events = useMarketplaceEventQuery()
+  console.log({ events })
 
-  const [filter, setFilter] = useState<
-    'All' | 'Recently Listed' | 'Recently Sold' | 'Recent Auctioned'
-  >('All')
-
-  // Filtering logic
-  const filteredData = (() => {
-    switch (filter) {
-      case 'Recently Listed':
-        return newListing
-      case 'Recently Sold':
-        return newSaleListing
-      case 'Recent Auctioned':
-        return newAuction
-      case 'All':
-      default:
-        return [...(newListing || []), ...(newSaleListing || []), ...(newAuction || [])]
-    }
-  })()
-  // console.log({
-  //   message: "create listing console",
-  //   isPending: createListingMutation.isPending,
-  // });
-
-  // const { data: isApproved } = useCheckApprovedForAllQuery(
-  //   "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229"
-  // );
-  // console.log({ isApproved });
-
-  // console.log({
-  //   message: "approved for all console",
-  //   isPending: approveForAllMutation.isPending,
-  // });
-
-  const { data: singleNFTQuery } = useGetSingleNFTQuery({
-    // contractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    contractAddress: '0xf99a92477F75569BD0F1a6624425C92F73E755Dd',
-    nftType: 'ERC721',
-    tokenId: '4',
-  })
-  console.log({ singleNFTQuery })
-
-  // const { data: approvedStaking } = useCheckApprovedForAllStakingQuery();
-  // console.log({ approvedStaking });
-
-  const { data: stakingInfo } = useGetUserStakingInfoQuery()
-  console.log({ stakingInfo })
-
-  const { data: globalListingOrAuction } = useGetGlobalListingOrAuctionQuery()
-  console.log({ globalListingOrAuction })
-  // const allAuction = globalListingOrAuction?.allAuction;
-
-  // console.log({
-  //   message: "approved for all staking console",
-  //   isPending: approvedForStakingMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "claim staking console",
-  //   isPending: claimStakingRewardMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "stake console",
-  //   isPending: stakingMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "withdraw stake console",
-  //   isPending: withdrawStakingMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "make listing offer console",
-  //   isPending: makeListingOfferMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "accept listing offer console",
-  //   isPending: acceptOfferMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "cancel offer console",
-  //   isPending: cancelOfferMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "bid in auction console",
-  //   isPending: bidInAuctionMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "cancel in auction console",
-  //   isPending: cancelAuctionMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "collect payout auction console",
-  //   isPending: collectAuctionPayOutMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "collect payout auction console",
-  //   isPending: collectAuctionTokenMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "create auction console",
-  //   isPending: createAuctionMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "cancel listing console",
-  //   isPending: cancelDirectListingMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "update direct console",
-  //   isPending: updateListingMutation.isPending,
-  // });
-
-  // console.log({
-  //   message: "buyfor direct listing console",
-  //   isPending: buyFromDirectListingMutation.isPending,
-  // });
-
-  const processFile = (file: File) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setImageUrl(reader.result as string)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const handleAddCollection = async () => {
-    // addCollectionMutation.mutate(newCollection);
-
-    // const params = {
-    //   assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    //   tokenId: "0",
-    //   quantity: "1",
-    //   currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-    //   pricePerToken: "10000000000000000000",
-    //   startTimestamp: "1724371517950",
-    //   endTimestamp: "1724966514213",
-    //   reserved: false,
-    // };
-
+  const handleClick = async () => {
+    // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})
     // createListingMutation.mutate({
     //   directListing: {
-    //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    //     tokenId: "1",
-    //     quantity: "1",
-    //     pricePerToken: "0.0001",
-    //     // startTimestamp: "1724575286588",
-    //     // endTimestamp: "1724966514213",
+    //     assetContract: CROSSFI_TEST_ASSET_ADDRESS,
+    //     tokenId: '0',
+    //     pricePerToken: '10',
     //   },
-    // });
-
-    // approveForAllMutation.mutate({
-    //   collectionContractAddress: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    // });
-
-    // approvedForStakingMutation.mutate();
-
-    // claimStakingRewardMutation.mutate({ tokenId: "5" });
-
-    // stakingMutation.mutate({ tokenId: "5" });
-
-    // withdrawStakingMutation.mutate({ tokenId: "5" });
-
-    // makeListingOfferMutation.mutate({
-    //   makeOffer: {
-    //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    //     tokenId: "0",
-    //     quantity: "1",
-    //     currency: "0x99a08a9AA59434cA893aE1A2E771Cf26b1B92E7A", // native currency should be the wrapped token but treat it as the native currency
-    //     totalPrice: "100",
-    //     // expirationTimestamp: ''
-    //   },
-    // });
-
-    // acceptOfferMutation.mutate({ offerId: "1" });
-
-    // cancelOfferMutation.mutate({ offerId: "1" });
-
-    const auctionId = '0'
-    // const bidAmount = "0.008";
-    // const percentageIncrease = 1;
-
-    // if (!allAuction) return;
-    // const auction = allAuction.find(
-    //   (auction) => auction.auctionId === BigInt("0")
-    // );
-    // console.log({ auction });
-    // if (!auction) {
-    //   alert("Auction not found");
-    //   return;
-    // }
-
-    // const isValidBid = isBidAmountValid({
-    //   currentBid: Number(decimalOffChain(Number(auction.winningBid.bidAmount))),
-    //   newBidAmount: Number(bidAmount),
-    //   percentageIncrease,
-    // });
-
-    // if (!isValidBid) {
-    //   alert(
-    //     `Bid amount should be higher than the current winning bid by ${percentageIncrease}`
-    //   );
-    //   return;
-    // }
-
-    // bidInAuctionMutation.mutate({ auctionId, bidAmount });
-
-    // cancelAuctionMutation.mutate({ auctionId });
-
-    // collectAuctionPayOutMutation.mutate({ auctionId });
-    // collectAuctionTokenMutation.mutate({ auctionId });
-
+    // })
     // createAuctionMutation.mutate({
     //   auctionDetails: {
-    //     assetContract: "0x7b26dA758df7A5E101c9ac0DBA8267B95175F229",
-    //     tokenId: "0",
-    //     quantity: "1",
-    //     minimumBidAmount: "0.001",
-    //     buyoutBidAmount: "0.001",
-    //   },
-    // });
-
-    // cancelDirectListingMutation.mutate({ listingId: "12" });
-
-    // updateListingMutation.mutate({
-    //   listingId: "12",
-    //   directListing: {
-    //     assetContract: '0x7b26dA758df7A5E101c9ac0DBA8267B95175F229',
-    //     pricePerToken: "0.01",
-    //     endTimestamp: "1724966514213",4880451148 //
+    //     assetContract: CROSSFI_TEST_ASSET_ADDRESS,
+    //     tokenId: '1',
     //     quantity: '1',
-    //     tokenId: '0',
+    //     minimumBidAmount: '1',
+    //     buyoutBidAmount: '10',
     //   },
-    // });
-
-    // buyFromDirectListingMutation.mutate({
-    //   buyFromListing: {
-    //     listingId: "17",
-    //     buyFor: activeAccount?.address,
-    //     quantity: "1",
-    //     currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-    //     totalPrice: "0.0001",
-    //   },
-    // });
-  }
-
-  const handleMintNFT = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      processFile(files[0])
-    }
-  }
-
-  const handleFileSelect = () => {
-    fileInputRef.current?.click()
-  }
-
-  const reset = () => {
-    setImageUrl(null)
+    // })
+    // addCollectionMutation.mutate({
+    //   collectionContractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+    //   description: 'MMMM First Collection',
+    //   name: 'MMM ',
+    // })
   }
 
   return (
     <div>
       <h1>Test</h1>
+      <ConnectButton client={client} chain={chainInfo} wallets={[createWallet('io.metamask')]} />
+      <button onClick={handleClick} disabled={addCollectionMutation.isPending}>
+        click me
+      </button>
     </div>
   )
 }
-
 
 // create auction
 

@@ -4,42 +4,48 @@ import { client } from '@/utils/configs'
 import { NFT } from '../types/types'
 import { Icon } from '@/modules/app'
 
-interface NFTCardProps {
+type NFTCardProps = {
   nft: NFT | undefined
   pricePerToken?: bigint
   currency?: string
-  bidAmount?: bigint
+  buyoutBidAmount?: bigint
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, pricePerToken, currency, bidAmount }) => {
-  const imageUrl = nft?.metadata.image
+export function NFTCard(props: NFTCardProps) {
+  const { nft, pricePerToken, currency, buyoutBidAmount } = props
 
-  // Format pricePerToken and bidAmount to Ether (assuming 18 decimals)
+  const imageUrl = nft?.metadata.image
   const formattedPrice = pricePerToken ? (Number(pricePerToken) / 10 ** 18).toFixed(2) : undefined
-  const formattedBidAmount = bidAmount ? (Number(bidAmount) / 10 ** 18).toFixed(2) : '0.00'
+  const formattedBuyoutAmount = buyoutBidAmount
+    ? (Number(buyoutBidAmount) / 10 ** 18).toFixed(2)
+    : undefined
 
   return (
-    <div className="relative w-fit max-w-[320px] h-[320px] rounded-3xl">
-      <MediaRenderer client={client} src={imageUrl} className="w-full h-full rounded-2xl" />
+    <div className="relative w-fit max-w-[320px] h-[320px] rounded-[20px] group overflow-hidden">
+      <MediaRenderer
+        client={client}
+        src={imageUrl}
+        className="w-full h-full rounded-2xl group-hover:scale-105 transition duration-300 ease-in-out"
+      />
       <div className="absolute bottom-0 left-0 w-full flex justify-end flex-col h-[160px] p-4 bg-gradient-to-t from-black/95 via-black/85 to-transparent">
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-2">
           <h3 className="text-foreground font-semibold text-2xl">{nft?.metadata.name}</h3>
 
           {formattedPrice && (
             <span className="flex items-center gap-1">
               <Icon iconType={'mint-coin'} />
-              <p className="text-foreground tex-sm">
+              <p className="text-foreground/75 text-sm">
                 Floor Price: {formattedPrice}{' '}
                 {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'ETH' : currency}
               </p>
             </span>
           )}
 
-          {bidAmount !== undefined && (
+          {buyoutBidAmount !== undefined && (
             <span className="flex items-center gap-1">
               <Icon iconType={'mint-coin'} />
-              <p className="text-foreground text-sm">
-                Winning Bid: {formattedBidAmount}{' '}
+              <p className="text-foreground/75 text-sm">
+                Buyout Price: {formattedBuyoutAmount}{' '}
                 {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'ETH' : currency}
               </p>
             </span>
@@ -50,4 +56,3 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, pricePerToken, currency, bidAmou
   )
 }
 
-export default NFTCard

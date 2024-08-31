@@ -1,16 +1,17 @@
 import React, { useState } from 'react'
 import { useGetGlobalListingOrAuctionQuery } from '@/modules/query'
-import { NewAuction, NewListing } from './types/types'
+
 import { StatusType } from '@/utils/lib/types'
-import FilterButtons from './components/filter'
 import Slider from 'react-slick'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
-import NFTCard from './components/nft-card'
+import { NFTCard } from './nft-card'
+import { FilterButtons } from './filter'
+import { NewAuction, NewListing } from '../types/types'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
-const Header: React.FC = () => {
+export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
 
@@ -43,12 +44,7 @@ const Header: React.FC = () => {
       default:
         return [...recentlyListed, ...recentlySold, ...recentlyAuctioned]
     }
-
-
   }
-      console.log('====================================')
-      console.log(global)
-      console.log('====================================')
 
   const filteredData = getFilteredData()
 
@@ -65,37 +61,29 @@ const Header: React.FC = () => {
   if (isLoading) return <p>Loading...</p>
   if (isError) return <p>Error loading data.</p>
 
-// const renderItem = (item: NewListing | NewAuction, index: number) => {
-//   const nft = 'listingId' in item ? item.nft : item.nft
-//   const pricePerToken = 'listingId' in item ? item.pricePerToken : undefined
-//   const currency = 'listingId' in item ? item.currency : undefined
+  const renderItem = (item: NewListing | NewAuction, index: number) => {
+    const isListing = 'listingId' in item
+    const nft = item.nft
+    const pricePerToken = isListing ? item.pricePerToken : undefined
+    const currency = isListing ? item.currency : item.winningBid.currency
+    const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
 
-//   return <NFTCard key={index} nft={nft} pricePerToken={pricePerToken} currency={currency} />
-// }
-const renderItem = (item: NewListing | NewAuction, index: number) => {
-  const isListing = 'listingId' in item
-  const nft = item.nft
-  const pricePerToken = isListing ? item.pricePerToken : undefined
-  const currency = isListing ? item.currency : item.winningBid.currency
-  const bidAmount = !isListing ? item.winningBid.bidAmount : undefined
-
-  return (
-    <NFTCard
-      key={index}
-      nft={nft}
-      pricePerToken={pricePerToken}
-      currency={currency}
-      bidAmount={bidAmount}
-    />
-  )
-}
-
+    return (
+      <NFTCard
+        key={index}
+        nft={nft}
+        pricePerToken={pricePerToken}
+        currency={currency}
+        buyoutBidAmount={buyOutAmount}
+      />
+    )
+  }
 
   return (
-    <div className="h-screen">
+    <div>
       <FilterButtons filter={filter} setFilter={setFilter} />
 
-      <div className=''>
+      <div className="">
         {filteredData.length === 0 ? (
           <div className="flex w-full items-center justify-center h-[320px]">
             <p>No data available</p>
@@ -109,5 +97,3 @@ const renderItem = (item: NewListing | NewAuction, index: number) => {
     </div>
   )
 }
-
-export default Header

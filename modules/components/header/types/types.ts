@@ -1,5 +1,5 @@
 // types.ts
-export type NFT ={
+export type NFT = {
   id: string
   metadata: {
     animation_url: string
@@ -17,37 +17,39 @@ export type NFT ={
   type: string
 }
 
-export type NewListing ={
+export type NewListing = {
   nft: NFT | undefined
-  listingCreator: string
+  tokenId: bigint
+  quantity: bigint
+  assetContract: string
+  currency: string
+  tokenType: number
+  status: number
   listingId: bigint
-  assetContract: string
-  listing: {
-    tokenId: bigint
-    quantity: bigint
-    assetContract: string
+  pricePerToken: bigint
+  startTimestamp: bigint
+  endTimestamp: bigint
+  listingCreator: string
+  reserved: boolean
+}
+
+export type NewAuction = {
+  winningBid: {
+    bidder: string
     currency: string
-    tokenType: number
-    reserved: boolean
+    bidAmount: bigint
   }
-}
-
-export type NewAuction ={
   nft: NFT | undefined
-  auctionCreator: string
   auctionId: bigint
-  assetContract: string
-  auction: {
-    auctionId: bigint
-    tokenId: bigint
-    quantity: bigint
-    minimumBidAmount: bigint
-    buyoutBidAmount: bigint
-    status: number
-  }
+  tokenId: bigint
+  quantity: bigint
+  minimumBidAmount: bigint
+  buyoutBidAmount: bigint
+  status: number
+  // add any other fields you have
 }
 
-export type RecentlySoldAuction ={
+export type RecentlySoldAuction = {
   nft: NFT | undefined
   offeror: string
   offerId: bigint
@@ -58,7 +60,7 @@ export type RecentlySoldAuction ={
   totalPricePaid: bigint
 }
 
-export type MarketplaceEventData ={
+export type MarketplaceEventData = {
   newListing: NewListing[]
   newAuction: NewAuction[]
   newSaleListing: any[] // Define this type as needed

@@ -96,25 +96,25 @@ export default function TestPage() {
   console.log({ approved })
   console.log({ approvedData })
 
-  //   const { data: global } = useGetGlobalListingOrAuctionQuery()
-  //   console.log({ global })
+    const { data: global } = useGetGlobalListingOrAuctionQuery()
+    console.log({ global })
 
-  //   const recentlyListed = global?.allListing
-  //     .filter((item) => item.status === StatusType.CREATED)
-  //     .reverse()
-  //     .slice(0, 20)
-  //   const recentlySold = global?.allListing
-  //     .filter((item) => item.status === StatusType.COMPLETED)
-  //     .reverse()
-  //     .slice(0, 20)
-  //   const recentlyAuctioned = global?.allAuction
-  //     .filter((item) => item.status === StatusType.CREATED)
-  //     .reverse()
-  //     .slice(0, 20)
+    const recentlyListed = global?.allListing
+      .filter((item) => item.status === StatusType.CREATED)
+      .reverse()
+      .slice(0, 20)
+    const recentlySold = global?.allListing
+      .filter((item) => item.status === StatusType.COMPLETED)
+      .reverse()
+      .slice(0, 20)
+    const recentlyAuctioned = global?.allAuction
+      .filter((item) => item.status === StatusType.CREATED)
+      .reverse()
+      .slice(0, 20)
 
-  //   console.log({ recentlyListed })
-  //   console.log({ recentlySold })
-  //   console.log({ recentlyAuctioned })
+    console.log({ recentlyListed })
+    console.log({ recentlySold })
+    console.log({ recentlyAuctioned })
 
   const userNFT = useUserNFTsQuery()
   console.log({ userNFT })

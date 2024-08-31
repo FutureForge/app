@@ -9,7 +9,7 @@ import { useDisableScroll } from '../../hooks/useDisableScroll'
 import { cn } from '../../utils'
 import { ConnectButton } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
-import { chainInfoV2, client } from '@/utils/configs'
+import { chainInfo, chainInfoV2, client } from '@/utils/configs'
 import { usePathname } from 'next/navigation'
 
 const Nav_Links = [
@@ -104,7 +104,7 @@ export function Nav() {
 
         <ConnectButton
           client={client}
-          chain={chainInfoV2}
+          chain={chainInfo}
           wallets={[createWallet('io.metamask')]}
           connectButton={{
             label: 'Connect Wallet',

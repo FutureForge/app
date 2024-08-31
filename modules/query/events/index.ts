@@ -6,190 +6,184 @@ import {
   getRecentlySoldAuction,
   getNewSaleListing,
   getContractCustom,
-} from "@/modules/blockchain";
-import { useQuery } from "@tanstack/react-query";
-import { NFT } from "thirdweb";
-import { getNFT as getERC721NFT } from "thirdweb/extensions/erc721";
-import { getNFT as getERC1155NFT } from "thirdweb/extensions/erc1155";
-import { TokenType } from "@/utils/lib/types";
-import { getListing, getOffer } from "@/modules/blockchain/global";
-import { includeNFTOwner } from "@/modules/blockchain/lib";
+} from '@/modules/blockchain'
+import { useQuery } from '@tanstack/react-query'
+import { NFT } from 'thirdweb'
+import { getNFT as getERC721NFT } from 'thirdweb/extensions/erc721'
+import { getNFT as getERC1155NFT } from 'thirdweb/extensions/erc1155'
+import { TokenType } from '@/utils/lib/types'
+import { getListing, getOffer } from '@/modules/blockchain/global'
+import { includeNFTOwner } from '@/modules/blockchain/lib'
 
 export function useMarketplaceEventQuery() {
   return useQuery({
-    queryKey: ["newly", "auction", "bid", "offer", "sale", "event"],
+    queryKey: ['newly', 'auction', 'bid', 'offer', 'sale', 'event'],
     queryFn: async () => {
-      const [
-        newListing,
-        newAuction,
-        newBid,
-        newOffer,
-        recentlySoldAuction,
-        newSaleListing,
-      ] = await Promise.all([
-        getNewListing(),
-        getNewAuction(),
-        getNewBid(),
-        getNewOffer(),
-        getRecentlySoldAuction(),
-        getNewSaleListing(),
-      ]);
+      const [newListing, newAuction, newBid, newOffer, recentlySoldAuction, newSaleListing] =
+        await Promise.all([
+          getNewListing(),
+          getNewAuction(),
+          getNewBid(),
+          getNewOffer(),
+          getRecentlySoldAuction(),
+          getNewSaleListing(),
+        ])
 
       const newListingWithNFTs = await Promise.all(
         newListing.map(async (listing) => {
           const contract = await getContractCustom({
             contractAddress: listing.assetContract,
-          });
+          })
 
-          let nftData: NFT | undefined = undefined;
+          let nftData: NFT | undefined = undefined
 
           if (listing.listing.tokenType === TokenType.ERC721) {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(listing.listing.tokenId),
               includeOwner: includeNFTOwner,
-            });
+            })
           } else if (listing.listing.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
               contract,
               tokenId: BigInt(listing.listing.tokenId),
-            });
+            })
           }
 
-          return { ...listing, nft: nftData };
-        })
-      );
+          return { ...listing, nft: nftData }
+        }),
+      )
 
       const newAuctionWithNFTs = await Promise.all(
         newAuction.map(async (auction) => {
           const contract = await getContractCustom({
             contractAddress: auction.assetContract,
-          });
+          })
 
-          let nftData: NFT | undefined = undefined;
+          let nftData: NFT | undefined = undefined
 
           if (auction.auction.tokenType === TokenType.ERC721) {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(auction.auction.tokenId),
               includeOwner: includeNFTOwner,
-            });
+            })
           } else if (auction.auction.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
               contract,
               tokenId: BigInt(auction.auction.tokenId),
-            });
+            })
           }
-          return { ...auction, nft: nftData };
-        })
-      );
+          return { ...auction, nft: nftData }
+        }),
+      )
 
       const newBidWithNFTs = await Promise.all(
         newBid.map(async (bidNFT) => {
           const contract = await getContractCustom({
             contractAddress: bidNFT.assetContract,
-          });
+          })
 
-          let nftData: NFT | undefined = undefined;
+          let nftData: NFT | undefined = undefined
 
           if (bidNFT.auction.tokenType === TokenType.ERC721) {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(bidNFT.auction.tokenId),
               includeOwner: includeNFTOwner,
-            });
+            })
           } else if (bidNFT.auction.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
               contract,
               tokenId: BigInt(bidNFT.auction.tokenId),
-            });
+            })
           }
 
-          return { ...bidNFT, nft: nftData };
-        })
-      );
+          return { ...bidNFT, nft: nftData }
+        }),
+      )
 
       const newOfferWithNFTs = await Promise.all(
         newOffer.map(async (offer) => {
           const contract = await getContractCustom({
             contractAddress: offer.assetContract,
-          });
+          })
 
-          let nftData: NFT | undefined = undefined;
+          let nftData: NFT | undefined = undefined
 
           if (offer.offer.tokenType === TokenType.ERC721) {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(offer.offer.tokenId),
               includeOwner: includeNFTOwner,
-            });
+            })
           } else if (offer.offer.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
               contract,
               tokenId: BigInt(offer.offer.tokenId),
-            });
+            })
           }
-          return { ...offer, nft: nftData };
-        })
-      );
+          return { ...offer, nft: nftData }
+        }),
+      )
 
       const recentlySoldWithNFTs = await Promise.all(
         recentlySoldAuction.map(async (sold) => {
           const contract = await getContractCustom({
             contractAddress: sold.assetContract,
-          });
+          })
 
-          let nftData: NFT | undefined = undefined;
+          let nftData: NFT | undefined = undefined
 
           const offerInfo = await getOffer({
             offerId: sold.offerId,
-          });
+          })
 
           if (offerInfo.tokenType === TokenType.ERC721) {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(offerInfo.tokenId),
               includeOwner: includeNFTOwner,
-            });
+            })
           } else if (offerInfo.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
               contract,
               tokenId: BigInt(offerInfo.tokenId),
-            });
+            })
           }
 
-          return { ...sold, nft: nftData };
-        })
-      );
+          return { ...sold, nft: nftData }
+        }),
+      )
 
       const newSaleWithNFTs = await Promise.all(
         newSaleListing.map(async (sale) => {
           const contract = await getContractCustom({
             contractAddress: sale.assetContract,
-          });
+          })
 
-          let nftData: NFT | undefined = undefined;
+          let nftData: NFT | undefined = undefined
 
           const listingInfo = await getListing({
             listingId: sale.listingId,
-          });
+          })
 
           if (listingInfo.tokenType === TokenType.ERC721) {
             nftData = await getERC721NFT({
               contract,
               tokenId: BigInt(listingInfo.tokenId),
               includeOwner: includeNFTOwner,
-            });
+            })
           } else if (listingInfo.tokenType === TokenType.ERC1155) {
             nftData = await getERC1155NFT({
               contract,
               tokenId: BigInt(listingInfo.tokenId),
-            });
+            })
           }
 
-          return { ...sale, nft: nftData };
-        })
-      );
+          return { ...sale, nft: nftData }
+        }),
+      )
 
       return {
         newListing: newListingWithNFTs,
@@ -198,7 +192,7 @@ export function useMarketplaceEventQuery() {
         newOffer: newOfferWithNFTs,
         recentlySoldAuction: recentlySoldWithNFTs,
         newSaleListing: newSaleWithNFTs,
-      };
+      }
     },
     initialData: {
       newListing: [],
@@ -209,5 +203,5 @@ export function useMarketplaceEventQuery() {
       newSaleListing: [],
     },
     refetchInterval: 6000,
-  });
+  })
 }

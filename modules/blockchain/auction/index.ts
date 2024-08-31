@@ -4,7 +4,7 @@
 
 import { CreateAuctionType } from "@/utils/lib/types";
 import { getContractCustom, nativeCurrency } from "../lib";
-import { MARKETPLACE_CONTRACT } from "@/utils/configs";
+import { CROSSFI_MARKETPLACE_CONTRACT } from "@/utils/configs";
 import { prepareContractCall, readContract, toWei } from "thirdweb";
 import {
   convertToBlockchainTimestamp,
@@ -19,7 +19,7 @@ export async function getCreateAuction({
   const startTimestamp = getCurrentBlockchainTimestamp();
   const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
 
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const formattedParams = {
     assetContract: _params.assetContract,
@@ -45,7 +45,7 @@ export async function getCreateAuction({
 }
 
 export async function getCancelAuction({ auctionId }: { auctionId: string }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -63,7 +63,7 @@ export async function getBidInAuction({
   auctionId: string;
   bidAmount: string;
 }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -81,7 +81,7 @@ export async function getCollectAuctionPayout({
 }: {
   auctionId: string;
 }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -97,7 +97,7 @@ export async function getCollectAuctionTokens({
 }: {
   auctionId: string;
 }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -109,7 +109,7 @@ export async function getCollectAuctionTokens({
 }
 
 export async function getWinningBid({ auctionId }: { auctionId: bigint }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await readContract({
     contract,
@@ -126,7 +126,7 @@ export async function getIsAuctionExpired({
 }: {
   auctionId: bigint;
 }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await readContract({
     contract,

@@ -1,23 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { useUserChainInfo } from "../user";
-import { getCheckApprovedForAll } from "@/modules/blockchain";
+import { useQuery } from '@tanstack/react-query'
+import { useUserChainInfo } from '../user'
+import { getCheckApprovedForAll } from '@/modules/blockchain'
 
-export function useCheckApprovedForAllQuery(collectionContractAddress: string) {
-  const { activeAccount } = useUserChainInfo();
+export function useCheckApprovedForAllQuery({
+  collectionContractAddress,
+}: {
+  collectionContractAddress: string
+}) {
+  const { activeAccount } = useUserChainInfo()
 
   return useQuery({
-    queryKey: ["approval", collectionContractAddress, activeAccount?.address],
+    queryKey: ['approval', collectionContractAddress, activeAccount?.address],
     queryFn: async () => {
-      if (!activeAccount?.address) return false;
+      if (!activeAccount?.address) return false
 
       const isApproved = await getCheckApprovedForAll({
         collectionContractAddress,
         walletAddress: activeAccount?.address,
-      });
+      })
 
-      return isApproved;
+      return isApproved
     },
     enabled: !!activeAccount && !!collectionContractAddress,
-    refetchInterval: 6000,
-  });
+    refetchInterval: 60000,
+  })
 }

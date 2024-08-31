@@ -2,7 +2,7 @@ import {
   convertToBlockchainTimestamp,
   getCurrentBlockchainTimestamp,
 } from "@/utils";
-import { MARKETPLACE_CONTRACT } from "@/utils/configs";
+import { CROSSFI_MARKETPLACE_CONTRACT } from "@/utils/configs";
 import { getContractCustom, nativeCurrency } from "../lib";
 import {
   BuyFromDirectListingType,
@@ -24,7 +24,7 @@ export async function getCreateDirectListing({
   // const startTimestamp = getCurrentBlockchainTimestamp();
   // const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
 
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   // const formattedParams = {
   //   assetContract: _params.assetContract,
@@ -68,7 +68,7 @@ export async function getUpdateDirectListing({
   const startTimestamp = getCurrentBlockchainTimestamp();
   const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
 
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const formattedParams = {
     assetContract: _params.assetContract,
@@ -96,7 +96,7 @@ export async function getCancelDirectListing({
 }: {
   listingId: string;
 }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -113,7 +113,7 @@ export async function getBuyFromDirectListing({
   params: BuyFromDirectListingType;
 }) {
   const currency = _params.currency || nativeCurrency;
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -142,7 +142,7 @@ export async function getMakeOffer({
   const expirationTimestamp = convertToBlockchainTimestamp(
     _params.expirationTimestamp
   );
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const formattedParams = {
     assetContract: _params.assetContract,
@@ -167,7 +167,7 @@ export async function getMakeOffer({
 }
 
 export async function getAcceptOffer({ offerId }: { offerId: string }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,
@@ -179,7 +179,7 @@ export async function getAcceptOffer({ offerId }: { offerId: string }) {
 }
 
 export async function getCancelOffer({ offerId }: { offerId: string }) {
-  const contract = getContractCustom({ contractAddress: MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
 
   const transaction = await prepareContractCall({
     contract,

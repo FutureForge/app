@@ -86,15 +86,15 @@ export default function TestPage() {
   //   const { data: userListing } = useUserListingQuery()
   //   console.log({ userListing })
 
-    const { data: approved } = useCheckApprovedForAllQuery({
-      collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
-    })
-    const approvedData = useCheckApprovedForAllQuery({
-      collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
-    })
+  const { data: approved } = useCheckApprovedForAllQuery({
+    collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
+  })
+  const approvedData = useCheckApprovedForAllQuery({
+    collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
+  })
 
-    console.log({ approved })
-    console.log({ approvedData })
+  console.log({ approved })
+  console.log({ approvedData })
 
   //   const { data: global } = useGetGlobalListingOrAuctionQuery()
   //   console.log({ global })
@@ -117,10 +117,19 @@ export default function TestPage() {
   //   console.log({ recentlyAuctioned })
 
   const userNFT = useUserNFTsQuery()
-  console.log([userNFT])
+  console.log({ userNFT })
 
   const events = useMarketplaceEventQuery()
   console.log({ events })
+
+  const userOffers = useUserOffersMadeQuery()
+  console.log({ userOffers })
+
+  const userListing = useUserListingQuery()
+  console.log({ userListing })
+
+  const userAuction = useUserAuctionQuery()
+  console.log({ userAuction })
 
   const handleClick = async () => {
     // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})

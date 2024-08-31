@@ -1,8 +1,9 @@
 import React from 'react'
 import { MediaRenderer } from 'thirdweb/react'
 import { client } from '@/utils/configs'
-import { NFT } from '../types/types'
 import { Icon } from '@/modules/app'
+import { decimalOffChain } from '@/modules/blockchain'
+import { NFT } from 'thirdweb'
 
 type NFTCardProps = {
   nft: NFT | undefined
@@ -15,10 +16,6 @@ export function NFTCard(props: NFTCardProps) {
   const { nft, pricePerToken, currency, buyoutBidAmount } = props
 
   const imageUrl = nft?.metadata.image
-  const formattedPrice = pricePerToken ? (Number(pricePerToken) / 10 ** 18).toFixed(2) : undefined
-  const formattedBuyoutAmount = buyoutBidAmount
-    ? (Number(buyoutBidAmount) / 10 ** 18).toFixed(2)
-    : undefined
 
   return (
     <div className="relative w-fit max-w-[320px] h-[320px] rounded-[20px] group overflow-hidden">
@@ -31,12 +28,12 @@ export function NFTCard(props: NFTCardProps) {
         <div className="flex flex-col gap-2">
           <h3 className="text-foreground font-semibold text-2xl">{nft?.metadata.name}</h3>
 
-          {formattedPrice && (
+          {pricePerToken && (
             <span className="flex items-center gap-1">
               <Icon iconType={'mint-coin'} />
               <p className="text-foreground/75 text-sm">
-                Floor Price: {formattedPrice}{' '}
-                {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'ETH' : currency}
+                Floor Price: {decimalOffChain(pricePerToken)}{' '}
+                {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
               </p>
             </span>
           )}
@@ -45,8 +42,8 @@ export function NFTCard(props: NFTCardProps) {
             <span className="flex items-center gap-1">
               <Icon iconType={'mint-coin'} />
               <p className="text-foreground/75 text-sm">
-                Buyout Price: {formattedBuyoutAmount}{' '}
-                {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'ETH' : currency}
+                Buyout Price: {decimalOffChain(buyoutBidAmount)}{' '}
+                {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
               </p>
             </span>
           )}

@@ -1,21 +1,23 @@
-// types.ts
-export type NFT = {
-  id: string
-  metadata: {
-    animation_url: string
-    background_color: string
-    customAnimationUrl: string
-    customImage: string
-    description: string
-    external_url: string
-    image: string
-    name: string
-    supply: number
-  }
-  owner: string
-  tokenURI: string
-  type: string
-}
+import { NFT } from "thirdweb"
+
+// export type NFT = {
+//   id: string
+//   metadata: {
+//     animation_url: string
+//     background_color: string
+//     customAnimationUrl: string
+//     customImage: string
+//     description: string
+//     external_url: string
+//     image: string
+//     name: string
+//     supply: number
+//   }
+//   owner: string
+//   tokenURI: string
+//   type: string
+// }
+
 
 export type NewListing = {
   nft: NFT | undefined

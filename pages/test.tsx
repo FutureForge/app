@@ -48,6 +48,8 @@ import { createWallet } from 'thirdweb/wallets'
 import { getAllListing, getAllOffers, getTotalListings, getTotalOffers } from '@/modules/blockchain'
 import { ethers } from 'ethers'
 import { StatusType } from '@/utils/lib/types'
+import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary'
+import { useState } from 'react'
 
 export default function TestPage() {
   //  mutation
@@ -86,50 +88,55 @@ export default function TestPage() {
   //   const { data: userListing } = useUserListingQuery()
   //   console.log({ userListing })
 
-  const { data: approved } = useCheckApprovedForAllQuery({
-    collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
-  })
-  const approvedData = useCheckApprovedForAllQuery({
-    collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
-  })
+  // const { data: approved } = useCheckApprovedForAllQuery({
+  //   collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
+  // })
+  // const approvedData = useCheckApprovedForAllQuery({
+  //   collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS,
+  // })
 
-  console.log({ approved })
-  console.log({ approvedData })
+  // console.log({ approved })
+  // console.log({ approvedData })
 
-    const { data: global } = useGetGlobalListingOrAuctionQuery()
-    console.log({ global })
+  // const { data: global } = useGetGlobalListingOrAuctionQuery()
+  // console.log({ global })
 
-    const recentlyListed = global?.allListing
-      .filter((item) => item.status === StatusType.CREATED)
-      .reverse()
-      .slice(0, 20)
-    const recentlySold = global?.allListing
-      .filter((item) => item.status === StatusType.COMPLETED)
-      .reverse()
-      .slice(0, 20)
-    const recentlyAuctioned = global?.allAuction
-      .filter((item) => item.status === StatusType.CREATED)
-      .reverse()
-      .slice(0, 20)
+  // const recentlyListed = global?.allListing
+  //   .filter((item) => item.status === StatusType.CREATED)
+  //   .reverse()
+  //   .slice(0, 20)
+  // const recentlySold = global?.allListing
+  //   .filter((item) => item.status === StatusType.COMPLETED)
+  //   .reverse()
+  //   .slice(0, 20)
+  // const recentlyAuctioned = global?.allAuction
+  //   .filter((item) => item.status === StatusType.CREATED)
+  //   .reverse()
+  //   .slice(0, 20)
 
-    console.log({ recentlyListed })
-    console.log({ recentlySold })
-    console.log({ recentlyAuctioned })
+  // console.log({ recentlyListed })
+  // console.log({ recentlySold })
+  // console.log({ recentlyAuctioned })
 
-  const userNFT = useUserNFTsQuery()
-  console.log({ userNFT })
+  // const userNFT = useUserNFTsQuery()
+  // console.log({ userNFT })
 
-  const events = useMarketplaceEventQuery()
-  console.log({ events })
+  // const events = useMarketplaceEventQuery()
+  // console.log({ events })
 
-  const userOffers = useUserOffersMadeQuery()
-  console.log({ userOffers })
+  // const userOffers = useUserOffersMadeQuery()
+  // console.log({ userOffers })
 
-  const userListing = useUserListingQuery()
-  console.log({ userListing })
+  // const userListing = useUserListingQuery()
+  // console.log({ userListing })
 
-  const userAuction = useUserAuctionQuery()
-  console.log({ userAuction })
+  // const userAuction = useUserAuctionQuery()
+  // console.log({ userAuction })
+
+  console.log('add collection mutation', addCollectionMutation)
+
+  const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
+  console.log({ imageUrl })
 
   const handleClick = async () => {
     // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})
@@ -149,17 +156,45 @@ export default function TestPage() {
     //     buyoutBidAmount: '10',
     //   },
     // })
-    // addCollectionMutation.mutate({
-    //   collectionContractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
-    //   description: 'MMMM First Collection',
-    //   name: 'MMM ',
-    // })
+
+    if (!imageUrl) return alert('Please upload an image')
+
+    const { secure_url } = imageUrl as CloudinaryUploadWidgetInfo
+
+    addCollectionMutation.mutate({
+      collectionContractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+      description: 'MMMM First Collection',
+      name: 'MMM ',
+      image: secure_url,
+    })
   }
 
   return (
     <div>
-      <h1>Test</h1>
-      <ConnectButton client={client} chain={chainInfo} wallets={[createWallet('io.metamask')]} />
+      <CldUploadWidget
+        options={{ sources: ['local'] }}
+        onSuccess={(result, { widget }) => {
+          setImageUrl(result?.info)
+          widget.close()
+        }}
+        onQueuesEnd={(result, { widget }) => {
+          widget.close()
+        }}
+        onError={(error, { widget }) => {
+          alert('Error uploading file')
+          widget.close()
+        }}
+        uploadPreset="mint-mingles-collection"
+      >
+        {({ open }) => {
+          function handleOnClick() {
+            setImageUrl(undefined)
+            open()
+          }
+          return <button onClick={handleOnClick}>Upload an Image</button>
+        }}
+      </CldUploadWidget>
+      <br />
       <button onClick={handleClick} disabled={addCollectionMutation.isPending}>
         click me
       </button>

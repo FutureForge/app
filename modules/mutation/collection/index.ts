@@ -9,6 +9,7 @@ export function useAddCollectionMutation() {
       collectionContractAddress: string;
       name: string;
       description: string;
+      image: string;
     }) => {
       const response = await axios.post("/api/collection", newCollection);
       return response.data; // handle success response

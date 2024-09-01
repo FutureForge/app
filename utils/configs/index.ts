@@ -17,13 +17,15 @@ export const CROSSFI_MARKETPLACE_CONTRACT = '0x7Ed11a18630a9E569882Ca2F4D3488A88
 export const TEST_WALLET_ADDRESS = '0xf58941e4258320d76bdab72c5ed8d47c25604e94'
 export const CROSSFI_TEST_ASSET_ADDRESS = '0x544C945415066564B0Fb707C7457590c0585e838'
 
+export const CROSSFI_MINTER_ADDRESS = '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'
+
 export const client = createThirdwebClient({
   clientId: CLIENT_ID,
 })
 
 export const chainInfo = defineChain({
   id: 4157,
-  rpc: 'https://crossfi-testnet-jsonrpc.itrocket.net',
+  rpc: 'https://rpc.testnet.ms',
   nativeCurrency: {
     decimals: 18,
     name: 'XFI',

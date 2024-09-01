@@ -40,16 +40,24 @@ import {
   chainInfo,
   client,
   CROSSFI_MARKETPLACE_CONTRACT,
+  CROSSFI_MINTER_ADDRESS,
   CROSSFI_TEST_ASSET_ADDRESS,
 } from '@/utils/configs'
-import { getContractCustom, getCurrentBlockNumber, ETHERS_CONTRACT } from '@/modules/blockchain/lib'
+import {
+  getContractCustom,
+  getCurrentBlockNumber,
+  ETHERS_CONTRACT,
+  provider,
+} from '@/modules/blockchain/lib'
 import { ConnectButton } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
 import { getAllListing, getAllOffers, getTotalListings, getTotalOffers } from '@/modules/blockchain'
 import { ethers } from 'ethers'
 import { StatusType } from '@/utils/lib/types'
 import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import MinterABI from '@/utils/abi/minterABI.json'
+import { upload } from 'thirdweb/storage'
 
 export default function TestPage() {
   //  mutation
@@ -133,10 +141,16 @@ export default function TestPage() {
   // const userAuction = useUserAuctionQuery()
   // console.log({ userAuction })
 
-  console.log('add collection mutation', addCollectionMutation)
+  // console.log('add collection mutation', addCollectionMutation)
 
-  const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
-  console.log({ imageUrl })
+  // const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
+  // console.log({ imageUrl })
+
+  const contract = getContractCustom({ contractAddress: CROSSFI_MINTER_ADDRESS })
+  console.log({ contract })
+
+  const etherContract = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, provider)
+  console.log({ etherContract })
 
   const handleClick = async () => {
     // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})
@@ -156,22 +170,37 @@ export default function TestPage() {
     //     buyoutBidAmount: '10',
     //   },
     // })
-
-    if (!imageUrl) return alert('Please upload an image')
-
-    const { secure_url } = imageUrl as CloudinaryUploadWidgetInfo
-
-    addCollectionMutation.mutate({
-      collectionContractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
-      description: 'MMMM First Collection',
-      name: 'MMM ',
-      image: secure_url,
+    // if (!imageUrl) return alert('Please upload an image')
+    // const { secure_url } = imageUrl as CloudinaryUploadWidgetInfo
+    // addCollectionMutation.mutate({
+    //   collectionContractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+    //   description: 'MMMM First Collection',
+    //   name: 'MMM ',
+    //   image: secure_url,
+    // })
+    const uri = await upload({
+      client,
+      files: [new File(['hello world'], 'hello.txt')],
     })
+    console.log({ uri })
   }
+
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [file, setFile] = useState(null)
+
+  // create nft
+  // const handleCreateNFT = async () => {
+  //   try {
+  //     const file1 = new Moralis.EvmApi.ipfs.uploadFolder({})
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 
   return (
     <div>
-      <CldUploadWidget
+      {/* <CldUploadWidget
         options={{ sources: ['local'] }}
         onSuccess={(result, { widget }) => {
           setImageUrl(result?.info)
@@ -193,7 +222,7 @@ export default function TestPage() {
           }
           return <button onClick={handleOnClick}>Upload an Image</button>
         }}
-      </CldUploadWidget>
+      </CldUploadWidget> */}
       <br />
       <button onClick={handleClick} disabled={addCollectionMutation.isPending}>
         click me

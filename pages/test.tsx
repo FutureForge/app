@@ -49,7 +49,7 @@ import {
   ETHERS_CONTRACT,
   provider,
 } from '@/modules/blockchain/lib'
-import { ConnectButton } from 'thirdweb/react'
+import { ConnectButton, MediaRenderer } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
 import { getAllListing, getAllOffers, getTotalListings, getTotalOffers } from '@/modules/blockchain'
 import { ethers } from 'ethers'
@@ -58,6 +58,7 @@ import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary'
 import { useRef, useState } from 'react'
 import MinterABI from '@/utils/abi/minterABI.json'
 import { upload } from 'thirdweb/storage'
+import { sendAndConfirmTransaction } from 'thirdweb'
 
 export default function TestPage() {
   //  mutation
@@ -126,8 +127,8 @@ export default function TestPage() {
   // console.log({ recentlySold })
   // console.log({ recentlyAuctioned })
 
-  // const userNFT = useUserNFTsQuery()
-  // console.log({ userNFT })
+  const userNFT = useUserNFTsQuery()
+  console.log({ userNFT })
 
   // const events = useMarketplaceEventQuery()
   // console.log({ events })
@@ -149,8 +150,15 @@ export default function TestPage() {
   const contract = getContractCustom({ contractAddress: CROSSFI_MINTER_ADDRESS })
   console.log({ contract })
 
-  const etherContract = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, provider)
-  console.log({ etherContract })
+  const minterContract = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, provider)
+  console.log({ minterContract })
+
+  const { activeAccount } = useUserChainInfo()
+
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [file, setFile] = useState()
+  const [imageUri, setImageUri] = useState('')
 
   const handleClick = async () => {
     // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})
@@ -178,16 +186,54 @@ export default function TestPage() {
     //   name: 'MMM ',
     //   image: secure_url,
     // })
-    const uri = await upload({
-      client,
-      files: [new File(['hello world'], 'hello.txt')],
-    })
-    console.log({ uri })
+    try {
+      const uri = await upload({
+        client,
+        files: [file!],
+        uploadWithoutDirectory: true,
+      })
+      setImageUri(uri)
+      console.log({ uri })
+
+      try {
+        if (uri) {
+          await window.ethereum.request({ method: 'eth_requestAccounts' })
+
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          console.log({ signer })
+
+          const minterContractI = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, signer)
+          console.log({ minterContractI })
+          const tokenURI = JSON.stringify({
+            name: 'MintMingles Logo',
+            description: 'MintMingles Logo ABCDEF',
+            image: uri,
+            attributes: [
+              { trait_type: 'Rarity', value: 'Common' },
+              { trait_type: 'Artist', value: 'Mingles' },
+            ],
+          })
+
+          const transaction = await minterContractI.mint(tokenURI, {
+            value: ethers.utils.parseEther('1'),
+          })
+
+          await transaction.wait()
+
+          console.log('Token minted successfully:', transaction)
+        } else {
+          alert('no uri')
+        }
+      } catch (error) {
+        console.log({ error })
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [file, setFile] = useState(null)
+  console.log({ file })
 
   // create nft
   // const handleCreateNFT = async () => {
@@ -224,6 +270,15 @@ export default function TestPage() {
         }}
       </CldUploadWidget> */}
       <br />
+      <input
+        type="file"
+        onChange={(event) => {
+          if (event.target.files) {
+            setFile(event.target.files[0])
+          }
+        }}
+      />
+      {imageUri && <MediaRenderer client={client} src={imageUri} />}
       <button onClick={handleClick} disabled={addCollectionMutation.isPending}>
         click me
       </button>

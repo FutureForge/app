@@ -6,8 +6,7 @@ export const buttonStyles = tv({
     variant: {
       primary:
         'bg-primary text-muted-foreground rounded-[10px]',
-      secondary:
-        'bg-sec-btn text-white px-2 rounded-[30px]',
+      secondary:'bg-sec-btn text-white px-2 rounded-lg',
       outline: 'bg-background text-foreground px-3 rounded-[30px] border border-foreground gap-2',
     },
     size: {

@@ -18,13 +18,17 @@ const Nav_Links = [
     link: '/create',
   },
   {
+    name: 'Add Collection',
+    link: '/add-collection',
+  },
+  {
     name: 'NFT Staking',
     link: '/staking',
   },
-  {
-    name: 'Collections',
-    link: '/collections',
-  },
+  // {
+  //   name: 'Collections',
+  //   link: '/collections',
+  // },
 ]
 export function Nav() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)

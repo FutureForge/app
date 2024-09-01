@@ -1,0 +1,1 @@
+export {AddCollection} from './components/add-collection'

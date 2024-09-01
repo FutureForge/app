@@ -31,8 +31,59 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      keyframes: {
+        overlayShow: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        overlayHide: {
+          from: { opacity: '1' },
+          to: { opacity: '0' },
+        },
+        dialogShow: {
+          from: { opacity: '0', transform: 'translateY(8px) scale(0.97)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        dialogHide: {
+          from: { opacity: '1', transform: 'translateY(0) scale(1)' },
+          to: { opacity: '0', transform: 'translateY(8px) scale(0.97)' },
+        },
+        caretBlink: {
+          '0%,70%,100%': { opacity: '1' },
+          '20%,50%': { opacity: '0' },
+        },
+        slideDownAndFade: {
+          from: { opacity: '0', transform: 'translateY(-4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideLeftAndFade: {
+          from: { opacity: '0', transform: 'translateX(4px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideUpAndFade: {
+          from: { opacity: '0', transform: 'translateY(4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideRightAndFade: {
+          from: { opacity: '0', transform: 'translateX(-4px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'overlay-show': 'overlayShow 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'overlay-hide': 'overlayHide 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'dialog-show': 'dialogShow 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'dialog-hide': 'dialogHide 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'caret-blink': 'caretBlink 1.2s ease-out infinite',
+        slideDownAndFade: 'slideDownAndFade 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideLeftAndFade: 'slideLeftAndFade 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideUpAndFade: 'slideUpAndFade 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideRightAndFade: 'slideRightAndFade 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar')
+  ],
 }
 export default config

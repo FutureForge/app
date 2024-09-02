@@ -14,6 +14,7 @@ import { getNFT as getERC1155NFT } from 'thirdweb/extensions/erc1155'
 import { TokenType } from '@/utils/lib/types'
 import { getListing, getOffer } from '@/modules/blockchain/global'
 import { includeNFTOwner } from '@/modules/blockchain/lib'
+import { ensureSerializable } from '@/utils'
 
 export function useMarketplaceEventQuery() {
   return useQuery({
@@ -185,14 +186,14 @@ export function useMarketplaceEventQuery() {
         }),
       )
 
-      return {
+      return ensureSerializable({
         newListing: newListingWithNFTs,
         newAuction: newAuctionWithNFTs,
         newBid: newBidWithNFTs,
         newOffer: newOfferWithNFTs,
         recentlySoldAuction: recentlySoldWithNFTs,
         newSaleListing: newSaleWithNFTs,
-      }
+      })
     },
     initialData: {
       newListing: [],

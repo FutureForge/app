@@ -3,204 +3,197 @@ import {
   getCancelDirectListing,
   getCreateDirectListing,
   getUpdateDirectListing,
-} from "@/modules/blockchain";
-import { useUserChainInfo } from "@/modules/query";
-import {
-  BuyFromDirectListingType,
-  CreateDirectListingType,
-} from "@/utils/lib/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { sendAndConfirmTransaction } from "thirdweb";
+} from '@/modules/blockchain'
+import { useUserChainInfo } from '@/modules/query'
+import { BuyFromDirectListingType, CreateDirectListingType } from '@/utils/lib/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { sendAndConfirmTransaction } from 'thirdweb'
 
 export function useCreateListingMutation() {
-  const queryClient = useQueryClient();
-  const { activeAccount } = useUserChainInfo();
+  const queryClient = useQueryClient()
+  const { activeAccount } = useUserChainInfo()
 
   return useMutation({
-    mutationFn: async ({
-      directListing,
-    }: {
-      directListing: Partial<CreateDirectListingType>;
-    }) => {
-      if (!activeAccount) return;
+    mutationFn: async ({ directListing }: { directListing: Partial<CreateDirectListingType> }) => {
+      if (!activeAccount) return
 
       const transaction = await getCreateDirectListing({
         params: {
-          assetContract: directListing.assetContract ?? "",
-          tokenId: directListing.tokenId ?? "",
-          pricePerToken: directListing.pricePerToken ?? "",
+          assetContract: directListing.assetContract ?? '',
+          tokenId: directListing.tokenId ?? '',
+          pricePerToken: directListing.pricePerToken ?? '',
         },
-      });
+      })
 
-      if (!transaction) throw new Error("Failed to create listing");
+      if (!transaction) throw new Error('Failed to create listing')
 
       const transactionReceipt = await sendAndConfirmTransaction({
         transaction,
         account: activeAccount,
-      });
+      })
 
-      if (transactionReceipt.status === "reverted") {
-        throw new Error("Transaction failed");
+      if (transactionReceipt.status === 'reverted') {
+        throw new Error('Transaction failed')
       }
 
-      return transactionReceipt;
+      return transactionReceipt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["newly", "event"],
-      });
+        queryKey: ['newly', 'event'],
+      })
     },
     onError: () => {},
     meta: {
       successMessage: {
-        description: "Listing created successfully",
+        description: 'Listing created successfully',
       },
       errorMessage: {
-        description: "Failed to create listing",
+        description: 'Failed to create listing',
       },
     },
-  });
+  })
 }
 export function useUpdateListingMutation() {
-  const queryClient = useQueryClient();
-  const { activeAccount } = useUserChainInfo();
+  const queryClient = useQueryClient()
+  const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({
       listingId,
       directListing,
     }: {
-      listingId: string;
-      directListing: Partial<CreateDirectListingType>;
+      listingId: string
+      directListing: Partial<CreateDirectListingType>
     }) => {
-      if (!activeAccount) return;
+      if (!activeAccount) return
 
       const transaction = await getUpdateDirectListing({
         listingId,
         params: {
-          assetContract: directListing.assetContract ?? "",
-          tokenId: directListing.tokenId ?? "",
-          quantity: directListing.quantity ?? "",
-          pricePerToken: directListing.pricePerToken ?? "",
-          endTimestamp: directListing.endTimestamp ?? "",
+          assetContract: directListing.assetContract ?? '',
+          tokenId: directListing.tokenId ?? '',
+          quantity: directListing.quantity ?? '',
+          pricePerToken: directListing.pricePerToken ?? '',
+          endTimestamp: directListing.endTimestamp ?? '',
         },
-      });
+      })
 
       const transactionReceipt = await sendAndConfirmTransaction({
         transaction,
         account: activeAccount,
-      });
+      })
 
-      if (transactionReceipt.status === "reverted") {
-        throw new Error("Transaction failed");
+      if (transactionReceipt.status === 'reverted') {
+        throw new Error('Transaction failed')
       }
 
-      return transactionReceipt;
+      return transactionReceipt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["userListing"],
-      });
+        queryKey: ['userListing'],
+      })
     },
     onError: () => {},
     meta: {
       successMessage: {
-        description: "Listing updated successfully",
+        description: 'Listing updated successfully',
       },
       errorMessage: {
-        description: "Failed to update listing",
+        description: 'Failed to update listing',
       },
     },
-  });
+  })
 }
 
 export function useCancelDirectListingMutation() {
-  const queryClient = useQueryClient();
-  const { activeAccount } = useUserChainInfo();
+  const queryClient = useQueryClient()
+  const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ listingId }: { listingId: string }) => {
-      if (!activeAccount) return;
+      if (!activeAccount) return
 
       const transaction = await getCancelDirectListing({
         listingId,
-      });
+      })
 
       const transactionReceipt = await sendAndConfirmTransaction({
         transaction,
         account: activeAccount,
-      });
+      })
 
-      if (transactionReceipt.status === "reverted") {
-        throw new Error("Transaction failed");
+      if (transactionReceipt.status === 'reverted') {
+        throw new Error('Transaction failed')
       }
 
-      return transactionReceipt;
+      return transactionReceipt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["userListing"],
-      });
+        queryKey: ['userListing'],
+      })
     },
     onError: () => {},
     meta: {
       successMessage: {
-        description: "Listing cancelled",
+        description: 'Listing cancelled',
       },
       errorMessage: {
-        description: "Failed to cancel listing",
+        description: 'Failed to cancel listing',
       },
     },
-  });
+  })
 }
 
 export function useBuyFromDirectListingMutation() {
-  const queryClient = useQueryClient();
-  const { activeAccount } = useUserChainInfo();
+  const queryClient = useQueryClient()
+  const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({
       buyFromListing,
     }: {
-      buyFromListing: Partial<BuyFromDirectListingType>;
+      buyFromListing: Partial<BuyFromDirectListingType>
     }) => {
-      if (!activeAccount) return;
+      if (!activeAccount) return
 
       const transaction = await getBuyFromDirectListing({
         params: {
-          buyFor: activeAccount.address,
-          currency: buyFromListing.currency ?? "",
-          listingId: buyFromListing.listingId ?? "",
-          quantity: buyFromListing.quantity ?? "",
-          nativeTokenValue: buyFromListing.nativeTokenValue ?? "",
-          totalPrice: buyFromListing.totalPrice ?? "",
+          buyFor: buyFromListing.buyFor || activeAccount.address,
+          currency: buyFromListing.currency ?? '',
+          listingId: buyFromListing.listingId ?? '',
+          quantity: buyFromListing.quantity ?? '',
+          nativeTokenValue: buyFromListing.nativeTokenValue ?? '',
+          totalPrice: buyFromListing.totalPrice ?? '',
         },
-      });
+      })
 
       const transactionReceipt = await sendAndConfirmTransaction({
         transaction,
         account: activeAccount,
-      });
+      })
 
-      if (transactionReceipt.status === "reverted") {
-        throw new Error("Transaction failed");
+      if (transactionReceipt.status === 'reverted') {
+        throw new Error('Transaction failed')
       }
 
-      return transactionReceipt;
+      return transactionReceipt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["userListing"],
-      });
+        queryKey: ['userListing'],
+      })
     },
     onError: () => {},
     meta: {
       successMessage: {
-        description: "Listing bought",
+        description: 'Listing bought',
       },
       errorMessage: {
-        description: "Failed to buy listing",
+        description: 'Failed to buy listing',
       },
     },
-  });
+  })
 }

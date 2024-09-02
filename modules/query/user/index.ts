@@ -13,6 +13,7 @@ import {
   getTotalListings,
   getTotalAuctions,
 } from '@/modules/blockchain'
+import { ensureSerializable } from '@/utils'
 
 export function useUserChainInfo() {
   const activeAccount = useActiveAccount()
@@ -49,7 +50,7 @@ export function useUserNFTsQuery() {
         return await Promise.all(tokenIdNFTs)
       })
 
-      return await Promise.all(updatedNFTs)
+      return ensureSerializable(await Promise.all(updatedNFTs))
     },
     enabled: !!userAddress,
   })
@@ -73,7 +74,7 @@ export function useUserOffersMadeQuery() {
           (offer) => offer.offeror === userAddress && offer.status === StatusType.CREATED,
         )
 
-        return userOffers
+        return ensureSerializable(userOffers)
       }
     },
     refetchInterval: 6000,
@@ -100,7 +101,7 @@ export function useUserListingQuery() {
             listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
         )
 
-        return userListings
+        return ensureSerializable(userListings)
       }
     },
     refetchInterval: 6000,
@@ -127,7 +128,7 @@ export function useUserAuctionQuery() {
             auction.auctionCreator === userAddress && auction.status === StatusType.CREATED,
         )
 
-        return userAuctions
+        return ensureSerializable(userAuctions)
       }
     },
     refetchInterval: 6000,

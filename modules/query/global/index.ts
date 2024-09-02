@@ -90,6 +90,6 @@ export function useGetGlobalListingOrAuctionQuery() {
       })
     },
     enabled: true,
-    refetchInterval: 6000,
+    refetchInterval: 5000,
   })
 }

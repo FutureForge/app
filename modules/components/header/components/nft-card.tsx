@@ -32,7 +32,7 @@ export function NFTCard(props: NFTCardProps) {
             <span className="flex items-center gap-1">
               <Icon iconType={'mint-coin'} />
               <p className="text-foreground/75 text-sm">
-                Floor Price: {decimalOffChain(pricePerToken)}{' '}
+                Listed Price: {decimalOffChain(pricePerToken)}{' '}
                 {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
               </p>
             </span>
@@ -52,4 +52,3 @@ export function NFTCard(props: NFTCardProps) {
     </div>
   )
 }
-

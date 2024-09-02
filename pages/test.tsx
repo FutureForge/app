@@ -144,7 +144,7 @@ export default function TestPage() {
 
   // console.log('add collection mutation', addCollectionMutation)
 
-  // const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
+  const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
   // console.log({ imageUrl })
 
   const contract = getContractCustom({ contractAddress: CROSSFI_MINTER_ADDRESS })
@@ -153,12 +153,12 @@ export default function TestPage() {
   const minterContract = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, provider)
   console.log({ minterContract })
 
-  const { activeAccount } = useUserChainInfo()
+  // const { activeAccount } = useUserChainInfo()
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [file, setFile] = useState()
-  const [imageUri, setImageUri] = useState('')
+  // const [name, setName] = useState('')
+  // const [description, setDescription] = useState('')
+  // const [file, setFile] = useState()
+  // const [imageUri, setImageUri] = useState('')
 
   const handleClick = async () => {
     // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})
@@ -186,54 +186,54 @@ export default function TestPage() {
     //   name: 'MMM ',
     //   image: secure_url,
     // })
-    try {
-      const uri = await upload({
-        client,
-        files: [file!],
-        uploadWithoutDirectory: true,
-      })
-      setImageUri(uri)
-      console.log({ uri })
+    // try {
+    //   const uri = await upload({
+    //     client,
+    //     files: [file!],
+    //     uploadWithoutDirectory: true,
+    //   })
+    //   setImageUri(uri)
+    //   console.log({ uri })
 
-      try {
-        if (uri) {
-          await window.ethereum.request({ method: 'eth_requestAccounts' })
+    //   try {
+    //     if (uri) {
+    //       await window.ethereum.request({ method: 'eth_requestAccounts' })
 
-          const provider = new ethers.providers.Web3Provider(window.ethereum)
-          const signer = provider.getSigner()
-          console.log({ signer })
+    //       const provider = new ethers.providers.Web3Provider(window.ethereum)
+    //       const signer = provider.getSigner()
+    //       console.log({ signer })
 
-          const minterContractI = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, signer)
-          console.log({ minterContractI })
-          const tokenURI = JSON.stringify({
-            name: 'MintMingles Logo',
-            description: 'MintMingles Logo ABCDEF',
-            image: uri,
-            attributes: [
-              { trait_type: 'Rarity', value: 'Common' },
-              { trait_type: 'Artist', value: 'Mingles' },
-            ],
-          })
+    //       const minterContractI = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, signer)
+    //       console.log({ minterContractI })
+    //       const tokenURI = JSON.stringify({
+    //         name: 'MintMingles Logo',
+    //         description: 'MintMingles Logo ABCDEF',
+    //         image: uri,
+    //         attributes: [
+    //           { trait_type: 'Rarity', value: 'Common' },
+    //           { trait_type: 'Artist', value: 'Mingles' },
+    //         ],
+    //       })
 
-          const transaction = await minterContractI.mint(tokenURI, {
-            value: ethers.utils.parseEther('1'),
-          })
+    //       const transaction = await minterContractI.mint(tokenURI, {
+    //         value: ethers.utils.parseEther('1'),
+    //       })
 
-          await transaction.wait()
+    //       await transaction.wait()
 
-          console.log('Token minted successfully:', transaction)
-        } else {
-          alert('no uri')
-        }
-      } catch (error) {
-        console.log({ error })
-      }
-    } catch (error) {
-      console.log(error)
-    }
+    //       console.log('Token minted successfully:', transaction)
+    //     } else {
+    //       alert('no uri')
+    //     }
+    //   } catch (error) {
+    //     console.log({ error })
+    //   }
+    // } catch (error) {
+    //   console.log(error)
+    // }
   }
 
-  console.log({ file })
+  // console.log({ file })
 
   // create nft
   // const handleCreateNFT = async () => {
@@ -246,7 +246,7 @@ export default function TestPage() {
 
   return (
     <div>
-      {/* <CldUploadWidget
+      <CldUploadWidget
         options={{ sources: ['local'] }}
         onSuccess={(result, { widget }) => {
           setImageUrl(result?.info)
@@ -268,8 +268,8 @@ export default function TestPage() {
           }
           return <button onClick={handleOnClick}>Upload an Image</button>
         }}
-      </CldUploadWidget> */}
-      <br />
+      </CldUploadWidget>
+      {/* <br />
       <input
         type="file"
         onChange={(event) => {
@@ -278,7 +278,7 @@ export default function TestPage() {
           }
         }}
       />
-      {imageUri && <MediaRenderer client={client} src={imageUri} />}
+      {imageUri && <MediaRenderer client={client} src={imageUri} />} */}
       <button onClick={handleClick} disabled={addCollectionMutation.isPending}>
         click me
       </button>

@@ -3,6 +3,7 @@ export {
   useGetMarketplaceCollectionsQuery,
   useGetSingleCollectionQuery,
   useGetSingleNFTQuery,
+  useCheckIfItsACollectionQuery,
 } from './collection'
 export {
   useUserChainInfo,

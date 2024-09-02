@@ -7,6 +7,11 @@ const nextConfig = {
         hostname: 'ipfs.io',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+      },
     ],
   },
   webpack(config) {
@@ -32,7 +37,7 @@ const nextConfig = {
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i
 
-    // FOr rainbowkit
+    // For rainbowkit
     config.resolve.fallback = { fs: false, net: false, tls: false }
 
     return config

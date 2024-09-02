@@ -32,13 +32,14 @@ TextField.displayName = 'TextField'
 
 export type TextAreaProps = React.ComponentPropsWithoutRef<'textarea'>
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>((props, ref) => {
-  const { className } = props
+  const { className, ...textareaProps } = props
 
   return (
     <textarea
       autoComplete="off"
       className={cn('bg-sec-bg rounded-xl resize-none h-[138px] p-4', className)}
       ref={ref}
+      {...textareaProps}
     />
   )
 })

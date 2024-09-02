@@ -10,6 +10,7 @@ import { NFT } from 'thirdweb'
 import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
+import { CROSSFI_API } from '@/utils/configs'
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -19,6 +20,25 @@ export function useFetchCollectionsQuery() {
       return response.data.data
     },
     initialData: [],
+    refetchInterval: 60000,
+  })
+}
+
+export function useCheckIfItsACollectionQuery(collectionAddress: string) {
+  return useQuery({
+    queryKey: ['add-collection', collectionAddress],
+    queryFn: async () => {
+      const response = await axios.get(
+        `${CROSSFI_API}/contracts?contractAddress=${collectionAddress}&page=1&limit=10&sort=-blockNumber`,
+      )
+      const nftData = response.data.docs
+
+      // Check if any document is CFC-721 and if nftData is not empty
+      const isCFC721 = nftData.some((doc: { tokenType: string }) => doc.tokenType === 'CFC-721')
+
+      return { isCFC721, nftData }
+    },
+    enabled: !!collectionAddress,
     refetchInterval: 60000,
   })
 }

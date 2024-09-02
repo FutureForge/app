@@ -1,11 +1,12 @@
 import { getAllAuctions, getAllListing, getContractCustom } from '@/modules/blockchain'
 import { getWinningBid } from '@/modules/blockchain/auction'
-import { includeNFTOwner } from '@/modules/blockchain/lib'
+import { decimalOffChain, includeNFTOwner } from '@/modules/blockchain/lib'
 import { StatusType, TokenType } from '@/utils/lib/types'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { NFT } from 'thirdweb'
 import { getNFT as getERC721NFT } from 'thirdweb/extensions/erc721'
 import { getNFT as getERC1155NFT } from 'thirdweb/extensions/erc1155'
+import { ensureSerializable } from '@/utils'
 
 export function useGetGlobalListingOrAuctionQuery() {
   return useQuery({
@@ -37,7 +38,10 @@ export function useGetGlobalListingOrAuctionQuery() {
             })
           }
 
-          return { ...listing, nft: nftData }
+          return ensureSerializable({
+            ...listing,
+            nft: nftData,
+          })
         }),
       )
 
@@ -72,17 +76,20 @@ export function useGetGlobalListingOrAuctionQuery() {
             })
           }
 
-          return { ...auction, winningBid: winningBidBody, nft: nftData }
+          return ensureSerializable({
+            ...auction,
+            winningBid: winningBidBody,
+            nft: nftData,
+          })
         }),
       )
 
-      return {
+      return ensureSerializable({
         allAuction: updatedAuction,
         allListing: newListingWithNFTs,
-      }
+      })
     },
-    // initialData: null,
     enabled: true,
-    refetchInterval: 60000,
+    refetchInterval: 6000,
   })
 }

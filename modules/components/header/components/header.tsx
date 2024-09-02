@@ -19,17 +19,17 @@ export function Header() {
     if (!global) return []
 
     const recentlyListed = global.allListing
-      .filter((item) => item.status === StatusType.CREATED)
+      .filter((item: NewListing) => item.status === StatusType.CREATED)
       .reverse()
       .slice(0, 20) as NewListing[]
 
     const recentlySold = global.allListing
-      .filter((item) => item.status === StatusType.COMPLETED)
+      .filter((item: NewListing) => item.status === StatusType.COMPLETED)
       .reverse()
       .slice(0, 20) as NewListing[]
 
     const recentlyAuctioned = global.allAuction
-      .filter((item) => item.status === StatusType.CREATED)
+      .filter((item: NewAuction) => item.status === StatusType.CREATED)
       .reverse()
       .slice(0, 20) as NewAuction[]
 

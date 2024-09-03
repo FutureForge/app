@@ -71,8 +71,8 @@ export default function TestPage() {
   const cancelListingMutation = useCancelDirectListingMutation()
   const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
 
-  const {activeAccount} = useUserChainInfo()
-  console.log({address: activeAccount?.address})
+  const { activeAccount } = useUserChainInfo()
+  console.log({ address: activeAccount?.address })
 
   //   const { data: fetchCollection } = useFetchCollectionsQuery()
   //   const { data: getMarketplaceCollection } = useGetMarketplaceCollectionsQuery()
@@ -172,13 +172,13 @@ export default function TestPage() {
 
   const handleClick = async () => {
     // approveAllMutation.mutate({collectionContractAddress: CROSSFI_TEST_ASSET_ADDRESS})
-    createListingMutation.mutate({
-      directListing: {
-        assetContract: CROSSFI_TEST_ASSET_ADDRESS,
-        tokenId: '4',
-        pricePerToken: '1',
-      },
-    })
+    // createListingMutation.mutate({
+    //   directListing: {
+    //     assetContract: CROSSFI_TEST_ASSET_ADDRESS,
+    //     tokenId: '4',
+    //     pricePerToken: '1',
+    //   },
+    // })
     // createAuctionMutation.mutate({
     //   auctionDetails: {
     //     assetContract: CROSSFI_TEST_ASSET_ADDRESS,
@@ -196,6 +196,7 @@ export default function TestPage() {
     //   name: 'MMM ',
     //   image: secure_url,
     // })
+    // MINT NFT to minter
     // try {
     //   const uri = await upload({
     //     client,
@@ -235,9 +236,7 @@ export default function TestPage() {
     // } catch (error) {
     //   console.log(error)
     // }
-
-    // stakingMutation.mutate({ tokenId: '0' })
-
+    stakingMutation.mutate({ tokenId: '0' })
     // updateListingMutation.mutate({
     //   listingId: '0',
     //   directListing: {
@@ -246,9 +245,7 @@ export default function TestPage() {
     //     pricePerToken: '1',
     //   },
     // })
-
     // cancelListingMutation.mutate({ listingId: '0' })
-
     // buyFromDirectListingMutation.mutate({
     //   buyFromListing: {
     //     buyFor: activeAccount?.address,
@@ -260,7 +257,7 @@ export default function TestPage() {
     // })
   }
 
-  console.log('buyFromDirectListingMutation mutation', buyFromDirectListingMutation)
+  console.log('stakingMutation mutation', stakingMutation)
 
   // console.log({ file })
 
@@ -308,7 +305,7 @@ export default function TestPage() {
         }}
       />
       {imageUri && <MediaRenderer client={client} src={imageUri} />} */}
-      <button onClick={handleClick} disabled={createListingMutation.isPending}>
+      <button onClick={handleClick} disabled={stakingMutation.isPending}>
         click me
       </button>
     </div>

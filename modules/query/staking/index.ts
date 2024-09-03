@@ -61,8 +61,6 @@ export function useGetUserStakingInfoQuery() {
         }),
       )
 
-      console.log({ tokensStaked, rewards, nftsTokenStaked })
-
       return ensureSerializable({ tokensStaked, rewards, nftsTokenStaked })
     },
     enabled: !!activeAccount?.address,

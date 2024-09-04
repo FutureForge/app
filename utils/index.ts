@@ -57,3 +57,37 @@ export function ensureSerializable(data: any): any {
 
   return data
 }
+
+export function getFormatAddress(address: string, width?: number): string {
+  const xxl = 1800
+  if (address && address.length !== 42) {
+    return 'Invalid Ethereum Address'
+  }
+  if (width && width >= xxl) {
+    return address
+  }
+  const start = address?.slice(0, 4)
+  const end = address?.slice(-4)
+  return `${start}...${end}`
+}
+
+export function formatBlockchainTimestamp(timestamp: string) {
+  // Convert the timestamp to a Date object
+  const date = new Date(parseInt(timestamp) * 1000)
+
+  // Fix the error by specifying the correct types for the options object
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    // hour: 'numeric',
+    // minute: 'numeric',
+    // second: 'numeric',
+    // timeZone: 'UTC',
+  }
+
+  // Format the date and time
+  const formattedDate = date?.toLocaleString('en-US', options)
+
+  return formattedDate
+}

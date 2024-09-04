@@ -1,4 +1,10 @@
-import { chainInfoV2, client, rpcRequest, chainInfo, CROSSFI_MARKETPLACE_CONTRACT } from '@/utils/configs'
+import {
+  chainInfoV2,
+  client,
+  rpcRequest,
+  chainInfo,
+  CROSSFI_MARKETPLACE_CONTRACT,
+} from '@/utils/configs'
 import { ethers } from 'ethers'
 import { eth_blockNumber, getContract as getContractThirdweb } from 'thirdweb'
 import MarketplaceABI from '@/utils/abi/marketplaceABI.json'
@@ -7,11 +13,15 @@ export const includeNFTOwner = true
 export const fromBlock = 4880746
 export const nativeCurrency = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
-const providerUrl = 'https://rpc.testnet.ms'
+const providerUrl = 'https://crossfi-testnet-jsonrpc.itrocket.net'
 
 export const provider = new ethers.providers.JsonRpcProvider(providerUrl)
 
-export const ETHERS_CONTRACT = new ethers.Contract(CROSSFI_MARKETPLACE_CONTRACT, MarketplaceABI, provider)
+export const ETHERS_CONTRACT = new ethers.Contract(
+  CROSSFI_MARKETPLACE_CONTRACT,
+  MarketplaceABI,
+  provider,
+)
 
 // const eventFilters = contract.filters.NewListing()
 // console.log({ eventFilters })
@@ -43,6 +53,7 @@ export function decimalOffChain(
   number: bigint | string | number,
   decimalPlaces: string = 'ethers',
 ) {
+  if (!number) return
   const value = ethers.utils.formatEther(number)
 
   return value

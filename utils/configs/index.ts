@@ -27,7 +27,7 @@ export const client = createThirdwebClient({
 
 export const chainInfo = defineChain({
   id: 4157,
-  rpc: 'https://rpc.testnet.ms',
+  rpc: 'https://crossfi-testnet-jsonrpc.itrocket.net',
   nativeCurrency: {
     decimals: 18,
     name: 'XFI',

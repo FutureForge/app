@@ -64,9 +64,13 @@ export function Header() {
   const renderItem = (item: NewListing | NewAuction, index: number) => {
     const isListing = 'listingId' in item
     const nft = item.nft
+    const tokenId = item.tokenId
+    const assetContract = item.assetContract
+    const type = nft?.type
     const pricePerToken = isListing ? item.pricePerToken : undefined
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
+
 
     return (
       <NFTCard
@@ -75,6 +79,9 @@ export function Header() {
         pricePerToken={pricePerToken}
         currency={currency}
         buyoutBidAmount={buyOutAmount}
+        tokenId={tokenId}
+        contractAddress={assetContract}
+        type={type}
       />
     )
   }

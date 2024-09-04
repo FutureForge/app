@@ -13,23 +13,14 @@ import { MediaRenderer } from 'thirdweb/react'
 import { Button } from '@/modules/app'
 import { formatBlockchainTimestamp, getFormatAddress } from '@/utils'
 import {
-  useAddCollectionMutation,
   useApprovedForAllMutation,
   useCreateListingMutation,
-  useMakeListingOfferMutation,
-  useApprovedForAllStakingMutation,
-  useClaimStakingRewardMutation,
-  useStakingMutation,
-  useWithdrawStakingMutation,
-  useAcceptOfferMutation,
   useBuyFromDirectListingMutation,
   useCancelAuctionMutation,
   useCancelDirectListingMutation,
-  useCancelOfferMutation,
   useCollectAuctionPayoutMutation,
   useCollectAuctionTokensMutation,
   useCreateAuctionMutation,
-  useUpdateListingMutation,
   useBidInAuctionMutation,
 } from '@/modules/mutation'
 import { useState } from 'react'
@@ -50,6 +41,8 @@ const NFTDetailPage = () => {
   const bidInAuctionMutation = useBidInAuctionMutation()
   const cancelAuctionMutation = useCancelAuctionMutation()
   const createAuctionMutation = useCreateAuctionMutation()
+  const collectAuctionPayoutMutation = useCollectAuctionPayoutMutation()
+  const collectAuctionTokensMutation = useCollectAuctionTokensMutation()
 
   // direct listing
   const cancelDirectListingMutation = useCancelDirectListingMutation()
@@ -67,7 +60,9 @@ const NFTDetailPage = () => {
     buyFromDirectListingMutation.isPending ||
     createAuctionMutation.isPending ||
     createListingMutation.isPending ||
-    approvedForAllMutation.isPending
+    approvedForAllMutation.isPending ||
+    collectAuctionPayoutMutation.isPending ||
+    collectAuctionTokensMutation.isPending
 
   const { data: isApproved } = useCheckApprovedForAllQuery({
     collectionContractAddress: contractAddress as string,
@@ -96,9 +91,7 @@ const NFTDetailPage = () => {
     offers,
   })
 
-  console.log({ isApproved })
-
-  console.log('mutation status', approvedForAllMutation)
+  console.log('mutation status', collectAuctionPayoutMutation)
 
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
@@ -204,7 +197,28 @@ const NFTDetailPage = () => {
     )
   }
 
-  const handleBuyOutAuction = () => {}
+  const handleBuyOutAuction = () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+
+    bidInAuctionMutation.mutate(
+      {
+        auctionId: nftAuctionList?.auctionId,
+        bidAmount: decimalOffChain(nftAuctionList?.buyoutBidAmount)!,
+      },
+      {
+        onSuccess: (data: any) => {
+          alert('Bid placed successfully!')
+          setValue('')
+          console.log({ data })
+        },
+        onError: (error: any) => {
+          alert(error.message)
+          setValue('')
+        },
+      },
+    )
+  }
 
   const handleCancelDirectListing = () => {
     if (!address) return alert('Please connect to a wallet.')
@@ -236,6 +250,49 @@ const NFTDetailPage = () => {
       {
         onSuccess: (data: any) => {
           alert('Cancelled Auction Successfully!')
+          setValue('')
+          console.log({ data })
+        },
+        onError: (error: any) => {
+          alert(error.message)
+        },
+      },
+    )
+  }
+
+  const handleClaimAuctionPayout = () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (nftAuctionList?.auctionCreator === address)
+      return alert('Only the auction creator can claim payout the listing.')
+
+    collectAuctionPayoutMutation.mutate(
+      { auctionId: nftAuctionList?.auctionId },
+      {
+        onSuccess: (data: any) => {
+          alert('Auction Reward claimed Successfully!')
+          setValue('')
+          console.log({ data })
+        },
+        onError: (error: any) => {
+          alert(error.message)
+        },
+      },
+    )
+  }
+
+  const handleClaimAuctionNFT = () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    console.log(winningBid?.bidder)
+    console.log(address)
+    if (winningBid?.bidder !== address) return alert('Only bidder can claim the NFT')
+
+    collectAuctionTokensMutation.mutate(
+      { auctionId: nftAuctionList?.auctionId },
+      {
+        onSuccess: (data: any) => {
+          alert('Auction NFT claimed Successfully!')
           setValue('')
           console.log({ data })
         },
@@ -393,22 +450,48 @@ const NFTDetailPage = () => {
                 )}
                 {id === 'auction' && (
                   <>
-                    <Button
-                      onClick={handlePlaceBidAuction}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      Place Bid
-                    </Button>
-                    <Button
-                      onClick={() => {}}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      Buy Auction
-                    </Button>
+                    {isAuctionExpired ? (
+                      <>
+                        {winningBid?.bidder === address ? (
+                          <>
+                            {' '}
+                            <Button
+                              onClick={handleClaimAuctionNFT}
+                              variant="secondary"
+                              disabled={isTxPending}
+                              className="text-sm font-medium h-8"
+                            >
+                              Claim Auction NFT
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            {winningBid?.bidder
+                              ? 'Auction Has Been Completed'
+                              : 'Auction Has Expired'}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={handlePlaceBidAuction}
+                          variant="secondary"
+                          disabled={isTxPending}
+                          className="text-sm font-medium h-8"
+                        >
+                          Place Bid
+                        </Button>
+                        <Button
+                          onClick={handleBuyOutAuction}
+                          variant="secondary"
+                          disabled={isTxPending}
+                          className="text-sm font-medium h-8"
+                        >
+                          Buy Auction
+                        </Button>
+                      </>
+                    )}
                   </>
                 )}
 
@@ -463,14 +546,27 @@ const NFTDetailPage = () => {
                   </Button>
                 )}
                 {id === 'auction' && (
-                  <Button
-                    onClick={handleCancelAuction}
-                    variant="secondary"
-                    disabled={isTxPending}
-                    className="text-sm font-medium h-8"
-                  >
-                    Cancel Auction
-                  </Button>
+                  <>
+                    {isAuctionExpired && nftAuctionList?.auctionCreator === address ? (
+                      <Button
+                        onClick={handleClaimAuctionPayout}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Claim Auction Payout
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleCancelAuction}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Cancel Auction
+                      </Button>
+                    )}
+                  </>
                 )}
               </>
             )}

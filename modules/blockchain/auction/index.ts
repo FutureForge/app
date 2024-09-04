@@ -2,24 +2,22 @@
  * WRITE FUNCTIONS
  * -----------------------------------------------------------------------------------------------*/
 
-import { CreateAuctionType } from "@/utils/lib/types";
-import { getContractCustom, nativeCurrency } from "../lib";
-import { CROSSFI_MARKETPLACE_CONTRACT } from "@/utils/configs";
-import { prepareContractCall, readContract, toWei } from "thirdweb";
-import {
-  convertToBlockchainTimestamp,
-  getCurrentBlockchainTimestamp,
-} from "@/utils";
+import { CreateAuctionType } from '@/utils/lib/types'
+import { getContractCustom, nativeCurrency } from '../lib'
+import { CROSSFI_MARKETPLACE_CONTRACT } from '@/utils/configs'
+import { prepareContractCall, readContract, toWei } from 'thirdweb'
+import { getCurrentBlockchainTimestamp, getEndBlockchainTimestamp } from '@/utils'
 
-export async function getCreateAuction({
-  params: _params,
-}: {
-  params: CreateAuctionType;
-}) {
-  const startTimestamp = getCurrentBlockchainTimestamp();
-  const endTimestamp = convertToBlockchainTimestamp(_params.endTimestamp);
+const startTimestamp = BigInt(
+  Math.floor(new Date(Date.now() + 1000 * 60 * 60 * 24).getTime() / 1000),
+)
 
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+export async function getCreateAuction({ params: _params }: { params: CreateAuctionType }) {
+  const startTimestamp = getCurrentBlockchainTimestamp()
+  // const endTimestamp = getEndBlockchainTimestamp() || BigInt(_params.endTimestamp ?? 0)
+  const endTimestamp = getEndBlockchainTimestamp(_params.endTimestamp)
+
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const formattedParams = {
     assetContract: _params.assetContract,
@@ -32,107 +30,94 @@ export async function getCreateAuction({
     bidBufferBps: BigInt(_params.bidBufferBps || 5),
     startTimestamp,
     endTimestamp,
-  };
+  }
 
   const transaction = await prepareContractCall({
     contract,
     method:
-      "function createAuction((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 minimumBidAmount, uint256 buyoutBidAmount, uint64 timeBufferInSeconds, uint64 bidBufferBps, uint64 startTimestamp, uint64 endTimestamp) _params) returns (uint256 auctionId)",
+      'function createAuction((address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 minimumBidAmount, uint256 buyoutBidAmount, uint64 timeBufferInSeconds, uint64 bidBufferBps, uint64 startTimestamp, uint64 endTimestamp) _params) returns (uint256 auctionId)',
     params: [formattedParams],
-  });
+  })
 
-  return transaction;
+  return transaction
 }
 
 export async function getCancelAuction({ auctionId }: { auctionId: string }) {
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const transaction = await prepareContractCall({
     contract,
-    method: "function cancelAuction(uint256 _auctionId)",
+    method: 'function cancelAuction(uint256 _auctionId)',
     params: [BigInt(auctionId)],
-  });
+  })
 
-  return transaction;
+  return transaction
 }
 
 export async function getBidInAuction({
   auctionId,
   bidAmount,
 }: {
-  auctionId: string;
-  bidAmount: string;
+  auctionId: string
+  bidAmount: string
 }) {
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const transaction = await prepareContractCall({
     contract,
-    method:
-      "function bidInAuction(uint256 _auctionId, uint256 _bidAmount) payable",
+    method: 'function bidInAuction(uint256 _auctionId, uint256 _bidAmount) payable',
     params: [BigInt(auctionId), toWei(bidAmount)],
     value: toWei(bidAmount),
-  });
+  })
 
-  return transaction;
+  return transaction
 }
 
-export async function getCollectAuctionPayout({
-  auctionId,
-}: {
-  auctionId: string;
-}) {
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+export async function getCollectAuctionPayout({ auctionId }: { auctionId: string }) {
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const transaction = await prepareContractCall({
     contract,
-    method: "function collectAuctionPayout(uint256 _auctionId)",
+    method: 'function collectAuctionPayout(uint256 _auctionId)',
     params: [BigInt(auctionId)],
-  });
+  })
 
-  return transaction;
+  return transaction
 }
 
-export async function getCollectAuctionTokens({
-  auctionId,
-}: {
-  auctionId: string;
-}) {
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+export async function getCollectAuctionTokens({ auctionId }: { auctionId: string }) {
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const transaction = await prepareContractCall({
     contract,
-    method: "function collectAuctionTokens(uint256 _auctionId)",
+    method: 'function collectAuctionTokens(uint256 _auctionId)',
     params: [BigInt(auctionId)],
-  });
+  })
 
-  return transaction;
+  return transaction
 }
 
 export async function getWinningBid({ auctionId }: { auctionId: bigint }) {
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const transaction = await readContract({
     contract,
     method:
-      "function getWinningBid(uint256 _auctionId) view returns (address _bidder, address _currency, uint256 _bidAmount)",
+      'function getWinningBid(uint256 _auctionId) view returns (address _bidder, address _currency, uint256 _bidAmount)',
     params: [BigInt(auctionId)],
-  });
+  })
 
-  return transaction;
+  return transaction
 }
 
-export async function getIsAuctionExpired({
-  auctionId,
-}: {
-  auctionId: bigint;
-}) {
-  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT });
+export async function getIsAuctionExpired({ auctionId }: { auctionId: bigint }) {
+  const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const transaction = await readContract({
     contract,
-    method: "function isAuctionExpired(uint256 _auctionId) view returns (bool)",
+    method: 'function isAuctionExpired(uint256 _auctionId) view returns (bool)',
     params: [BigInt(auctionId)],
-  });
+  })
 
-  return transaction;
+  return transaction
 }

@@ -225,10 +225,8 @@ export function useGetSingleNFTQuery({
           }
         }
 
-        console.log('final result', result)
         return ensureSerializable(result)
       } catch (error: any) {
-        console.error('Error in useGetSingleNFTQuery:', error)
         throw new Error(`Failed to fetch NFT data: ${error.message}`)
       }
     },

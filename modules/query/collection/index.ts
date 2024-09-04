@@ -11,6 +11,7 @@ import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 import { CROSSFI_API } from '@/utils/configs'
+import { ensureSerializable } from '@/utils'
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -113,7 +114,7 @@ export function useGetMarketplaceCollectionsQuery() {
 
       const collectionsData = await Promise.all(collectionPromises)
 
-      return collectionsData
+      return ensureSerializable(collectionsData)
     },
     enabled: !!collections,
     refetchInterval: 6000,
@@ -225,7 +226,7 @@ export function useGetSingleNFTQuery({
         }
       }
 
-      return result
+      return ensureSerializable(result)
     },
     enabled: !!contractAddress && !!nftType && !!tokenId,
     refetchInterval: 6000,
@@ -319,7 +320,7 @@ export function useGetSingleCollectionQuery({
           ? ethers.utils.formatUnits(totalFormattedPrice.div(collectionLength), 'ether')
           : '0'
 
-      return {
+      return ensureSerializable({
         nfts,
         collectionListing,
         collectionOffers,
@@ -328,7 +329,7 @@ export function useGetSingleCollectionQuery({
         floorPrice,
         listedNFTs,
         percentageOfListed,
-      }
+      })
     },
     initialData: {
       nfts: [],

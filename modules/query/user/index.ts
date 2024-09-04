@@ -13,6 +13,7 @@ import {
   getTotalListings,
   getTotalAuctions,
 } from '@/modules/blockchain'
+import { ensureSerializable } from '@/utils'
 
 export function useUserChainInfo() {
   const activeAccount = useActiveAccount()
@@ -31,25 +32,48 @@ export function useUserNFTsQuery() {
       const response = await axios.get<NFTResponse>(
         `${CROSSFI_API}/token-holders?address=${userAddress}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`,
       )
+
       const userNFTs = response.data.docs
 
-      const updatedNFTs = userNFTs.map(async (nfts) => {
-        const tokenIds = nfts.tokenIds
+      const updatedNFTs = await Promise.all(
+        userNFTs.map(async (nfts) => {
+          const { tokenIds, contractAddress } = nfts
 
-        const contract = await getContractCustom({
-          contractAddress: nfts.contractAddress,
-        })
+          const uniqueTokenIds = Array.from(new Set(tokenIds))
 
-        const tokenIdNFTs = tokenIds.map(async (ids) => {
-          const nft = await getCFC721NFT({ contract, tokenId: BigInt(ids) })
+          const contract = await getContractCustom({
+            contractAddress,
+          })
 
-          return { ...nfts, nft }
-        })
+          const tokenIdNFTs = await Promise.all(
+            uniqueTokenIds.map(async (ids) => {
+              const nft = await getCFC721NFT({ contract, tokenId: BigInt(ids) })
+              let updatedNFT = nft
 
-        return await Promise.all(tokenIdNFTs)
-      })
+              if (contractAddress === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+                const { uri } = nft.metadata
+                const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
-      return await Promise.all(updatedNFTs)
+                updatedNFT = {
+                  ...nft,
+                  tokenURI: parsedMetadata.image,
+                  metadata: {
+                    ...parsedMetadata,
+                  },
+                }
+              }
+
+              return { ...nfts, nft: updatedNFT }
+            }),
+          )
+
+          return tokenIdNFTs
+        }),
+      )
+
+      const flatNFTs = updatedNFTs.flat()
+
+      return ensureSerializable(flatNFTs)
     },
     enabled: !!userAddress,
   })
@@ -73,7 +97,7 @@ export function useUserOffersMadeQuery() {
           (offer) => offer.offeror === userAddress && offer.status === StatusType.CREATED,
         )
 
-        return userOffers
+        return ensureSerializable(userOffers)
       }
     },
     refetchInterval: 6000,
@@ -100,7 +124,7 @@ export function useUserListingQuery() {
             listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
         )
 
-        return userListings
+        return ensureSerializable(userListings)
       }
     },
     refetchInterval: 6000,
@@ -127,7 +151,7 @@ export function useUserAuctionQuery() {
             auction.auctionCreator === userAddress && auction.status === StatusType.CREATED,
         )
 
-        return userAuctions
+        return ensureSerializable(userAuctions)
       }
     },
     refetchInterval: 6000,

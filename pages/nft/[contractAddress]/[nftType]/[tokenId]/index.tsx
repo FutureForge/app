@@ -23,7 +23,7 @@ const NFTDetailPage = () => {
 
   return (
     <div className="container mx-auto p-4 md:px-14 px-4">
-   
+      details here
     </div>
   )
 }

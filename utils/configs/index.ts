@@ -18,6 +18,8 @@ export const TEST_WALLET_ADDRESS = '0xf58941e4258320d76bdab72c5ed8d47c25604e94'
 export const CROSSFI_TEST_ASSET_ADDRESS = '0x544C945415066564B0Fb707C7457590c0585e838'
 
 export const CROSSFI_MINTER_ADDRESS = '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'
+export const CROSSFI_STAKING_CONTRACT = '0xB244f70F623Ca37A044ecB67caC38dA9fA1e167E'
+export const CROSSFI_TOKEN_CONTRACT = '0x63019ee1b42737E262145F767946cC2A78462532'
 
 export const client = createThirdwebClient({
   clientId: CLIENT_ID,
@@ -47,3 +49,20 @@ export const chainInfo = defineChain({
 export const chainInfoV2 = sepolia
 
 export const rpcRequest = getRpcClient({ client, chain: chainInfo })
+
+// [
+  // {
+  //   "listingId": "0",
+  //   "tokenId": "0",
+  //   "quantity": "1",
+  //   "pricePerToken": "10000000000000000000",
+  //   "startTimestamp": "1725053335",
+  //   "endTimestamp": "2040413335",
+  //   "listingCreator": "0x1FFE2134c82D07227715af2A12D1406165A305BF",
+  //   "assetContract": "0x544C945415066564B0Fb707C7457590c0585e838",
+  //   "currency": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+  //   "tokenType": 0,
+  //   "status": 1,
+  //   "reserved": false
+  // }
+// ]

@@ -1,19 +1,19 @@
 import {
-  STAKING_CONTRACT,
-  TEST_ASSET_ADDRESS,
+  CROSSFI_STAKING_CONTRACT,
+  CROSSFI_TEST_ASSET_ADDRESS,
 } from "@/utils/configs";
 import { prepareContractCall, readContract } from "thirdweb";
 import { getContractCustom } from "..";
 
 export async function getSetApprovalForAllStaking() {
   const contract = await getContractCustom({
-    contractAddress: TEST_ASSET_ADDRESS,
+    contractAddress: CROSSFI_TEST_ASSET_ADDRESS,
   });
 
   const transaction = await prepareContractCall({
     contract,
     method: "function setApprovalForAll(address operator, bool approved)",
-    params: [STAKING_CONTRACT, true],
+    params: [CROSSFI_STAKING_CONTRACT, true],
   });
 
   return transaction;
@@ -25,14 +25,14 @@ export async function getCheckApprovedForAllStaking({
   walletAddress: string;
 }) {
   const contract = getContractCustom({
-    contractAddress: TEST_ASSET_ADDRESS,
+    contractAddress: CROSSFI_TEST_ASSET_ADDRESS,
   });
 
   const approved = await readContract({
     contract,
     method:
       "function isApprovedForAll(address owner, address operator) view returns (bool)",
-    params: [walletAddress, STAKING_CONTRACT],
+    params: [walletAddress, CROSSFI_STAKING_CONTRACT],
   });
 
   return approved;
@@ -44,7 +44,7 @@ export async function getStakeInfo({
   walletAddress: string;
 }) {
   const contract = getContractCustom({
-    contractAddress: STAKING_CONTRACT,
+    contractAddress: CROSSFI_STAKING_CONTRACT,
   });
 
   const stakeInfo = await readContract({
@@ -59,7 +59,7 @@ export async function getStakeInfo({
 
 export async function getWithdrawStake({ tokenId }: { tokenId: string }) {
   const contract = getContractCustom({
-    contractAddress: STAKING_CONTRACT,
+    contractAddress: CROSSFI_STAKING_CONTRACT,
   });
 
   const transaction = await prepareContractCall({
@@ -73,7 +73,7 @@ export async function getWithdrawStake({ tokenId }: { tokenId: string }) {
 
 export async function getStake({ tokenId }: { tokenId: string }) {
   const contract = getContractCustom({
-    contractAddress: STAKING_CONTRACT,
+    contractAddress: CROSSFI_STAKING_CONTRACT,
   });
 
   const transaction = await prepareContractCall({
@@ -87,7 +87,7 @@ export async function getStake({ tokenId }: { tokenId: string }) {
 
 export async function getClaimStakingReward() {
   const contract = getContractCustom({
-    contractAddress: STAKING_CONTRACT,
+    contractAddress: CROSSFI_STAKING_CONTRACT,
   });
 
   const transaction = await prepareContractCall({

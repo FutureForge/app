@@ -66,6 +66,13 @@ export default function TestPage() {
   const createListingMutation = useCreateListingMutation()
   const createAuctionMutation = useCreateAuctionMutation()
   const addCollectionMutation = useAddCollectionMutation()
+  const stakingMutation = useStakingMutation()
+  const updateListingMutation = useUpdateListingMutation()
+  const cancelListingMutation = useCancelDirectListingMutation()
+  const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
+
+  const { activeAccount } = useUserChainInfo()
+  console.log({ address: activeAccount?.address })
 
   //   const { data: fetchCollection } = useFetchCollectionsQuery()
   //   const { data: getMarketplaceCollection } = useGetMarketplaceCollectionsQuery()
@@ -130,6 +137,9 @@ export default function TestPage() {
   const userNFT = useUserNFTsQuery()
   console.log({ userNFT })
 
+  const userStakingInfoQuery = useGetUserStakingInfoQuery()
+  console.log({ userStakingInfoQuery })
+
   // const events = useMarketplaceEventQuery()
   // console.log({ events })
 
@@ -144,14 +154,14 @@ export default function TestPage() {
 
   // console.log('add collection mutation', addCollectionMutation)
 
-  const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
-  // console.log({ imageUrl })
+  // const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
+  // // console.log({ imageUrl })
 
-  const contract = getContractCustom({ contractAddress: CROSSFI_MINTER_ADDRESS })
-  console.log({ contract })
+  // const contract = getContractCustom({ contractAddress: CROSSFI_MINTER_ADDRESS })
+  // console.log({ contract })
 
-  const minterContract = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, provider)
-  console.log({ minterContract })
+  // const minterContract = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, provider)
+  // console.log({ minterContract })
 
   // const { activeAccount } = useUserChainInfo()
 
@@ -165,8 +175,8 @@ export default function TestPage() {
     // createListingMutation.mutate({
     //   directListing: {
     //     assetContract: CROSSFI_TEST_ASSET_ADDRESS,
-    //     tokenId: '0',
-    //     pricePerToken: '10',
+    //     tokenId: '4',
+    //     pricePerToken: '1',
     //   },
     // })
     // createAuctionMutation.mutate({
@@ -186,6 +196,7 @@ export default function TestPage() {
     //   name: 'MMM ',
     //   image: secure_url,
     // })
+    // MINT NFT to minter
     // try {
     //   const uri = await upload({
     //     client,
@@ -194,15 +205,12 @@ export default function TestPage() {
     //   })
     //   setImageUri(uri)
     //   console.log({ uri })
-
     //   try {
     //     if (uri) {
     //       await window.ethereum.request({ method: 'eth_requestAccounts' })
-
     //       const provider = new ethers.providers.Web3Provider(window.ethereum)
     //       const signer = provider.getSigner()
     //       console.log({ signer })
-
     //       const minterContractI = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, signer)
     //       console.log({ minterContractI })
     //       const tokenURI = JSON.stringify({
@@ -214,13 +222,10 @@ export default function TestPage() {
     //           { trait_type: 'Artist', value: 'Mingles' },
     //         ],
     //       })
-
     //       const transaction = await minterContractI.mint(tokenURI, {
     //         value: ethers.utils.parseEther('1'),
     //       })
-
     //       await transaction.wait()
-
     //       console.log('Token minted successfully:', transaction)
     //     } else {
     //       alert('no uri')
@@ -231,7 +236,28 @@ export default function TestPage() {
     // } catch (error) {
     //   console.log(error)
     // }
+    stakingMutation.mutate({ tokenId: '0' })
+    // updateListingMutation.mutate({
+    //   listingId: '0',
+    //   directListing: {
+    //     assetContract: CROSSFI_TEST_ASSET_ADDRESS,
+    //     tokenId: '0',
+    //     pricePerToken: '1',
+    //   },
+    // })
+    // cancelListingMutation.mutate({ listingId: '0' })
+    // buyFromDirectListingMutation.mutate({
+    //   buyFromListing: {
+    //     buyFor: activeAccount?.address,
+    //     listingId: '3',
+    //     quantity: '1',
+    //     nativeTokenValue: '1', // pass the listed(buy out price)
+    //     totalPrice: '1', // pass the listed(buy out price)
+    //   },
+    // })
   }
+
+  console.log('stakingMutation mutation', stakingMutation)
 
   // console.log({ file })
 
@@ -246,7 +272,7 @@ export default function TestPage() {
 
   return (
     <div>
-      <CldUploadWidget
+      {/* <CldUploadWidget
         options={{ sources: ['local'] }}
         onSuccess={(result, { widget }) => {
           setImageUrl(result?.info)
@@ -268,7 +294,7 @@ export default function TestPage() {
           }
           return <button onClick={handleOnClick}>Upload an Image</button>
         }}
-      </CldUploadWidget>
+      </CldUploadWidget> */}
       {/* <br />
       <input
         type="file"
@@ -279,7 +305,7 @@ export default function TestPage() {
         }}
       />
       {imageUri && <MediaRenderer client={client} src={imageUri} />} */}
-      <button onClick={handleClick} disabled={addCollectionMutation.isPending}>
+      <button onClick={handleClick} disabled={stakingMutation.isPending}>
         click me
       </button>
     </div>

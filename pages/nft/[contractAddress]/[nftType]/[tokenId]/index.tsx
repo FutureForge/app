@@ -3,7 +3,11 @@
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
 import { NFTTypeV2 } from '@/utils/lib/types'
-import { useGetSingleNFTQuery, useUserChainInfo } from '@/modules/query'
+import {
+  useCheckApprovedForAllQuery,
+  useGetSingleNFTQuery,
+  useUserChainInfo,
+} from '@/modules/query'
 import { client } from '@/utils/configs'
 import { MediaRenderer } from 'thirdweb/react'
 import { Button } from '@/modules/app'
@@ -52,6 +56,8 @@ const NFTDetailPage = () => {
   const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
   const createListingMutation = useCreateListingMutation()
 
+  const approvedForAllMutation = useApprovedForAllMutation()
+
   // mutation
 
   const isTxPending =
@@ -60,8 +66,12 @@ const NFTDetailPage = () => {
     cancelDirectListingMutation.isPending ||
     buyFromDirectListingMutation.isPending ||
     createAuctionMutation.isPending ||
-    createListingMutation.isPending
+    createListingMutation.isPending ||
+    approvedForAllMutation.isPending
 
+  const { data: isApproved } = useCheckApprovedForAllQuery({
+    collectionContractAddress: contractAddress as string,
+  })
   const {
     data: nftData,
     isLoading,
@@ -71,14 +81,6 @@ const NFTDetailPage = () => {
     nftType: nftType as NFTTypeV2,
     tokenId: tokenId as string,
   })
-
-  const data = useGetSingleNFTQuery({
-    contractAddress: contractAddress as string,
-    nftType: nftType as NFTTypeV2,
-    tokenId: tokenId as string,
-  })
-
-  console.log({ data })
 
   const { id, isAuctionExpired, nft, nftAuctionList, winningBid, message, nftListingList, offers } =
     nftData || {}
@@ -94,13 +96,24 @@ const NFTDetailPage = () => {
     offers,
   })
 
-  console.log('mutation status', createListingMutation)
+  console.log({ isApproved })
+
+  console.log('mutation status', approvedForAllMutation)
 
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
   const isOwner = owner === address
 
   console.log({ isOwner })
+
+  const handleApproveNFT = async () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+
+    approvedForAllMutation.mutate({
+      collectionContractAddress: contractAddress as string,
+    })
+  }
 
   const handleCreateListing = async () => {
     if (!address) return alert('Please connect to a wallet.')
@@ -417,14 +430,27 @@ const NFTDetailPage = () => {
             {isOwner && (
               <>
                 {id === 'none' && (
-                  <Button
-                    onClick={() => {}}
-                    variant="secondary"
-                    disabled={isTxPending}
-                    className="text-sm font-medium h-8"
-                  >
-                    List/Auction
-                  </Button>
+                  <>
+                    {!isApproved ? (
+                      <Button
+                        onClick={handleApproveNFT}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Approve Spending
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {}}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        List/Auction
+                      </Button>
+                    )}
+                  </>
                 )}
                 {id === 'listing' && (
                   <Button

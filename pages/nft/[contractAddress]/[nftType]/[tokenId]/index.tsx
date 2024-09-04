@@ -38,18 +38,19 @@ const NFTDetailPage = () => {
   const { contractAddress, nftType, tokenId } = router.query
 
   const [value, setValue] = useState('')
-
-  console.log({ contractAddress, nftType, tokenId })
+  const [buyOutAmount, setBuyOutAmount] = useState('2')
 
   // mutation
 
   // auction
   const bidInAuctionMutation = useBidInAuctionMutation()
   const cancelAuctionMutation = useCancelAuctionMutation()
+  const createAuctionMutation = useCreateAuctionMutation()
 
   // direct listing
   const cancelDirectListingMutation = useCancelDirectListingMutation()
   const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
+  const createListingMutation = useCreateListingMutation()
 
   // mutation
 
@@ -57,7 +58,9 @@ const NFTDetailPage = () => {
     bidInAuctionMutation.isPending ||
     cancelAuctionMutation.isPending ||
     cancelDirectListingMutation.isPending ||
-    buyFromDirectListingMutation.isPending
+    buyFromDirectListingMutation.isPending ||
+    createAuctionMutation.isPending ||
+    createListingMutation.isPending
 
   const {
     data: nftData,
@@ -91,18 +94,46 @@ const NFTDetailPage = () => {
     offers,
   })
 
-  console.log({ nftData })
-  console.log({ address })
-  console.log({ value })
-  console.log(new Date(Date.now() + 1000 * 60 * 60 * 24))
-
-  console.log('mutation status')
+  console.log('mutation status', createListingMutation)
 
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
   const isOwner = owner === address
 
   console.log({ isOwner })
+
+  const handleCreateListing = async () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (!value) return alert('Please enter a valid listing amount.')
+
+    createListingMutation.mutate({
+      directListing: {
+        assetContract: contractAddress as string,
+        tokenId: tokenId as string,
+        quantity: '1',
+        pricePerToken: value,
+        endTimestamp: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      },
+    })
+  }
+
+  const handleCreateAuction = async () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (!value) return alert('Please enter a valid auction amount.')
+    if (!buyOutAmount) return alert('Please enter a valid auction amount.')
+
+    createAuctionMutation.mutate({
+      auctionDetails: {
+        assetContract: contractAddress as string,
+        tokenId: tokenId as string,
+        quantity: '1',
+        minimumBidAmount: value,
+        buyoutBidAmount: buyOutAmount,
+      },
+    })
+  }
 
   const handlePlaceBidAuction = async () => {
     if (!address) return alert('Please connect to a wallet.')

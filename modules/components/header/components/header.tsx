@@ -8,13 +8,15 @@ import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
 import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
+import Image from 'next/image'
+import { Loader } from '@/modules/app'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
-  console.log({global})
+  console.log({ global })
 
   const getFilteredData = () => {
     if (!global) return []
@@ -59,7 +61,7 @@ export function Header() {
     autoplaySpeed: 3000,
   }
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <Loader />
   if (isError) return <p>Error loading data.</p>
 
   const renderItem = (item: NewListing | NewAuction, index: number) => {
@@ -71,7 +73,6 @@ export function Header() {
     const pricePerToken = isListing ? item.pricePerToken : undefined
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
-
 
     return (
       <NFTCard

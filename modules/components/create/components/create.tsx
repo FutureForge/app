@@ -16,11 +16,11 @@ export function CreateNFT() {
           <div className="w-full flex flex-col gap-10">
             <div className="flex flex-col gap-2 min-[1720px]:gap-3">
               <Label htmlFor="name">Token Name</Label>
-              <TextField id="name" placeholder="Name your NFT" />
+              <TextField type='text' id="name" placeholder="Name your NFT" />
             </div>
             <div className="flex flex-col gap-2 min-[1720px]:gap-3">
               <Label htmlFor="contract">Token Contract Address</Label>
-              <TextField id="contract" placeholder="Contract Address" />
+              <TextField type='text' id="contract" placeholder="Contract Address" />
             </div>
             <div className="flex flex-col gap-2 min-[1720px]:gap-3">
               <Label htmlFor="description">Description</Label>

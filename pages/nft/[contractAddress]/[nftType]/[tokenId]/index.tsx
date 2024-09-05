@@ -10,7 +10,7 @@ import {
 } from '@/modules/query'
 import { client } from '@/utils/configs'
 import { MediaRenderer } from 'thirdweb/react'
-import { Button } from '@/modules/app'
+import { Button, Loader } from '@/modules/app'
 import { formatBlockchainTimestamp, getFormatAddress } from '@/utils'
 import {
   useApprovedForAllMutation,
@@ -24,9 +24,18 @@ import {
   useBidInAuctionMutation,
 } from '@/modules/mutation'
 import { useState } from 'react'
+import Image from 'next/image'
+import { Dialog } from '@/modules/app/component/dialog'
+import { NFTDialog } from '@/modules/components/nft-details'
 
 const NFTDetailPage = () => {
   const { activeAccount, activeWallet } = useUserChainInfo()
+  const filterOptions = [
+    { id: '1month', title: '1 month' },
+    { id: '2months', title: '2 months' },
+    { id: '3months', title: '3 months' },
+    { id: '4months', title: '4 months' },
+  ]
   const address = activeAccount?.address
   const chain = activeWallet?.getChain()
   const router = useRouter()
@@ -80,6 +89,9 @@ const NFTDetailPage = () => {
   const { id, isAuctionExpired, nft, nftAuctionList, winningBid, message, nftListingList, offers } =
     nftData || {}
 
+  console.log('====================================')
+  console.log(offers, 'look for me')
+  console.log('====================================')
   console.log({
     isAuctionExpired,
     nftAuctionList,
@@ -303,288 +315,280 @@ const NFTDetailPage = () => {
     )
   }
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <Loader />
   if (isError) return <p>Error loading NFT details.</p>
 
-  return (
-    <div className="container h-[calc(100vh-349px)] mx-auto md:px-14 px-4 items-center justify-center flex mt-5">
-      <div className="flex w-full h-full gap-12 items-center justify-center">
-        <div className="h-full w-1/2 relative border border-red-500">
-          <MediaRenderer
-            client={client}
-            src={nft?.metadata?.image}
-            className="rounded-2xl absolute inset-0"
-          />
-        </div>
-        <div className="flex flex-col gap-8">
-          <div className=" flex flex-col gap-8">
-            <span className="flex flex-col gap-4 pb">
-              <h3 className="text-[30px] font-semibold">
-                {nft?.metadata?.name} #{nft?.id}
-              </h3>
-              <p>
-                Owned by{' '}
-                <span className="text-special">
-                  {getFormatAddress(id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner)}
-                </span>
-              </p>
-            </span>
-            <div>
-              <p className="font-semibold border-b border-b-white/25 pb-7">Description</p>
+  const imageUrl = nft?.metadata.image
 
-              <div className="pt-7">
-                {/* <p className="text-[#8A939B]">
+  return (
+    <div className="container h-full mx-auto items-center gap-8 md:px-14 px-4 max-md:flex-col justify-center flex mt-5 max-w-[1550px]">
+      <div className="h-[500px] md:w-1/2 w-full relative">
+        <MediaRenderer
+          client={client}
+          src={nft?.metadata?.image}
+          className="rounded-2xl"
+          style={{ maxHeight: '100%', width: '100%', height: '100%' }}
+        />
+      </div>
+      <div className="flex flex-col gap-8 h-full max-md:w-full">
+        <div className=" flex flex-col gap-8">
+          <span className="flex flex-col gap-4 pb">
+            <h3 className="text-[30px] font-semibold">
+              {nft?.metadata?.name} #{nft?.id}
+            </h3>
+            <p>
+              Owned by{' '}
+              <span className="text-special">
+                {getFormatAddress(id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner)}
+              </span>
+            </p>
+          </span>
+          <div>
+            <p className="font-semibold border-b border-b-white/25 pb-7">Description</p>
+
+            <div className="pt-7">
+              {/* <p className="text-[#8A939B]">
                   By <span className="font-semibold text-foreground">Producers</span>
                 </p> */}
 
-                <p className="text-sm mt-2">
-                  {nft?.metadata?.description || 'No description available'}
-                </p>
-              </div>
+              <p className="text-sm mt-2">
+                {nft?.metadata?.description || 'No description available'}
+              </p>
             </div>
           </div>
+        </div>
 
-          <p className="text-[#8A939B]">
-            <span className="font-semibold text-foreground">
-              {id === 'listing' ? 'Listed' : id === 'auction' ? 'English Auction' : ''}
-            </span>
-          </p>
+        <p className="text-[#8A939B]">
+          <span className="font-semibold text-foreground">
+            {id === 'listing' ? 'Listed' : id === 'auction' ? 'English Auction' : ''}
+          </span>
+        </p>
 
-          <div className="bg-special-bg w-full p-8 flex items-center justify-center flex-col gap-6 rounded-2xl">
-            <div className="flex items-center justify-between w-full gap-3">
-              {/* {id === 'listing' && ( */}
-
-              <div className="flex flex-col gap-2">
-                <p className="capitalize text-sm">
-                  {id === 'listing' ? 'Listing Price' : 'Buyout Price'}
-                </p>
-                {id === 'listing' && (
-                  <h3 className="text-xl font-bold">
-                    {decimalOffChain(nftListingList?.pricePerToken) || '0'} XFI
-                  </h3>
-                )}
-
-                {id === 'auction' && (
-                  <h3 className="text-xl font-bold">
-                    {decimalOffChain(nftAuctionList?.buyoutBidAmount) || '0'} XFI
-                  </h3>
-                )}
-              </div>
-
-              {id === 'auction' && (
-                <div className="flex flex-col gap-2">
-                  <p className="capitalize text-sm">Minimum Bid</p>
-                  <h3 className="text-xl font-bold">
-                    {decimalOffChain(nftAuctionList?.minimumBidAmount) || '0'} XFI
-                  </h3>
-                </div>
-              )}
-              <div className="flex flex-col gap-2">
-                <p className="capitalize text-sm">Token Type</p>
-                <h3 className="text-xl font-bold">CRC-721</h3>
-              </div>
-              <div className="flex flex-col gap-2">
-                <p className="capitalize text-sm">Token Id</p>
-                <h3 className="text-xl font-bold">{nft?.id}</h3>
-              </div>
-
+        <div className="bg-special-bg w-full p-6 flex items-center justify-center flex-col gap-6 rounded-2xl">
+          <div className="md:flex md:items-center grid grid-cols-2 justify-between max-md:flex-col w-full gap-3">
+            <div className="flex flex-col gap-2">
+              <p className="capitalize text-sm">
+                {id === 'listing' ? 'Listing Price' : 'Buyout Price'}
+              </p>
               {id === 'listing' && (
-                <div className="flex flex-col gap-2">
-                  <p className="capitalize text-sm">Available On:</p>
-                  <h3 className="text-xl font-bold">
-                    {formatBlockchainTimestamp(nftListingList?.startTimestamp)}
-                  </h3>
-                </div>
+                <h3 className="text-xl font-bold">
+                  {decimalOffChain(nftListingList?.pricePerToken) || '0'} XFI
+                </h3>
               )}
 
               {id === 'auction' && (
-                <div className="flex flex-col gap-2">
-                  <p className="capitalize text-sm">Ends on</p>
-                  <h3 className="text-xl font-bold">
-                    {formatBlockchainTimestamp(nftAuctionList?.endTimestamp)}
-                  </h3>
-                </div>
+                <h3 className="text-xl font-bold">
+                  {decimalOffChain(nftAuctionList?.buyoutBidAmount) || '0'} XFI
+                </h3>
               )}
-
-              {/* // )} */}
-
-              {/* {id === 'auction' && (
-                <>
-                  <div className="flex flex-col gap-2">
-                    <p className="capitalize">Buyout Price</p>
-                    <h3 className="text-2xl font-bold">
-                      {decimalOffChain(nftAuctionList?.buyoutBidAmount) || '0'} XFI
-                    </h3>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <p className="capitalize">Minimum Bid</p>
-                    <h3 className="text-2xl font-bold">
-                      {decimalOffChain(nftAuctionList?.minimumBidAmount) || '0'} XFI
-                    </h3>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <p className="capitalize">Token Type</p>
-                    <h3 className="text-2xl font-bold">CRC-721</h3>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <p className="capitalize">Token Id</p>
-                    <h3 className="text-2xl font-bold">{nft?.id}</h3>
-                  </div>
-                </>
-              )} */}
-
-              {/* {id === 'none' && (
-                <>
-                  <div className="flex flex-col gap-2">
-                    <p className="capitalize">Token Type</p>
-                    <h3 className="text-2xl font-bold">CRC-721</h3>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <p className="capitalize">Token Id</p>
-                    <h3 className="text-2xl font-bold">{nft?.id}</h3>
-                  </div>
-                </>
-              )} */}
             </div>
 
-            {/* BUYER BUTTON */}
-            {!isOwner && (
-              <>
-                {id === 'listing' && (
-                  <Button
-                    onClick={handleBuyOutDirectListing}
-                    variant="secondary"
-                    disabled={isTxPending}
-                    className="text-sm font-medium h-8"
-                  >
-                    Buy Now
-                  </Button>
-                )}
-                {id === 'auction' && (
-                  <>
-                    {isAuctionExpired ? (
-                      <>
-                        {winningBid?.bidder === address ? (
-                          <>
-                            {' '}
-                            <Button
-                              onClick={handleClaimAuctionNFT}
-                              variant="secondary"
-                              disabled={isTxPending}
-                              className="text-sm font-medium h-8"
-                            >
-                              Claim Auction NFT
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            {winningBid?.bidder
-                              ? 'Auction Has Been Completed'
-                              : 'Auction Has Expired'}
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          onClick={handlePlaceBidAuction}
-                          variant="secondary"
-                          disabled={isTxPending}
-                          className="text-sm font-medium h-8"
-                        >
-                          Place Bid
-                        </Button>
-                        <Button
-                          onClick={handleBuyOutAuction}
-                          variant="secondary"
-                          disabled={isTxPending}
-                          className="text-sm font-medium h-8"
-                        >
-                          Buy Auction
-                        </Button>
-                      </>
-                    )}
-                  </>
-                )}
-
-                {id === 'none' && (
-                  <Button
-                    onClick={() => {}}
-                    variant="secondary"
-                    disabled={isTxPending}
-                    className="text-sm font-medium h-8"
-                  >
-                    Make Offer
-                  </Button>
-                )}
-              </>
+            {id === 'auction' && (
+              <div className="flex flex-col gap-2">
+                <p className="capitalize text-sm">Minimum Bid</p>
+                <h3 className="text-xl font-bold">
+                  {decimalOffChain(nftAuctionList?.minimumBidAmount) || '0'} XFI
+                </h3>
+              </div>
             )}
-            {/* BUYER BUTTON */}
+            <div className="flex flex-col gap-2">
+              <p className="capitalize text-sm">Token Type</p>
+              <h3 className="text-xl font-bold">CRC-721</h3>
+            </div>
+            <div className="flex flex-col gap-2 md:items-center">
+              <p className="capitalize text-sm">Token Id</p>
+              <h3 className="text-xl font-bold">{nft?.id}</h3>
+            </div>
 
-            {/* SELLER BUTTON */}
-            {isOwner && (
-              <>
-                {id === 'none' && (
-                  <>
-                    {!isApproved ? (
-                      <Button
-                        onClick={handleApproveNFT}
-                        variant="secondary"
-                        disabled={isTxPending}
-                        className="text-sm font-medium h-8"
-                      >
-                        Approve Spending
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => {}}
-                        variant="secondary"
-                        disabled={isTxPending}
-                        className="text-sm font-medium h-8"
-                      >
-                        List/Auction
-                      </Button>
-                    )}
-                  </>
-                )}
-                {id === 'listing' && (
-                  <Button
-                    onClick={handleCancelDirectListing}
-                    variant="secondary"
-                    disabled={isTxPending}
-                    className="text-sm font-medium h-8"
-                  >
-                    Cancel Direct Listing
-                  </Button>
-                )}
-                {id === 'auction' && (
-                  <>
-                    {isAuctionExpired && nftAuctionList?.auctionCreator === address ? (
-                      <Button
-                        onClick={handleClaimAuctionPayout}
-                        variant="secondary"
-                        disabled={isTxPending}
-                        className="text-sm font-medium h-8"
-                      >
-                        Claim Auction Payout
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleCancelAuction}
-                        variant="secondary"
-                        disabled={isTxPending}
-                        className="text-sm font-medium h-8"
-                      >
-                        Cancel Auction
-                      </Button>
-                    )}
-                  </>
-                )}
-              </>
+            {id === 'listing' && (
+              <div className="flex flex-col gap-2">
+                <p className="capitalize text-sm">Available On:</p>
+                <h3 className="text-xl font-bold">
+                  {formatBlockchainTimestamp(nftListingList?.startTimestamp)}
+                </h3>
+              </div>
             )}
-            {/* SELLER BUTTON */}
+
+            {id === 'auction' && (
+              <div className="flex flex-col gap-2">
+                <p className="capitalize text-sm">Ends on</p>
+                <h3 className="text-xl font-bold">
+                  {formatBlockchainTimestamp(nftAuctionList?.endTimestamp)}
+                </h3>
+              </div>
+            )}
           </div>
+
+          {/* BUYER BUTTON */}
+          {!isOwner && (
+            <>
+              {id === 'listing' && (
+                <Dialog.Root>
+                  <Dialog.Trigger>
+                    <Button
+                      onClick={handleBuyOutDirectListing}
+                      variant="secondary"
+                      disabled={isTxPending}
+                      className="text-sm font-medium h-8"
+                    >
+                      Buy Now
+                    </Button>
+                  </Dialog.Trigger>
+                  <Dialog.Content className="max-w-[690px] w-full p-6">
+                    <NFTDialog
+                      filters={filterOptions}
+                      placeholder="1 month"
+                      ctaText="Continue"
+                      src={
+                        imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
+                        '/assets/webp/1.webp'
+                      }
+                      title={nft?.metadata?.name}
+                    />
+                  </Dialog.Content>
+                </Dialog.Root>
+              )}
+              {id === 'auction' && (
+                <>
+                  {isAuctionExpired ? (
+                    <>
+                      {winningBid?.bidder === address ? (
+                        <>
+                          {' '}
+                          <Button
+                            onClick={handleClaimAuctionNFT}
+                            variant="secondary"
+                            disabled={isTxPending}
+                            className="text-sm font-medium h-8"
+                          >
+                            Claim Auction NFT
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {winningBid?.bidder
+                            ? 'Auction Has Been Completed'
+                            : 'Auction Has Expired'}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center w-full max-md:flex-col gap-3">
+                      <Dialog.Root>
+                        <Dialog.Trigger>
+                          <Button
+                            onClick={handlePlaceBidAuction}
+                            variant="secondary"
+                            disabled={isTxPending}
+                            className="text-sm font-medium h-8"
+                          >
+                            Place Bid
+                          </Button>
+                        </Dialog.Trigger>
+
+                        <Dialog.Content className="max-w-[690px] w-full p-6">
+                          <NFTDialog
+                            filters={filterOptions}
+                            placeholder="1 month"
+                            ctaText="Continue"
+                            src={
+                              imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
+                              '/assets/webp/1.webp'
+                            }
+                            title={nft?.metadata?.name}
+                          />
+                        </Dialog.Content>
+                      </Dialog.Root>
+
+                      <Button
+                        onClick={handleBuyOutAuction}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Buy Auction
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {id === 'none' && (
+                <Button
+                  onClick={() => {}}
+                  variant="secondary"
+                  disabled={isTxPending}
+                  className="text-sm font-medium h-8"
+                >
+                  Make Offer
+                </Button>
+              )}
+            </>
+          )}
+          {/* BUYER BUTTON */}
+
+          {/* SELLER BUTTON */}
+          {isOwner && (
+            <>
+              {id === 'none' && (
+                <>
+                  {!isApproved ? (
+                    <Button
+                      onClick={handleApproveNFT}
+                      variant="secondary"
+                      disabled={isTxPending}
+                      className="text-sm font-medium h-8"
+                    >
+                      Approve Spending
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {}}
+                      variant="secondary"
+                      disabled={isTxPending}
+                      className="text-sm font-medium h-8"
+                    >
+                      List/Auction
+                    </Button>
+                  )}
+                </>
+              )}
+              {id === 'listing' && (
+                <Button
+                  onClick={handleCancelDirectListing}
+                  variant="secondary"
+                  disabled={isTxPending}
+                  className="text-sm font-medium h-8"
+                >
+                  Cancel Direct Listing
+                </Button>
+              )}
+              {id === 'auction' && (
+                <>
+                  {isAuctionExpired && nftAuctionList?.auctionCreator === address ? (
+                    <Button
+                      onClick={handleClaimAuctionPayout}
+                      variant="secondary"
+                      disabled={isTxPending}
+                      className="text-sm font-medium h-8"
+                    >
+                      Claim Auction Payout
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleCancelAuction}
+                      variant="secondary"
+                      disabled={isTxPending}
+                      className="text-sm font-medium h-8"
+                    >
+                      Cancel Auction
+                    </Button>
+                  )}
+                </>
+              )}
+            </>
+          )}
+          {/* SELLER BUTTON */}
         </div>
       </div>
     </div>

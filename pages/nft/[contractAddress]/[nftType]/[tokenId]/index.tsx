@@ -527,71 +527,72 @@ const NFTDetailPage = () => {
           )}
           {/* BUYER BUTTON */}
 
-          {/* SELLER BUTTON */}
-          {isOwner && (
-            <>
-              {id === 'none' && (
-                <>
-                  {!isApproved ? (
-                    <Button
-                      onClick={handleApproveNFT}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      Approve Spending
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => {}}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      List/Auction
-                    </Button>
-                  )}
-                </>
-              )}
-              {id === 'listing' && (
-                <Button
-                  onClick={handleCancelDirectListing}
-                  variant="secondary"
-                  disabled={isTxPending}
-                  className="text-sm font-medium h-8"
-                >
-                  Cancel Direct Listing
-                </Button>
-              )}
-              {id === 'auction' && (
-                <>
-                  {isAuctionExpired && nftAuctionList?.auctionCreator === address ? (
-                    <Button
-                      onClick={handleClaimAuctionPayout}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      Claim Auction Payout
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleCancelAuction}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      Cancel Auction
-                    </Button>
-                  )}
-                </>
-              )}
-            </>
-          )}
-          {/* SELLER BUTTON */}
+            {/* SELLER BUTTON */}
+            {isOwner && (
+              <>
+                {id === 'none' && (
+                  <>
+                    {!isApproved ? (
+                      <Button
+                        onClick={handleApproveNFT}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Approve Spending
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleCreateAuction}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        List/Auction
+                      </Button>
+                    )}
+                  </>
+                )}
+                {id === 'listing' && (
+                  <Button
+                    onClick={handleCancelDirectListing}
+                    variant="secondary"
+                    disabled={isTxPending}
+                    className="text-sm font-medium h-8"
+                  >
+                    Cancel Direct Listing
+                  </Button>
+                )}
+                {id === 'auction' && (
+                  <>
+                    {isAuctionExpired && nftAuctionList?.auctionCreator === address ? (
+                      <Button
+                        onClick={handleClaimAuctionPayout}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Claim Auction Payout
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleCancelAuction}
+                        variant="secondary"
+                        disabled={isTxPending}
+                        className="text-sm font-medium h-8"
+                      >
+                        Cancel Auction
+                      </Button>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            {/* SELLER BUTTON */}
+          </div>
         </div>
       </div>
-    </div>
+
   )
 }
 

@@ -76,6 +76,7 @@ export function useUserNFTsQuery() {
       return ensureSerializable(flatNFTs)
     },
     enabled: !!userAddress,
+    refetchInterval: 5000,
   })
 }
 

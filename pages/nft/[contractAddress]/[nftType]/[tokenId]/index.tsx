@@ -525,7 +525,7 @@ const NFTDetailPage = () => {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => {}}
+                        onClick={handleCreateAuction}
                         variant="secondary"
                         disabled={isTxPending}
                         className="text-sm font-medium h-8"

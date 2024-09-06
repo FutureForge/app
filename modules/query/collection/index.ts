@@ -195,36 +195,40 @@ export function useGetSingleNFTQuery({
             winningBid: winningBidBody,
           }
         } else if (nftListingList) {
-          const totalOffers = await getTotalOffers()
-          if (totalOffers === 0) {
-            result = {
-              id: 'listing',
-              nftListingList,
-              nft: nftList,
-              message: 'No offers found for the given token ID.',
-            }
-          } else {
-            const allOffers = await getAllOffers()
-            const filteredOffers = allOffers.filter(
-              (offers) =>
-                offers.assetContract === contractAddress && offers.tokenId === BigInt(tokenId),
-            )
+          const allOffers = await getAllOffers()
+          const filteredOffers = allOffers.filter(
+            (offers) =>
+              offers.assetContract === contractAddress &&
+              offers.tokenId === BigInt(tokenId) &&
+              offers.status === StatusType.CREATED,
+          )
 
-            result = {
-              id: 'listing',
-              nftListingList,
-              nft: nftList,
-              offers: filteredOffers.map((offer) => ({
+          result = {
+            id: 'listing',
+            nftListingList,
+            nft: nftList,
+            offers:
+              filteredOffers.map((offer) => ({
                 ...offer,
                 tokenId: offer.tokenId.toString(),
-              })),
-            }
+              })) || [],
           }
         } else {
+          const allOffers = await getAllOffers()
+          const filteredOffers = allOffers.filter(
+            (offers) =>
+              offers.assetContract === contractAddress && offers.tokenId === BigInt(tokenId),
+          )
+
           result = {
             id: 'none',
             nft: nftList,
             message: 'No auction or listing found for the given token ID.',
+            offers:
+              filteredOffers.map((offer) => ({
+                ...offer,
+                tokenId: offer.tokenId.toString(),
+              })) || [],
           }
         }
 
@@ -234,7 +238,7 @@ export function useGetSingleNFTQuery({
       }
     },
     enabled: !!contractAddress && !!nftType && !!tokenId && !!activeAccount?.address,
-    refetchInterval: 6000,
+    refetchInterval: 5000,
   })
 }
 

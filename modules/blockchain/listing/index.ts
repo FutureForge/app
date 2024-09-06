@@ -133,8 +133,7 @@ export async function getBuyFromDirectListing({
 export async function getMakeOffer({ params: _params }: { params: MakeOfferListingType }) {
   console.log('make offer', _params)
 
-  const expirationTimestamp =
-    getEndBlockchainTimestamp() || BigInt(_params.expirationTimestamp ?? 0)
+  const expirationTimestamp = getEndBlockchainTimestamp(_params.expirationTimestamp)
   const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 
   const formattedParams = {

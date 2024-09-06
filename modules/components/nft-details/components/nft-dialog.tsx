@@ -13,10 +13,10 @@ type NFTDialogProps = {
   title: string
   placeholder?: string
   ctaText?: string
-  onClick?: () => void
+  onClick: () => void
   secondaryOnClick?: () => void
   onChange?: (value: string) => void
-  value?: string
+  value: string
   disabled?: boolean
   nftList?: any
   onBuyOutChange?: (value: string) => void
@@ -129,11 +129,7 @@ export function NFTDialog({
         variant="secondary"
         className="h-8"
       >
-        {disabled
-          ? 'Loading...'
-          : listingType === 'listing'
-          ? 'List NFT'
-          : 'Auction NFT'}
+        {disabled ? 'Loading...' : listingType === 'listing' ? 'List NFT' : 'Auction NFT'}
       </Button>
     </>
   )
@@ -161,6 +157,26 @@ export function NFTDialog({
     </>
   )
 
+  const renderMakeOfferContent = () => (
+    <>
+      <div className="flex flex-col gap-3">
+        <h4>Note: Offers are made in WXFI. Dont have WXFI? Dont worry, we will take care of that.</h4>
+        <Label htmlFor="amount">Offer Amount</Label>
+        <TextField
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          type="number"
+          id="amount"
+          placeholder="Make Offer"
+          className="resize-none bg-[#1B1F26B8] placeholder:font-medium"
+        />
+      </div>
+      <Button disabled={disabled} onClick={onClick} variant="secondary" className="h-8">
+        {disabled ? 'Loading...' : ctaText}
+      </Button>
+    </>
+  )
+
   return (
     <div className="w-full flex gap-8 justify-between">
       <div className="!rounded-lg relative w-[230px] h-[230px]">
@@ -177,7 +193,11 @@ export function NFTDialog({
             {id === 'none' ? 'Create' : id} - {title}
           </h5>
         </Dialog.Title>
-        {type === 'create' ? renderCreateContent() : renderBidContent()}
+        {type === 'create'
+          ? renderCreateContent()
+          : type === 'make-offer'
+          ? renderMakeOfferContent()
+          : renderBidContent()}
       </div>
     </div>
   )

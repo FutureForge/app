@@ -22,9 +22,9 @@ import {
   useCollectAuctionTokensMutation,
   useCreateAuctionMutation,
   useBidInAuctionMutation,
+  useMakeListingOfferMutation,
 } from '@/modules/mutation'
 import { useState } from 'react'
-import Image from 'next/image'
 import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
 
@@ -35,7 +35,7 @@ const NFTDetailPage = () => {
   const router = useRouter()
   const { contractAddress, nftType, tokenId } = router.query
 
-  const [value, setValue] = useState<string | undefined>(undefined)
+  const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
 
@@ -52,6 +52,7 @@ const NFTDetailPage = () => {
   const cancelDirectListingMutation = useCancelDirectListingMutation()
   const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
   const createListingMutation = useCreateListingMutation()
+  const makeListingOfferMutation = useMakeListingOfferMutation()
 
   const approvedForAllMutation = useApprovedForAllMutation()
 
@@ -66,7 +67,8 @@ const NFTDetailPage = () => {
     createListingMutation.isPending ||
     approvedForAllMutation.isPending ||
     collectAuctionPayoutMutation.isPending ||
-    collectAuctionTokensMutation.isPending
+    collectAuctionTokensMutation.isPending ||
+    makeListingOfferMutation.isPending
 
   const { data: isApproved } = useCheckApprovedForAllQuery({
     collectionContractAddress: contractAddress as string,
@@ -97,8 +99,6 @@ const NFTDetailPage = () => {
     nftListingList,
     offers,
   })
-
-  console.log('mutation status', buyFromDirectListingMutation)
 
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
@@ -295,8 +295,6 @@ const NFTDetailPage = () => {
   const handleClaimAuctionNFT = () => {
     if (!address) return alert('Please connect to a wallet.')
     if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    console.log(winningBid?.bidder)
-    console.log(address)
     if (winningBid?.bidder !== address) return alert('Only bidder can claim the NFT')
 
     collectAuctionTokensMutation.mutate(
@@ -313,6 +311,25 @@ const NFTDetailPage = () => {
       },
     )
   }
+
+  const handleMakeOffer = () => {
+    if (!address) return alert('Please connect to a wallet.')
+    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (owner === address) return alert('Owner is not allowed make offer ')
+    if (!value) return alert('Please enter a valid auction amount.')
+
+    makeListingOfferMutation.mutate({
+      makeOffer: {
+        assetContract: contractAddress as string,
+        tokenId: tokenId as string,
+        quantity: '1',
+        totalPrice: value,
+        // expirationTimestamp: endTimestamp,
+      },
+    })
+  }
+
+  console.log('mutation status', makeListingOfferMutation)
 
   console.log({ value, buyOutAmount, endTimestamp })
 
@@ -484,7 +501,6 @@ const NFTDetailPage = () => {
                         <Dialog.Trigger>
                           <Button
                             variant="secondary"
-                            disabled={isTxPending}
                             className="text-sm font-medium h-8"
                           >
                             Place Bid
@@ -499,7 +515,6 @@ const NFTDetailPage = () => {
                             onChange={setValue}
                             disabled={isTxPending}
                             value={value}
-                            placeholder="1 month"
                             ctaText="Place Bid"
                             src={
                               imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'
@@ -522,16 +537,31 @@ const NFTDetailPage = () => {
                 </>
               )}
 
-              {/* {id === 'none' && (
-                <Button
-                  onClick={() => {}}
-                  variant="secondary"
-                  disabled={isTxPending}
-                  className="text-sm font-medium h-8"
-                >
-                  Make Offer
-                </Button>
-              )} */}
+              {(id === 'none' || id === 'listing') && (
+                <Dialog.Root>
+                  <Dialog.Trigger>
+                    <Button
+                      variant="secondary"
+                      className="text-sm font-medium h-8"
+                    >
+                      Make Offer
+                    </Button>
+                  </Dialog.Trigger>
+                  <Dialog.Content className="max-w-[690px] w-full p-6">
+                    <NFTDialog
+                      id={id}
+                      type="make-offer"
+                      value={value}
+                      onChange={setValue}
+                      onClick={handleMakeOffer}
+                      disabled={isTxPending}
+                      ctaText="Make Offer"
+                      src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
+                      title={nft?.metadata?.name}
+                    />
+                  </Dialog.Content>
+                </Dialog.Root>
+              )}
             </>
           )}
           {/* BUYER BUTTON */}

@@ -22,6 +22,7 @@ export function useCreateListingMutation() {
           assetContract: directListing.assetContract ?? '',
           tokenId: directListing.tokenId ?? '',
           pricePerToken: directListing.pricePerToken ?? '',
+          endTimestamp: directListing.endTimestamp,
         },
       })
 

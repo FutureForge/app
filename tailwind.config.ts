@@ -26,6 +26,9 @@ const config: Config = {
         'sec-btn': '#5856D6',
         'muted-foreground': '#999999',
         foreground: '#F5F5F5',
+        special: '#5856D6',
+        'special-bg': '#1B1F26B8',
+        'dialog-border': '#2C2C2C',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -82,8 +85,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    require('tailwind-scrollbar')
-  ],
+  plugins: [require('tailwind-scrollbar')],
 }
 export default config

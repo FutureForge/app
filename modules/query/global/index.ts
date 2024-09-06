@@ -40,7 +40,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           return ensureSerializable({
             ...listing,
-            nft: nftData,
+            nft: {
+              ...nftData,
+              type: 'CFC-721',
+            },
           })
         }),
       )
@@ -79,7 +82,10 @@ export function useGetGlobalListingOrAuctionQuery() {
           return ensureSerializable({
             ...auction,
             winningBid: winningBidBody,
-            nft: nftData,
+            nft: {
+              ...nftData,
+              type: 'CFC-721',
+            },
           })
         }),
       )

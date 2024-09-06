@@ -3,7 +3,7 @@ import React from 'react'
 
 export function CreateNFT() {
   return (
-    <form className="h-[calc(100vh-120px)] w-full flex max-lg:flex-col justify-between max-lg:gap-8 gap-20">
+    <form className="h-[calc(100vh-120px)] w-full flex max-lg:flex-col container mx-auto justify-between max-lg:gap-8 gap-20">
       <div className="flex flex-col gap-8 h-full w-1/2 max-lg:w-full">
         <Title
           title="Create an NFT"
@@ -12,15 +12,15 @@ export function CreateNFT() {
         <FileInput />
       </div>
       <div className="w-1/2 h-full flex flex-col max-lg:w-full max-lg:py-8">
-        <div className="lg:overflow-y-auto flex-grow px-1">
+        <div className="lg:overflow-y-auto flex-grow px-1 scrollbar-none">
           <div className="w-full flex flex-col gap-10">
             <div className="flex flex-col gap-2 min-[1720px]:gap-3">
               <Label htmlFor="name">Token Name</Label>
-              <TextField id="name" placeholder="Name your NFT" />
+              <TextField type='text' id="name" placeholder="Name your NFT" />
             </div>
             <div className="flex flex-col gap-2 min-[1720px]:gap-3">
               <Label htmlFor="contract">Token Contract Address</Label>
-              <TextField id="contract" placeholder="Contract Address" />
+              <TextField type='text' id="contract" placeholder="Contract Address" />
             </div>
             <div className="flex flex-col gap-2 min-[1720px]:gap-3">
               <Label htmlFor="description">Description</Label>

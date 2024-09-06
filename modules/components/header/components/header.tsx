@@ -1,19 +1,22 @@
 import React, { useState } from 'react'
 import { useGetGlobalListingOrAuctionQuery } from '@/modules/query'
 
-import { StatusType } from '@/utils/lib/types'
+import { NFTTypeV2, StatusType } from '@/utils/lib/types'
 import Slider from 'react-slick'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
 import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
+import Image from 'next/image'
+import { Loader } from '@/modules/app'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
+  console.log({ global })
 
   const getFilteredData = () => {
     if (!global) return []
@@ -58,12 +61,15 @@ export function Header() {
     autoplaySpeed: 3000,
   }
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <Loader />
   if (isError) return <p>Error loading data.</p>
 
   const renderItem = (item: NewListing | NewAuction, index: number) => {
     const isListing = 'listingId' in item
     const nft = item.nft
+    const tokenId = item.tokenId
+    const assetContract = item.assetContract
+    const type = nft?.type as NFTTypeV2
     const pricePerToken = isListing ? item.pricePerToken : undefined
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
@@ -75,6 +81,9 @@ export function Header() {
         pricePerToken={pricePerToken}
         currency={currency}
         buyoutBidAmount={buyOutAmount}
+        tokenId={tokenId}
+        contractAddress={assetContract}
+        type={type}
       />
     )
   }

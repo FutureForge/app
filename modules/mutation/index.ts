@@ -10,7 +10,7 @@ export {
   useMakeListingOfferMutation,
   useAcceptOfferMutation,
   useCancelOfferMutation,
-  useBitInAuctionMutation,
+  useBidInAuctionMutation,
   useCollectAuctionPayoutMutation,
   useCollectAuctionTokensMutation,
 } from "./offers";

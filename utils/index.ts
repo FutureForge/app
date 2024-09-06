@@ -1,32 +1,41 @@
-export function convertToBlockchainTimestamp(dateTimeString?: string): bigint {
-  console.log({ dateTimeString })
+// export function convertToBlockchainTimestamp(dateTimeString?: string): bigint {
+//   console.log({ dateTimeString })
 
-  let date: Date
+//   let date: Date
 
-  // Check if the input is a timestamp (numeric string)
-  if (dateTimeString && !isNaN(Number(dateTimeString))) {
-    date = new Date(Number(dateTimeString))
-  } else if (dateTimeString) {
-    // Handle date string in expected format (e.g., 'dd/mm/yyyy, hh:mm AM/PM')
-    const dateTimeParts = dateTimeString.split(', ')
-    const datePart = dateTimeParts[0]?.split('/')?.reverse()?.join('-')
-    const timePart = dateTimeParts[1]?.split(' ')[0]
-    const timezone = dateTimeParts[1]?.split(' ')[1]
+//   // Check if the input is a timestamp (numeric string)
+//   if (dateTimeString && !isNaN(Number(dateTimeString))) {
+//     date = new Date(Number(dateTimeString))
+//   } else if (dateTimeString) {
+//     // Handle date string in expected format (e.g., 'dd/mm/yyyy, hh:mm AM/PM')
+//     const dateTimeParts = dateTimeString.split(', ')
+//     const datePart = dateTimeParts[0]?.split('/')?.reverse()?.join('-')
+//     const timePart = dateTimeParts[1]?.split(' ')[0]
+//     const timezone = dateTimeParts[1]?.split(' ')[1]
 
-    const isoString = `${datePart}T${timePart}${timezone}`
+//     const isoString = `${datePart}T${timePart}${timezone}`
 
-    date = new Date(isoString)
-  } else {
-    // If no input is provided, set the date to the current time plus 7 days
-    date = new Date()
-    date.setDate(date.getDate() + 7)
-  }
+//     date = new Date(isoString)
+//   } else {
+//     // If no input is provided, set the date to the current time plus 7 days
+//     date = new Date()
+//     date.setDate(date.getDate() + 7)
+//   }
 
-  return BigInt(date.getTime())
-}
+//   return BigInt(date.getTime())
+// }
 
 export function getCurrentBlockchainTimestamp(): bigint {
-  return BigInt(Date.now())
+  // return BigInt(Date.now())
+  return BigInt(Math.floor(new Date(Date.now()).getTime() / 1000))
+}
+
+export function getEndBlockchainTimestamp(date?: Date) {
+  if (date) {
+    return BigInt(Math.floor(date.getTime() / 1000))
+  } else {
+    return BigInt(Math.floor(new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).getTime() / 1000))
+  }
 }
 
 export function isBidAmountValid({
@@ -56,4 +65,38 @@ export function ensureSerializable(data: any): any {
   }
 
   return data
+}
+
+export function getFormatAddress(address: string, width?: number): string {
+  const xxl = 1800
+  if (address && address.length !== 42) {
+    return 'Invalid Ethereum Address'
+  }
+  if (width && width >= xxl) {
+    return address
+  }
+  const start = address?.slice(0, 4)
+  const end = address?.slice(-4)
+  return `${start}...${end}`
+}
+
+export function formatBlockchainTimestamp(timestamp: string) {
+  // Convert the timestamp to a Date object
+  const date = new Date(parseInt(timestamp) * 1000)
+
+  // Fix the error by specifying the correct types for the options object
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    // hour: 'numeric',
+    // minute: 'numeric',
+    // second: 'numeric',
+    // timeZone: 'UTC',
+  }
+
+  // Format the date and time
+  const formattedDate = date?.toLocaleString('en-US', options)
+
+  return formattedDate
 }

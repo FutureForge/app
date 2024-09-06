@@ -4,21 +4,43 @@ import { client } from '@/utils/configs'
 import { Icon } from '@/modules/app'
 import { decimalOffChain } from '@/modules/blockchain'
 import { NFT } from 'thirdweb'
+import Link from 'next/link'
+import { NFTTypeV2 } from '@/utils/lib/types'
+import { useRouter } from 'next/router'
 
 type NFTCardProps = {
   nft: NFT | undefined
   pricePerToken?: bigint
   currency?: string
   buyoutBidAmount?: bigint
+  tokenId?: string
+  contractAddress?: string
+  type?: NFTTypeV2
 }
 
 export function NFTCard(props: NFTCardProps) {
-  const { nft, pricePerToken, currency, buyoutBidAmount } = props
+  const {
+    nft,
+    pricePerToken,
+    currency,
+    buyoutBidAmount,
+    tokenId,
+    contractAddress,
+    type = 'CFC-721',
+  } = props
+  const router = useRouter()
 
   const imageUrl = nft?.metadata.image
 
+  // Handle missing parameters or type
+  if (!tokenId || !contractAddress || !type) return null
+  const slug = [contractAddress, type, tokenId].join('/')
+
   return (
-    <div className="relative w-fit max-w-[320px] h-[320px] rounded-[20px] group overflow-hidden">
+    <Link
+      href={`/nft/${contractAddress}/${type}/${tokenId}`}
+      className="relative cursor-pointer w-fit max-w-[320px] h-[320px] rounded-[20px] group overflow-hidden"
+    >
       <MediaRenderer
         client={client}
         src={imageUrl}
@@ -49,6 +71,6 @@ export function NFTCard(props: NFTCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

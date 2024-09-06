@@ -21,7 +21,7 @@ import { NFT } from "thirdweb"
 
 export type NewListing = {
   nft: NFT | undefined
-  tokenId: bigint
+  tokenId: string
   quantity: bigint
   assetContract: string
   currency: string
@@ -35,6 +35,7 @@ export type NewListing = {
   reserved: boolean
 }
 
+
 export type NewAuction = {
   winningBid: {
     bidder: string
@@ -43,11 +44,13 @@ export type NewAuction = {
   }
   nft: NFT | undefined
   auctionId: bigint
-  tokenId: bigint
+  tokenId: string
   quantity: bigint
   minimumBidAmount: bigint
   buyoutBidAmount: bigint
   status: number
+  assetContract: string
+  auctionCreator: string
   // add any other fields you have
 }
 

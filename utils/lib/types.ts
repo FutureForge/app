@@ -29,7 +29,7 @@ export type CreateDirectListingType = {
   currency?: string;
   pricePerToken: string;
   startTimestamp?: string;
-  endTimestamp?: string;
+  endTimestamp?: Date;
   reserved?: boolean;
 };
 
@@ -61,7 +61,7 @@ export type AuctionBaseType = {
   timeBufferInSeconds: string;
   bidBufferBps: string;
   startTimestamp?: string;
-  endTimestamp?: string;
+  endTimestamp?: Date;
 };
 
 export type CreateAuctionType = AuctionBaseType;

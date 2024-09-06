@@ -146,7 +146,7 @@ export function useCancelOfferMutation() {
   });
 }
 
-export function useBitInAuctionMutation() {
+export function useBidInAuctionMutation() {
   const queryClient = useQueryClient();
   const { activeAccount } = useUserChainInfo();
 

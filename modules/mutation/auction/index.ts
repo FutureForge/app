@@ -26,7 +26,7 @@ export function useCreateAuctionMutation() {
           minimumBidAmount: auctionDetails.minimumBidAmount ?? "",
           timeBufferInSeconds: auctionDetails.timeBufferInSeconds ?? "",
           startTimestamp: auctionDetails.startTimestamp ?? "",
-          endTimestamp: auctionDetails.endTimestamp ?? "",
+          endTimestamp: auctionDetails.endTimestamp,
           currency: auctionDetails.currency ?? "",
         },
       });

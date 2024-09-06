@@ -5,7 +5,7 @@ import { Icon } from '@/modules/app'
 import { decimalOffChain } from '@/modules/blockchain'
 import { NFT } from 'thirdweb'
 import Link from 'next/link'
-import { NFTType } from '@/utils/lib/types'
+import { NFTTypeV2 } from '@/utils/lib/types'
 import { useRouter } from 'next/router'
 
 type NFTCardProps = {
@@ -15,11 +15,19 @@ type NFTCardProps = {
   buyoutBidAmount?: bigint
   tokenId?: string
   contractAddress?: string
-  type?: NFTType
+  type?: NFTTypeV2
 }
 
 export function NFTCard(props: NFTCardProps) {
-  const { nft, pricePerToken, currency, buyoutBidAmount, tokenId, contractAddress, type } = props
+  const {
+    nft,
+    pricePerToken,
+    currency,
+    buyoutBidAmount,
+    tokenId,
+    contractAddress,
+    type = 'CFC-721',
+  } = props
   const router = useRouter()
 
   const imageUrl = nft?.metadata.image

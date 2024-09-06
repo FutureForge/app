@@ -75,7 +75,7 @@ export function useUpdateListingMutation() {
           tokenId: directListing.tokenId ?? '',
           quantity: directListing.quantity ?? '',
           pricePerToken: directListing.pricePerToken ?? '',
-          endTimestamp: directListing.endTimestamp ?? '',
+          endTimestamp: directListing.endTimestamp ?? new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       })
 

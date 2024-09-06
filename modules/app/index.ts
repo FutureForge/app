@@ -6,3 +6,4 @@ export { TextField, TextArea, Label, FileInput } from  './component/inputs/input
 export {Title} from './component/title/title'
 export {Dropdown} from './component/dropdown'
 export {Select} from './component/select'
+export {Loader} from './component/loader/loader'

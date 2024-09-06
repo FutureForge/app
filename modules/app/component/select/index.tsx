@@ -33,10 +33,18 @@ type TriggerProps = ComponentPropsWithoutRef<typeof SelectTrigger> & {
   placeholder?: string
   variant?: ButtonProps['variant']
   disabled?: boolean
+  btnClass?: string
 }
 
 const Trigger = forwardRef<TriggerElement, TriggerProps>((props, ref) => {
-  const { placeholder, className, variant = 'secondary', disabled = false, ...triggerProps } = props
+  const {
+    placeholder,
+    className,
+    variant = 'secondary',
+    disabled = false,
+    btnClass,
+    ...triggerProps
+  } = props
 
   return (
     <SelectTrigger
@@ -48,7 +56,7 @@ const Trigger = forwardRef<TriggerElement, TriggerProps>((props, ref) => {
       ref={ref}
       asChild
     >
-      <button className="text-sm bg-sec-bg h-[45px] px-4 rounded-xl w-full">
+      <button className={cn('text-sm bg-sec-bg h-[45px] px-4 rounded-xl w-full', btnClass)}>
         <SelectValue placeholder={placeholder} />
         <SelectIcon>
           <Icon iconType={'caret'} className="w-7" />
@@ -77,7 +85,7 @@ const Content = forwardRef<ContentElement, ContentProps>((props, ref) => {
         sideOffset={sideOffset}
         align="end"
         className={cn(
-          'bg-background text-foreground px-2 rounded-[.9375rem] border border-foreground w-full flex items-center gap-8',
+          'bg-background text-foreground px-2 rounded-[.9375rem] border border-dialog-border w-full flex items-center gap-8',
           className,
         )}
         {...contentProps}

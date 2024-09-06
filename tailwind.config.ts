@@ -28,6 +28,7 @@ const config: Config = {
         foreground: '#F5F5F5',
         special: '#5856D6',
         'special-bg': '#1B1F26B8',
+        'dialog-border': '#2C2C2C',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

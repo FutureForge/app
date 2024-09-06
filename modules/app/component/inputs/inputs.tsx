@@ -10,6 +10,15 @@ export type TextFieldProps = React.ComponentPropsWithoutRef<'input'>
 
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>((props, ref) => {
   const { type, className, ...inputProps } = props
+
+  // Function to prevent negative input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (type === 'number' && (e.key === '-' || e.key === 'e')) {
+      e.preventDefault()
+    }
+  }
+
+
   return (
     <input
       autoComplete="off"
@@ -18,8 +27,10 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>((props, ref) => {
         'flex h-[45px] w-full rounded-xl bg-sec-bg px-4 text-sm outline-none transition-all duration-150 ease-out placeholder:text-muted-foreground',
         'focus-visible:bg-transparent focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         className,
+        type === 'number' && 'hide-arrows',
       )}
       ref={ref}
+      onKeyDown={handleKeyDown}
       {...inputProps}
     />
   )

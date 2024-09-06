@@ -3,7 +3,7 @@ import { fromBlock, getContractCustom, getCurrentBlockNumber } from '../lib'
 import { getContractEvents, prepareEvent } from 'thirdweb'
 import { ethers } from 'ethers'
 
-const providerUrl = 'https://rpc.testnet.ms'
+const providerUrl = 'https://crossfi-testnet-jsonrpc.itrocket.net'
 const provider = new ethers.providers.JsonRpcProvider(providerUrl)
 
 /* -------------------------------------------------------------------------------------------------

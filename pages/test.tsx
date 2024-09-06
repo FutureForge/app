@@ -26,7 +26,7 @@ import {
   useStakingMutation,
   useWithdrawStakingMutation,
   useAcceptOfferMutation,
-  useBitInAuctionMutation,
+  useBidInAuctionMutation,
   useBuyFromDirectListingMutation,
   useCancelAuctionMutation,
   useCancelDirectListingMutation,
@@ -227,6 +227,7 @@ export default function TestPage() {
     //       })
     //       await transaction.wait()
     //       console.log('Token minted successfully:', transaction)
+          // console.log('token uri', tokenURI )
     //     } else {
     //       alert('no uri')
     //     }

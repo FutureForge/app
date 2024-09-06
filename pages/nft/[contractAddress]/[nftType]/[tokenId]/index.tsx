@@ -86,9 +86,6 @@ const NFTDetailPage = () => {
   const { id, isAuctionExpired, nft, nftAuctionList, winningBid, message, nftListingList, offers } =
     nftData || {}
 
-  console.log('====================================')
-  console.log(offers, 'look for me')
-  console.log('====================================')
   console.log({
     isAuctionExpired,
     nftAuctionList,

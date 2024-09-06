@@ -8,6 +8,7 @@ type ButtonVariants = VariantProps<typeof buttonStyles>
 type ButtonProps = React.ComponentPropsWithoutRef<'button'> &
   ButtonVariants & {
     asChild?: boolean
+    disabled?: boolean
   }
 
 export const Button = forwardRef<ButtonElement, ButtonProps>((props, ref) => {
@@ -18,6 +19,7 @@ export const Button = forwardRef<ButtonElement, ButtonProps>((props, ref) => {
     variant,
     size,
     active,
+    disabled = false,
     ...buttonProps
   } = props
   const Component = asChild ? Slot : 'button'
@@ -25,9 +27,10 @@ export const Button = forwardRef<ButtonElement, ButtonProps>((props, ref) => {
   return (
     <Component
       type={type}
-      className={buttonStyles({ variant, size, active, className })}
+      className={buttonStyles({ variant, size, active, disabled, className })}
       {...buttonProps}
       ref={ref}
+      disabled={disabled}
     />
   )
 })

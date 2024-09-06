@@ -141,11 +141,25 @@ export function useGetSingleNFTQuery({
         let nftList: NFT | null = null
 
         if (nftType === 'CFC-721') {
-          nftList = await getERC721NFT({
+          const nft = await getERC721NFT({
             contract,
             tokenId: BigInt(tokenId),
             includeOwner: includeNFTOwner,
           })
+          if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+            const { uri } = nft.metadata
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            nftList = {
+              ...nft,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          } else {
+            nftList = nft
+          }
         } else {
           throw new Error('NFT type not supported')
         }

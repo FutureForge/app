@@ -93,7 +93,8 @@ Label.displayName = LABEL_NAME
  * File Input
  * -----------------------------------------------------------------------------------------------*/
 
-const FileInput = forwardRef<HTMLInputElement, FileInputProps>((props, ref) => {
+const FileInput = forwardRef<HTMLInputElement, FileInputProps & { key?: string }>((props, ref) => {
+  const { onChange, ...otherProps } = props
   const [fileName, setFileName] = useState<string | null>(null)
   const [filePreview, setFilePreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -109,6 +110,10 @@ const FileInput = forwardRef<HTMLInputElement, FileInputProps>((props, ref) => {
         setFileName(file.name)
         setFilePreview(URL.createObjectURL(file))
         setError(null)
+        // Call the onChange prop with the selected file
+        if (onChange) {
+          onChange(event)
+        }
       }
     }
   }
@@ -128,10 +133,13 @@ const FileInput = forwardRef<HTMLInputElement, FileInputProps>((props, ref) => {
         setFileName(file.name)
         setFilePreview(URL.createObjectURL(file))
         setError(null)
-        if (fileInputRef.current) {
+        // Create a new change event and call onChange
+        if (onChange && fileInputRef.current) {
           const dataTransfer = new DataTransfer()
           dataTransfer.items.add(file)
           fileInputRef.current.files = dataTransfer.files
+          const newEvent = new Event('change', { bubbles: true })
+          onChange(newEvent as unknown as React.ChangeEvent<HTMLInputElement>)
         }
       }
     }
@@ -181,7 +189,7 @@ const FileInput = forwardRef<HTMLInputElement, FileInputProps>((props, ref) => {
           onChange={handleFileChange}
           accept=".jpeg,.jpg,.png,.gif,.svg,.mp4"
           style={{ display: 'none' }}
-          {...props}
+          {...otherProps}
         />
         {filePreview ? (
           filePreview.endsWith('.mp4') ? (

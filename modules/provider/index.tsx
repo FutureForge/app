@@ -16,6 +16,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
         defaultOptions: { queries: { retry: 0 } },
         mutationCache: new MutationCache({
           onSuccess: (_data, _variables, _context, mutation) => {
+            console.log('query provider success', _data, _variables, _context, mutation)
+
             const successMessage = mutation?.meta?.successMessage as {
               title?: string;
               description: string;
@@ -23,7 +25,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
 
             if (!successMessage) return console.log({ _data });
 
-            console.log({ message: successMessage, data: _data });
+            console.log({ message: successMessage, data: _data })
           },
           onError: (error, _variables, _context, mutation) => {
             console.log("query provider error: ", error);

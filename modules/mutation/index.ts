@@ -21,6 +21,7 @@ export {
   useStakingMutation,
   useWithdrawStakingMutation,
 } from "./staking";
+export { useCreateNFTMutation } from './create-nft'
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 // syntax

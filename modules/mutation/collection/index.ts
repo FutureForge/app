@@ -40,5 +40,13 @@ export function useAddCollectionMutation() {
       })
     },
     onError: (error) => {},
+    meta: {
+      successMessage: {
+        description: 'Collection added successfully',
+      },
+      errorMessage: {
+        description: 'Failed to add new collection to the marketplace',
+      },
+    },
   })
 }

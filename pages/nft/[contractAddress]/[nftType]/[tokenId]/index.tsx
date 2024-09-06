@@ -101,8 +101,6 @@ const NFTDetailPage = () => {
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
   const isOwner = owner === address
 
-  console.log({ isOwner })
-
   const handleApproveNFT = async () => {
     if (!address) return alert('Please connect to a wallet.')
     if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
@@ -166,7 +164,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Bid placed successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -195,7 +192,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('NFT Bought Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -218,7 +214,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Bid placed successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -239,7 +234,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Canceled Direct Listing Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -259,7 +253,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Cancelled Auction Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -280,7 +273,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Auction Reward claimed Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -300,7 +292,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Auction NFT claimed Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -327,8 +318,6 @@ const NFTDetailPage = () => {
   }
 
   console.log('mutation status', makeListingOfferMutation)
-
-  console.log({ value, buyOutAmount, endTimestamp })
 
   if (isLoading || isError) return <Loader />
   // if (isError) return <p>Error loading NFT details.</p>

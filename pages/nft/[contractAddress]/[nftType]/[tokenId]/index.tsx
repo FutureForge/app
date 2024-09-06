@@ -30,12 +30,6 @@ import { NFTDialog } from '@/modules/components/nft-details'
 
 const NFTDetailPage = () => {
   const { activeAccount, activeWallet } = useUserChainInfo()
-  const filterOptions = [
-    { id: '1month', title: '1 month' },
-    { id: '2months', title: '2 months' },
-    { id: '3months', title: '3 months' },
-    { id: '4months', title: '4 months' },
-  ]
   const address = activeAccount?.address
   const chain = activeWallet?.getChain()
   const router = useRouter()
@@ -104,7 +98,7 @@ const NFTDetailPage = () => {
     offers,
   })
 
-  console.log('mutation status', bidInAuctionMutation)
+  console.log('mutation status', buyFromDirectListingMutation)
 
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
@@ -430,27 +424,35 @@ const NFTDetailPage = () => {
           {!isOwner && (
             <>
               {id === 'listing' && (
-                <Dialog.Root>
-                  <Dialog.Trigger>
-                    <Button
-                      onClick={handleBuyOutDirectListing}
-                      variant="secondary"
-                      disabled={isTxPending}
-                      className="text-sm font-medium h-8"
-                    >
-                      Buy Now
-                    </Button>
-                  </Dialog.Trigger>
-                  <Dialog.Content className="max-w-[690px] w-full p-6">
-                    <NFTDialog
-                      id={id}
-                      placeholder="1 month"
-                      ctaText="Continue"
-                      src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
-                      title={nft?.metadata?.name}
-                    />
-                  </Dialog.Content>
-                </Dialog.Root>
+                <Button
+                  onClick={handleBuyOutDirectListing}
+                  variant="secondary"
+                  disabled={isTxPending}
+                  className="text-sm font-medium h-8"
+                >
+                  Buy Now
+                </Button>
+                // <Dialog.Root>
+                //   <Dialog.Trigger>
+                //     <Button
+                //       onClick={handleBuyOutDirectListing}
+                //       variant="secondary"
+                //       disabled={isTxPending}
+                //       className="text-sm font-medium h-8"
+                //     >
+                //       Buy Now
+                //     </Button>
+                //   </Dialog.Trigger>
+                //   <Dialog.Content className="max-w-[690px] w-full p-6">
+                //     <NFTDialog
+                //       id={id}
+                //       placeholder="1 month"
+                //       ctaText="Continue"
+                //       src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
+                //       title={nft?.metadata?.name}
+                //     />
+                //   </Dialog.Content>
+                // </Dialog.Root>
               )}
               {id === 'auction' && (
                 <>

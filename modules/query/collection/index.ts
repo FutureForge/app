@@ -12,6 +12,7 @@ import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/b
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 import { CROSSFI_API } from '@/utils/configs'
 import { ensureSerializable } from '@/utils'
+import { useUserChainInfo } from '../user'
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -130,6 +131,8 @@ export function useGetSingleNFTQuery({
   nftType: NFTTypeV2
   tokenId: string
 }) {
+  const { activeAccount } = useUserChainInfo()
+
   return useQuery({
     queryKey: ['nft', contractAddress, nftType, tokenId],
     queryFn: async () => {
@@ -230,7 +233,7 @@ export function useGetSingleNFTQuery({
         throw new Error(`Failed to fetch NFT data: ${error.message}`)
       }
     },
-    enabled: !!contractAddress && !!nftType && !!tokenId,
+    enabled: !!contractAddress && !!nftType && !!tokenId && !!activeAccount?.address,
     refetchInterval: 6000,
   })
 }

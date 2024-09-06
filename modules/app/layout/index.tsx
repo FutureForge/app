@@ -1,10 +1,13 @@
 import { ReactNode } from 'react'
 import { Nav } from '../component/nav'
+import dynamic from 'next/dynamic'
 
 type RootLayoutProps = {
   children: ReactNode
   scrollToTop?: boolean
 }
+
+const Toast = dynamic(() => import('@/modules/components/toast/toast'), { ssr: false })
 export const RootLayout = ({ children, scrollToTop }: RootLayoutProps) => {
   return (
     <div className="flex isolate flex-col h-screen relative bg-background">
@@ -18,6 +21,7 @@ export const RootLayout = ({ children, scrollToTop }: RootLayoutProps) => {
         }}
       >
         {children}
+        <Toast />
       </div>
     </div>
   )

@@ -16,7 +16,6 @@ type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctio
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
-  console.log({ global })
 
   const getFilteredData = () => {
     if (!global) return []

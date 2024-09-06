@@ -1,15 +1,14 @@
-import {
-  MutationCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import { ReactNode, useState } from "react";
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactNode, useState } from 'react'
+import { useToast } from '../app/hooks/useToast'
 
 type QueryProviderProps = {
-  children: ReactNode;
-};
+  children: ReactNode
+}
 
 export function QueryProvider({ children }: QueryProviderProps) {
+  const toast = useToast()
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -19,25 +18,32 @@ export function QueryProvider({ children }: QueryProviderProps) {
             console.log('query provider success', _data, _variables, _context, mutation)
 
             const successMessage = mutation?.meta?.successMessage as {
-              title?: string;
-              description: string;
-            };
+              title?: string
+              description: string
+            }
 
-            if (!successMessage) return console.log({ _data });
+            if (!successMessage) return toast.success('Transaction was Successfully')
+
+            toast.success(successMessage.description, {
+              title: successMessage.title,
+            })
 
             console.log({ message: successMessage, data: _data })
           },
           onError: (error, _variables, _context, mutation) => {
-            console.log("query provider error: ", error);
+            console.log('query provider error: ', error)
 
             const errorMessage = mutation?.meta?.errorMessage as {
-              title?: string;
-              description: string;
-            };
+              title?: string
+              description: string
+            }
 
-            if (!errorMessage) return console.log({ error });
+            if (!errorMessage) return toast.error(error.message)
 
-            console.log({ message: errorMessage, error: error.message });
+            toast.error(`${errorMessage.description} ${error.message}`, {
+              title: errorMessage.title,
+            })
+            console.log({ message: errorMessage, error: error.message })
 
             // if (errorMessage) {
             //   toast.error(errorMessage.description, {
@@ -48,10 +54,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
             // }
           },
         }),
-      })
-  );
+      }),
+  )
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }

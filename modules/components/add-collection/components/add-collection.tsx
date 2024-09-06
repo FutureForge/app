@@ -9,8 +9,10 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { useCheckIfItsACollectionQuery, useFetchCollectionsQuery } from '@/modules/query'
 import { ICollection } from '@/utils/models'
+import { useToast } from '@/modules/app/hooks/useToast'
 
 export function AddCollection() {
+  const toast = useToast()
   const addCollectionMutation = useAddCollectionMutation()
   const { data: collections } = useFetchCollectionsQuery()
 
@@ -22,7 +24,7 @@ export function AddCollection() {
   const { data: collectionInfo } = useCheckIfItsACollectionQuery(collectionContractAddress)
 
   const [error, setError] = useState<string | null | CloudinaryUploadWidgetError>(null)
-  const [filter, setFilter] = useState('erc721')
+  const [filter, setFilter] = useState('cfc721')
   const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
   const secureUrl = imageUrl ? (imageUrl as CloudinaryUploadWidgetInfo).secure_url : undefined
 
@@ -42,7 +44,6 @@ export function AddCollection() {
           setCollectionContractAddress('')
           setDescription('')
           setImageUrl(undefined)
-          alert('collection added successfully')
         },
         onError: () => {
           setNFTName('')
@@ -57,6 +58,12 @@ export function AddCollection() {
   useEffect(() => {
     setNFTName(collectionInfo?.nftData?.[0]?.name)
   }, [collectionInfo])
+
+  useEffect(() => {
+    if (addCollectionMutation.isPending) {
+      toast.loading('Adding Collection To Marketplace.....')
+    }
+  }, [addCollectionMutation.isPending])
 
   useEffect(() => {
     if (collections) {
@@ -206,18 +213,15 @@ type FilterSelectionProps = {
   onChangeFilter: (value: string) => void
 }
 
-const FilterSelection = ({ onChangeFilter, filter = 'erc721' }: FilterSelectionProps) => {
+const FilterSelection = ({ onChangeFilter, filter = 'cfc721' }: FilterSelectionProps) => {
   const filters = useMemo(() => {
-    const filters = [
-      { id: 'erc721', title: 'ERC721' },
-      { id: 'erc1155', title: 'ERC1155' },
-    ].filter(Boolean)
+    const filters = [{ id: 'cfc21', title: 'CFC721' }].filter(Boolean)
     return filters as TypeFiltersSelection[]
   }, [])
 
   return (
     <Select.Root value={filter} onValueChange={onChangeFilter}>
-      <Select.Trigger placeholder="ERC721" />
+      <Select.Trigger placeholder="CFC721" />
       <Select.Content className="data-[state=open]:animate-slideDownAndFade py-1 px-0">
         {filters.map(({ id, title }) => (
           <Select.Item

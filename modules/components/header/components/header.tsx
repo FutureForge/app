@@ -60,8 +60,7 @@ export function Header() {
     autoplaySpeed: 3000,
   }
 
-  if (isLoading) return <Loader />
-  if (isError) return <p>Error loading data.</p>
+  if (isLoading || isError) return <Loader />
 
   const renderItem = (item: NewListing | NewAuction, index: number) => {
     const isListing = 'listingId' in item

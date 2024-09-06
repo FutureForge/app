@@ -55,6 +55,7 @@ export function useCreateListingMutation() {
     },
   })
 }
+
 export function useUpdateListingMutation() {
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()

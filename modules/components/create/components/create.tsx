@@ -1,6 +1,7 @@
 import { Button, FileInput, Label, TextArea, TextField, Title } from '@/modules/app'
+import { useToast } from '@/modules/app/hooks/useToast'
 import { useCreateNFTMutation } from '@/modules/mutation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 type Trait = {
   trait_type: string
@@ -8,6 +9,7 @@ type Trait = {
 }
 
 export function CreateNFT() {
+  const toast = useToast()
   const createNFTMutation = useCreateNFTMutation()
 
   const [name, setName] = useState('')
@@ -39,7 +41,7 @@ export function CreateNFT() {
   }
 
   const handleCreateNFT = async () => {
-    if (!name || !description || !file) return alert('Fill all required fields')
+    if (!name || !description || !file) return toast.error('Please fill out all fields')
 
     createNFTMutation.mutate(
       {
@@ -58,6 +60,12 @@ export function CreateNFT() {
       },
     )
   }
+
+  useEffect(() => {
+    if (createNFTMutation.isPending) {
+      toast.error('Creating NFT...')
+    }
+  }, [createNFTMutation.isPending])
 
   return (
     <div className="h-[calc(100vh-120px)] w-full flex max-lg:flex-col container mx-auto justify-between max-lg:gap-8 gap-20">

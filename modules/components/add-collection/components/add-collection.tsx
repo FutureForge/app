@@ -26,7 +26,6 @@ export function AddCollection() {
   const { data: collectionInfo } = useCheckIfItsACollectionQuery(collectionContractAddress)
 
   const [error, setError] = useState<string | null | CloudinaryUploadWidgetError>(null)
-  const [filter, setFilter] = useState('cfc721')
   const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
   const secureUrl = imageUrl ? (imageUrl as CloudinaryUploadWidgetInfo).secure_url : undefined
 
@@ -190,11 +189,6 @@ export function AddCollection() {
                 id="description"
               />
             </div>
-
-            <div className="flex flex-col gap-2 min-[1720px]:gap-3">
-              <Label htmlFor="traits">NFT type</Label>
-              <FilterSelection filter={filter} onChangeFilter={setFilter} />
-            </div>
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between gap-3">
@@ -206,7 +200,7 @@ export function AddCollection() {
               !description ||
               !secureUrl ||
               !collectionContractAddress ||
-              !collectionInfo?.isCFC721 ||
+              !NFTContract ||
               collectionExist
             }
             variant="secondary"
@@ -217,40 +211,5 @@ export function AddCollection() {
         </div>
       </div>
     </div>
-  )
-}
-
-type TypeFiltersSelection = {
-  id: string
-  title: string
-}
-
-type FilterSelectionProps = {
-  filter?: string
-  onChangeFilter: (value: string) => void
-}
-
-const FilterSelection = ({ onChangeFilter, filter = 'cfc721' }: FilterSelectionProps) => {
-  const filters = useMemo(() => {
-    const filters = [{ id: 'cfc21', title: 'CFC721' }].filter(Boolean)
-    return filters as TypeFiltersSelection[]
-  }, [])
-
-  return (
-    <Select.Root value={filter} onValueChange={onChangeFilter}>
-      <Select.Trigger placeholder="CFC721" />
-      <Select.Content className="data-[state=open]:animate-slideDownAndFade py-1 px-0">
-        {filters.map(({ id, title }) => (
-          <Select.Item
-            disabled
-            key={id}
-            value={id}
-            className="hover:bg-border-elements/60 dark:hover:bg-primary dark:hover:text-white duration-75 ease-out !rounded-lg px-2 py-1"
-          >
-            {title}
-          </Select.Item>
-        ))}
-      </Select.Content>
-    </Select.Root>
   )
 }

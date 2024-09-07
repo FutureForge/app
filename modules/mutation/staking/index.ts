@@ -132,7 +132,7 @@ export function useClaimStakingRewardMutation() {
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
-    mutationFn: async ({ tokenId }: { tokenId: string }) => {
+    mutationFn: async () => {
       if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getClaimStakingReward()

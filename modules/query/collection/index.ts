@@ -33,10 +33,8 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
       const response = await axios.get(
         `${CROSSFI_API}/contracts?contractAddress=${collectionAddress}&page=1&limit=10&sort=-blockNumber`,
       )
-      console.log({response})
       const nftData = response.data.docs
 
-      // Check if any document is CFC-721 and if nftData is not empty
       const isCFC721 = nftData.some((doc: { tokenType: string }) => doc.tokenType === 'CFC-721')
 
       return { isCFC721, nftData }

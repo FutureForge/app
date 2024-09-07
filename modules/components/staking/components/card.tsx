@@ -4,8 +4,8 @@ import React, { ReactNode } from 'react'
 import { MediaRenderer } from 'thirdweb/react'
 
 type CardProps = {
-  src: string
-  title: string
+  src: string | undefined
+  title: string | undefined
   onClick: () => void
   cta: ReactNode
 }
@@ -14,18 +14,13 @@ export function Card(props: CardProps) {
   return (
     <div className="max-w-[273px] w-full rounded-2xl max-h-[350px]">
       <div>
-        <MediaRenderer
-          src={'/assets/webp/1.webp'}
-          client={client}
-          className="rounded-tr-2xl rounded-tl-2xl"
-        />
+        <MediaRenderer src={src} client={client} className="rounded-tr-2xl rounded-tl-2xl" />
       </div>
-      <div className="p-4 bg-primary">
-        <p className="font-semibold">Animakid #123</p>
+      <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl">
+        <p className="font-semibold">{title}</p>
 
-        <Button>
-          Stake
-          <Icon iconType={'coins'} className="w-4 text-white" />
+        <Button onClick={onClick} variant="secondary" className="h-10 mt-3">
+          {cta}
         </Button>
       </div>
     </div>

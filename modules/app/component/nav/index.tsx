@@ -58,7 +58,7 @@ export function Nav() {
   return (
     <nav
       className={cn(
-        'flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 justify-between px-4 items-center font-inter',
+        'flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 px-4 justify-between items-center font-inter',
         isScrolled ? 'bg-[#0F0F0F] border-b border-sec-bg' : 'bg-transparent',
       )}
     >

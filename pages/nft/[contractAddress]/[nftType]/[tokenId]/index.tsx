@@ -100,9 +100,13 @@ const NFTDetailPage = () => {
   })
 
   useEffect(() => {
-    if (isTxPending) {
-      toast.loading('Transaction in progress...')
+    const showToast = async () => {
+      if (isTxPending) {
+        await toast.loading('Transaction in progress...')
+      }
     }
+
+    showToast()
   }, [toast, isTxPending])
 
   const owner =

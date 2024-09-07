@@ -11,6 +11,11 @@ import { ConnectButton } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
 import { chainInfo, chainInfoV2, client } from '@/utils/configs'
 import { usePathname } from 'next/navigation'
+import {
+  useFetchCollectionsQuery,
+  useGetGlobalListingOrAuctionQuery,
+  useGetMarketplaceCollectionsQuery,
+} from '@/modules/query'
 
 const Nav_Links = [
   {
@@ -31,6 +36,14 @@ const Nav_Links = [
   // },
 ]
 export function Nav() {
+  const collection = useFetchCollectionsQuery()
+  const { data: marketplaceCollection } = useGetMarketplaceCollectionsQuery()
+  const { data: global } = useGetGlobalListingOrAuctionQuery()
+
+  console.log({ marketplaceCollection })
+  console.log({ collection })
+  console.log({ global })
+
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
@@ -40,6 +53,9 @@ export function Nav() {
     value: state.value,
     setValue: state.setValue,
   }))
+
+  console.log({ value })
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value)
   }

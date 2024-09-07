@@ -60,10 +60,16 @@ export function AddCollection() {
   }, [collectionInfo])
 
   useEffect(() => {
-    if (addCollectionMutation.isPending) {
-      toast.loading('Adding Collection To Marketplace.....')
+    const showToast = async () => {
+      if (addCollectionMutation.isPending) {
+        await toast.loading('Adding Collection To Marketplace.....')
+      }
     }
-  }, [addCollectionMutation.isPending])
+
+    showToast()
+  }, [addCollectionMutation.isPending, toast])
+
+  console.log('add collection', addCollectionMutation)
 
   useEffect(() => {
     if (collections) {

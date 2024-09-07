@@ -38,7 +38,7 @@ export function useMakeListingOfferMutation() {
       )
 
       if (BigNumber.from(wxfiBalanceRaw).lt(makeOfferValue!)) {
-        toast.loading('Wrapping XFI to WXFI')
+        await toast.loading('Wrapping XFI to WXFI')
         try {
           const depositTxData = await WXFIContract.populateTransaction.deposit({
             value: makeOfferValue,
@@ -63,7 +63,7 @@ export function useMakeListingOfferMutation() {
       }
 
       if (BigNumber.from(wxfiAllowance).lt(makeOfferValue!)) {
-        toast.loading('Approving WXFI to spend')
+        await toast.loading('Approving WXFI to spend')
         try {
           const approvalTxData = await WXFIContract.populateTransaction.approve(
             CROSSFI_MARKETPLACE_CONTRACT,

@@ -19,10 +19,11 @@ export function useFetchCollectionsQuery() {
     queryKey: ['collections'],
     queryFn: async () => {
       const response = await axios.get('/api/collection')
+      console.log('fetch collections', response)
       return response.data.data
     },
     initialData: [],
-    refetchInterval: 60000,
+    refetchInterval: 5000,
   })
 }
 

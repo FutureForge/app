@@ -14,6 +14,7 @@ import {
   getTotalAuctions,
 } from '@/modules/blockchain'
 import { ensureSerializable } from '@/utils'
+import { includeNFTOwner } from '@/modules/blockchain/lib'
 
 export function useUserChainInfo() {
   const activeAccount = useActiveAccount()
@@ -47,7 +48,11 @@ export function useUserNFTsQuery() {
 
           const tokenIdNFTs = await Promise.all(
             uniqueTokenIds.map(async (ids) => {
-              const nft = await getCFC721NFT({ contract, tokenId: BigInt(ids) })
+              const nft = await getCFC721NFT({
+                contract,
+                tokenId: BigInt(ids),
+                includeOwner: includeNFTOwner,
+              })
               let updatedNFT = nft
 
               if (contractAddress === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {

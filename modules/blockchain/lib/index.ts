@@ -6,7 +6,7 @@ import {
   CROSSFI_MARKETPLACE_CONTRACT,
 } from '@/utils/configs'
 import { ethers } from 'ethers'
-import { eth_blockNumber, getContract as getContractThirdweb } from 'thirdweb'
+import { eth_blockNumber, getContract as getContractThirdweb, Hex, waitForReceipt } from 'thirdweb'
 import MarketplaceABI from '@/utils/abi/marketplaceABI.json'
 
 export const includeNFTOwner = true
@@ -23,6 +23,11 @@ export const ETHERS_CONTRACT = new ethers.Contract(
   provider,
 )
 
+export function getContractEthers({ contractAddress, abi }: { contractAddress: string; abi: any }) {
+  const contract = new ethers.Contract(contractAddress, abi, provider)
+  return contract
+}
+
 // const eventFilters = contract.filters.NewListing()
 // console.log({ eventFilters })
 
@@ -34,12 +39,10 @@ export function getContractCustom({ contractAddress }: { contractAddress: string
   // );
   // return contract;
 
-  if (!contractAddress) throw new Error('Please pass in a contract address')
-
   const contract = getContractThirdweb({
     client,
     chain: chainInfo,
-    address: contractAddress,
+    address: contractAddress!,
   })
 
   return contract
@@ -57,4 +60,21 @@ export function decimalOffChain(
   const value = ethers.utils.formatEther(number)
 
   return value
+}
+
+export function decimalOnChain(number: bigint | string | number) {
+  if (!number) return
+  const value = ethers.utils.parseEther(number.toString())
+
+  return value
+}
+
+export async function waitForTransaction(txHash: string) {
+  const receipt = await waitForReceipt({
+    client,
+    chain: chainInfo,
+    transactionHash: txHash as Hex,
+  })
+
+  return receipt
 }

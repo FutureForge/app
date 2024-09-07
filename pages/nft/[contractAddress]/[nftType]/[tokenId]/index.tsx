@@ -22,20 +22,22 @@ import {
   useCollectAuctionTokensMutation,
   useCreateAuctionMutation,
   useBidInAuctionMutation,
+  useMakeListingOfferMutation,
 } from '@/modules/mutation'
-import { useState } from 'react'
-import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
+import { useToast } from '@/modules/app/hooks/useToast'
 
 const NFTDetailPage = () => {
+  const toast = useToast()
   const { activeAccount, activeWallet } = useUserChainInfo()
   const address = activeAccount?.address
   const chain = activeWallet?.getChain()
   const router = useRouter()
   const { contractAddress, nftType, tokenId } = router.query
 
-  const [value, setValue] = useState<string | undefined>(undefined)
+  const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
 
@@ -52,6 +54,7 @@ const NFTDetailPage = () => {
   const cancelDirectListingMutation = useCancelDirectListingMutation()
   const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
   const createListingMutation = useCreateListingMutation()
+  const makeListingOfferMutation = useMakeListingOfferMutation()
 
   const approvedForAllMutation = useApprovedForAllMutation()
 
@@ -66,7 +69,8 @@ const NFTDetailPage = () => {
     createListingMutation.isPending ||
     approvedForAllMutation.isPending ||
     collectAuctionPayoutMutation.isPending ||
-    collectAuctionTokensMutation.isPending
+    collectAuctionTokensMutation.isPending ||
+    makeListingOfferMutation.isPending
 
   const { data: isApproved } = useCheckApprovedForAllQuery({
     collectionContractAddress: contractAddress as string,
@@ -95,17 +99,23 @@ const NFTDetailPage = () => {
     offers,
   })
 
-  console.log('mutation status', buyFromDirectListingMutation)
+  useEffect(() => {
+    const showToast = async () => {
+      if (isTxPending) {
+        await toast.loading('Transaction in progress...')
+      }
+    }
+
+    showToast()
+  }, [toast, isTxPending])
 
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
   const isOwner = owner === address
 
-  console.log({ isOwner })
-
   const handleApproveNFT = async () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
 
     approvedForAllMutation.mutate({
       collectionContractAddress: contractAddress as string,
@@ -113,10 +123,10 @@ const NFTDetailPage = () => {
   }
 
   const handleCreateListing = async () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    if (!value) return alert('Please enter a valid listing amount.')
-    if (!endTimestamp) return alert('Please select an end date')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!value) return toast.error('Please enter a valid listing amount.')
+    if (!endTimestamp) return toast.error('Please select an end date')
 
     createListingMutation.mutate({
       directListing: {
@@ -131,11 +141,11 @@ const NFTDetailPage = () => {
   }
 
   const handleCreateAuction = async () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    if (!value) return alert('Please enter a valid auction amount.')
-    if (!buyOutAmount) return alert('Please enter a valid auction amount.')
-    if (!endTimestamp) return alert('Please select an end date')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!value) return toast.error('Please enter a valid auction amount.')
+    if (!buyOutAmount) return toast.error('Please enter a valid auction amount.')
+    if (!endTimestamp) return toast.error('Please select an end date')
 
     createAuctionMutation.mutate({
       auctionDetails: {
@@ -150,12 +160,12 @@ const NFTDetailPage = () => {
   }
 
   const handlePlaceBidAuction = async () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    if (!value) return alert('Please enter a valid bid amount.')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!value) return toast.error('Please enter a valid bid amount.')
     if (Number(value) < Number(decimalOffChain(winningBid?.bidAmount)))
-      return alert('Bid amount should be greater than current winning')
-    if (isOwner) return alert('Owner cant buy own listing')
+      return toast.error('Bid amount should be greater than current winning')
+    if (isOwner) return toast.error('Owner cant buy own listing')
 
     bidInAuctionMutation.mutate(
       {
@@ -166,7 +176,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Bid placed successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -177,9 +186,9 @@ const NFTDetailPage = () => {
   }
 
   const handleBuyOutDirectListing = () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    if (isOwner) return alert('Owner cant buy own listing')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (isOwner) return toast.error('Owner cant buy own listing')
 
     buyFromDirectListingMutation.mutate(
       {
@@ -193,12 +202,9 @@ const NFTDetailPage = () => {
       },
       {
         onSuccess: (data: any) => {
-          alert('NFT Bought Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
-          alert(error.message)
           setValue('')
         },
       },
@@ -206,8 +212,8 @@ const NFTDetailPage = () => {
   }
 
   const handleBuyOutAuction = () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
 
     bidInAuctionMutation.mutate(
       {
@@ -218,7 +224,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Bid placed successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -229,9 +234,9 @@ const NFTDetailPage = () => {
   }
 
   const handleCancelDirectListing = () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    if (!isOwner) return alert('Only the owner can cancel the listing.')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!isOwner) return toast.error('Only the owner can cancel the listing.')
 
     cancelDirectListingMutation.mutate(
       { listingId: nftListingList?.listingId },
@@ -239,7 +244,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Canceled Direct Listing Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -249,9 +253,9 @@ const NFTDetailPage = () => {
   }
 
   const handleCancelAuction = () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    if (!isOwner) return alert('Only the owner can cancel the listing.')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!isOwner) return toast.error('Only the owner can cancel the listing.')
 
     cancelAuctionMutation.mutate(
       { auctionId: nftAuctionList?.auctionId },
@@ -259,7 +263,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Cancelled Auction Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -269,10 +272,10 @@ const NFTDetailPage = () => {
   }
 
   const handleClaimAuctionPayout = () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
     if (nftAuctionList?.auctionCreator === address)
-      return alert('Only the auction creator can claim payout the listing.')
+      return toast.error('Only the auction creator can claim payout the listing.')
 
     collectAuctionPayoutMutation.mutate(
       { auctionId: nftAuctionList?.auctionId },
@@ -280,7 +283,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Auction Reward claimed Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -290,11 +292,9 @@ const NFTDetailPage = () => {
   }
 
   const handleClaimAuctionNFT = () => {
-    if (!address) return alert('Please connect to a wallet.')
-    if (chain?.id !== 4157) return alert('Please switch to CrossFi Testnet.')
-    console.log(winningBid?.bidder)
-    console.log(address)
-    if (winningBid?.bidder !== address) return alert('Only bidder can claim the NFT')
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (winningBid?.bidder !== address) return toast.error('Only bidder can claim the NFT')
 
     collectAuctionTokensMutation.mutate(
       { auctionId: nftAuctionList?.auctionId },
@@ -302,7 +302,6 @@ const NFTDetailPage = () => {
         onSuccess: (data: any) => {
           alert('Auction NFT claimed Successfully!')
           setValue('')
-          console.log({ data })
         },
         onError: (error: any) => {
           alert(error.message)
@@ -311,10 +310,26 @@ const NFTDetailPage = () => {
     )
   }
 
-  console.log({ value, buyOutAmount, endTimestamp })
+  const handleMakeOffer = () => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (owner === address) return toast.error('Owner is not allowed make offer ')
+    if (!value) return toast.error('Please enter a valid auction amount.')
+
+    makeListingOfferMutation.mutate({
+      makeOffer: {
+        assetContract: contractAddress as string,
+        tokenId: tokenId as string,
+        quantity: '1',
+        totalPrice: value,
+        // expirationTimestamp: endTimestamp,
+      },
+    })
+  }
+
+  console.log('mutation status', makeListingOfferMutation)
 
   if (isLoading || isError) return <Loader />
-  // if (isError) return <p>Error loading NFT details.</p>
 
   const imageUrl = nft?.metadata.image
 
@@ -419,7 +434,7 @@ const NFTDetailPage = () => {
 
           {/* BUYER BUTTON */}
           {!isOwner && (
-            <>
+            <div className='flex items-center w-full gap-3 max-md:flex-col'>
               {id === 'listing' && (
                 <Button
                   onClick={handleBuyOutDirectListing}
@@ -479,11 +494,7 @@ const NFTDetailPage = () => {
                     <div className="flex items-center w-full max-md:flex-col gap-3">
                       <Dialog.Root>
                         <Dialog.Trigger>
-                          <Button
-                            variant="secondary"
-                            disabled={isTxPending}
-                            className="text-sm font-medium h-8"
-                          >
+                          <Button variant="secondary" className="text-sm font-medium h-8">
                             Place Bid
                           </Button>
                         </Dialog.Trigger>
@@ -496,7 +507,6 @@ const NFTDetailPage = () => {
                             onChange={setValue}
                             disabled={isTxPending}
                             value={value}
-                            placeholder="1 month"
                             ctaText="Place Bid"
                             src={
                               imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'
@@ -519,17 +529,29 @@ const NFTDetailPage = () => {
                 </>
               )}
 
-              {/* {id === 'none' && (
-                <Button
-                  onClick={() => {}}
-                  variant="secondary"
-                  disabled={isTxPending}
-                  className="text-sm font-medium h-8"
-                >
-                  Make Offer
-                </Button>
-              )} */}
-            </>
+              {(id === 'none' || id === 'listing') && (
+                <Dialog.Root>
+                  <Dialog.Trigger>
+                    <Button variant="secondary" className="text-sm font-medium h-8">
+                      Make Offer
+                    </Button>
+                  </Dialog.Trigger>
+                  <Dialog.Content className="max-w-[690px] w-full p-6">
+                    <NFTDialog
+                      id={id}
+                      type="make-offer"
+                      value={value}
+                      onChange={setValue}
+                      onClick={handleMakeOffer}
+                      disabled={isTxPending}
+                      ctaText="Make Offer"
+                      src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
+                      title={nft?.metadata?.name}
+                    />
+                  </Dialog.Content>
+                </Dialog.Root>
+              )}
+            </div>
           )}
           {/* BUYER BUTTON */}
 

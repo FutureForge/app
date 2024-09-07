@@ -20,6 +20,7 @@
     "clsx": "^2.1.1",
     "ethers": "5.7.1",
     "formidable": "^3.5.1",
+    "mongodb": "^6.8.1",
     "framer-motion": "^11.5.4",
     "mongoose": "^8.5.4",
     "next": "14.2.6",

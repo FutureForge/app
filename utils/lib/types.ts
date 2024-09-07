@@ -39,7 +39,7 @@ export type MakeOfferListingType = {
   quantity: string;
   currency: string;
   totalPrice: string;
-  expirationTimestamp?: string;
+  expirationTimestamp?: Date;
 };
 
 export type BuyFromDirectListingType = {

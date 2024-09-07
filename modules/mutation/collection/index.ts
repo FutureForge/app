@@ -3,6 +3,13 @@ import { owner } from 'thirdweb/extensions/common'
 import axios from 'axios'
 import { getContractCustom } from '@/modules/blockchain'
 import { useUserChainInfo } from '@/modules/query'
+import { isERC721 } from 'thirdweb/extensions/erc721'
+
+export async function isNFTContract(contractAddress: string) {
+  const contract = await getContractCustom({ contractAddress })
+  const result = await isERC721({ contract })
+  return result
+}
 
 export function useAddCollectionMutation() {
   const queryClient = useQueryClient()
@@ -15,6 +22,10 @@ export function useAddCollectionMutation() {
       description: string
       image: string
     }) => {
+      if (!activeAccount?.address) {
+        throw new Error('Wallet not connected')
+      }
+
       const contract = await getContractCustom({
         contractAddress: newCollection.collectionContractAddress,
       })
@@ -24,15 +35,15 @@ export function useAddCollectionMutation() {
       })
 
       if (contractOwner !== activeAccount?.address) {
-        throw new Error('You are not the owner of this contract')
+        throw new Error('Not the contract owner')
       }
 
-      const signMessage = `I am the owner of the contract 0x544C945415066564B0Fb707C7457590c0585e838 and want to add a new collection. Sign this message to confirm`
+      const signMessage = `I am the owner of the contract ${newCollection.collectionContractAddress} and want to add a new collection. Sign this message to confirm`
 
       await activeAccount?.signMessage({ message: signMessage })
 
       const response = await axios.post('/api/collection', newCollection)
-      return response.data // handle success response
+      return response.data
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
@@ -40,5 +51,13 @@ export function useAddCollectionMutation() {
       })
     },
     onError: (error) => {},
+    meta: {
+      successMessage: {
+        description: 'Collection added successfully',
+      },
+      errorMessage: {
+        description: 'Failed to add new collection to the marketplace',
+      },
+    },
   })
 }

@@ -22,7 +22,7 @@ export function useFetchCollectionsQuery() {
       return response.data.data
     },
     initialData: [],
-    refetchInterval: 60000,
+    refetchInterval: 5000,
   })
 }
 
@@ -33,6 +33,7 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
       const response = await axios.get(
         `${CROSSFI_API}/contracts?contractAddress=${collectionAddress}&page=1&limit=10&sort=-blockNumber`,
       )
+      console.log({response})
       const nftData = response.data.docs
 
       // Check if any document is CFC-721 and if nftData is not empty
@@ -41,7 +42,7 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
       return { isCFC721, nftData }
     },
     enabled: !!collectionAddress,
-    refetchInterval: 60000,
+    refetchInterval: 5000,
   })
 }
 
@@ -54,66 +55,72 @@ export function useGetMarketplaceCollectionsQuery() {
       if (!collections || collections.length === 0) return []
 
       const collectionPromises = collections.map(async (collection: ICollection) => {
-        const contract = await getContractCustom({
-          contractAddress: collection.collectionContractAddress,
-        })
+        try {
+          const contract = await getContractCustom({
+            contractAddress: collection.collectionContractAddress,
+          })
 
-        let nfts: NFT[] = []
-        if (collection.nftType === 'ERC721') {
-          nfts = await getERC721NFTs({ contract })
-        } else if (collection.nftType === 'ERC1155') {
-          nfts = await getERC1155NFTs({ contract })
-        }
+          const nfts: NFT[] = ([] = await getERC721NFTs({
+            contract,
+            includeOwners: includeNFTOwner,
+          }))
 
-        const allListing = await getAllListing()
+          const allListing = await getAllListing()
 
-        const collectionListing = allListing.filter(
-          (listing) =>
-            listing.assetContract === collection.collectionContractAddress &&
-            listing.status === StatusType.CREATED,
-        )
+          const collectionListing = allListing.filter(
+            (listing) =>
+              listing.assetContract === collection.collectionContractAddress &&
+              listing.status === StatusType.CREATED,
+          )
 
-        const totalVolumeCollection = allListing.filter(
-          (listing) =>
-            listing.assetContract === collection.collectionContractAddress &&
-            listing.status === StatusType.COMPLETED,
-        )
+          const totalVolumeCollection = allListing.filter(
+            (listing) =>
+              listing.assetContract === collection.collectionContractAddress &&
+              listing.status === StatusType.COMPLETED,
+          )
 
-        const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
-          const price = parseFloat(decimalOffChain(listing.pricePerToken) || '0')
-          return acc + price
-        }, 0)
+          const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
+            const price = parseFloat(decimalOffChain(listing.pricePerToken) || '0')
+            return acc + price
+          }, 0)
 
-        const formattedPrices = await Promise.all(
-          collectionListing.map(async (listing) => {
-            if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-              return ethers.utils.formatUnits(listing.pricePerToken, 'ether')
-            } else {
-              const tokenContract = await getContractCustom({
-                contractAddress: listing.currency,
-              })
-              const tokenDecimals = await decimals({
-                contract: tokenContract,
-              })
-              return ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals)
-            }
-          }),
-        )
+          const formattedPrices = await Promise.all(
+            collectionListing.map(async (listing) => {
+              if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
+                return ethers.utils.formatUnits(listing.pricePerToken, 'ether')
+              } else {
+                const tokenContract = await getContractCustom({
+                  contractAddress: listing.currency,
+                })
+                const tokenDecimals = await decimals({
+                  contract: tokenContract,
+                })
+                return ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals)
+              }
+            }),
+          )
 
-        const floorPrice =
-          formattedPrices.length > 0
-            ? Math.min(...formattedPrices.map((price) => parseFloat(price)))
-            : 0
+          const floorPrice =
+            formattedPrices.length > 0
+              ? Math.min(...formattedPrices.map((price) => parseFloat(price)))
+              : 0
 
-        return {
-          collection,
-          nfts,
-          totalVolume,
-          floorPrice: floorPrice.toString(),
+          return {
+            collection,
+            nfts,
+            totalVolume,
+            floorPrice: floorPrice.toString(),
+          }
+        } catch (error) {
+          return null
         }
       })
 
-      const collectionsData = await Promise.all(collectionPromises)
+      const settledResults = await Promise.allSettled(collectionPromises)
+      const collectionsData = settledResults
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .map((result) => result.value)
+        .filter((value) => value !== null)
 
       return ensureSerializable(collectionsData)
     },
@@ -141,11 +148,25 @@ export function useGetSingleNFTQuery({
         let nftList: NFT | null = null
 
         if (nftType === 'CFC-721') {
-          nftList = await getERC721NFT({
+          const nft = await getERC721NFT({
             contract,
             tokenId: BigInt(tokenId),
             includeOwner: includeNFTOwner,
           })
+          if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+            const { uri } = nft.metadata
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            nftList = {
+              ...nft,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          } else {
+            nftList = nft
+          }
         } else {
           throw new Error('NFT type not supported')
         }
@@ -195,36 +216,40 @@ export function useGetSingleNFTQuery({
             winningBid: winningBidBody,
           }
         } else if (nftListingList) {
-          const totalOffers = await getTotalOffers()
-          if (totalOffers === 0) {
-            result = {
-              id: 'listing',
-              nftListingList,
-              nft: nftList,
-              message: 'No offers found for the given token ID.',
-            }
-          } else {
-            const allOffers = await getAllOffers()
-            const filteredOffers = allOffers.filter(
-              (offers) =>
-                offers.assetContract === contractAddress && offers.tokenId === BigInt(tokenId),
-            )
+          const allOffers = await getAllOffers()
+          const filteredOffers = allOffers.filter(
+            (offers) =>
+              offers.assetContract === contractAddress &&
+              offers.tokenId === BigInt(tokenId) &&
+              offers.status === StatusType.CREATED,
+          )
 
-            result = {
-              id: 'listing',
-              nftListingList,
-              nft: nftList,
-              offers: filteredOffers.map((offer) => ({
+          result = {
+            id: 'listing',
+            nftListingList,
+            nft: nftList,
+            offers:
+              filteredOffers.map((offer) => ({
                 ...offer,
                 tokenId: offer.tokenId.toString(),
-              })),
-            }
+              })) || [],
           }
         } else {
+          const allOffers = await getAllOffers()
+          const filteredOffers = allOffers.filter(
+            (offers) =>
+              offers.assetContract === contractAddress && offers.tokenId === BigInt(tokenId),
+          )
+
           result = {
             id: 'none',
             nft: nftList,
             message: 'No auction or listing found for the given token ID.',
+            offers:
+              filteredOffers.map((offer) => ({
+                ...offer,
+                tokenId: offer.tokenId.toString(),
+              })) || [],
           }
         }
 
@@ -234,7 +259,7 @@ export function useGetSingleNFTQuery({
       }
     },
     enabled: !!contractAddress && !!nftType && !!tokenId && !!activeAccount?.address,
-    refetchInterval: 6000,
+    refetchInterval: 5000,
   })
 }
 

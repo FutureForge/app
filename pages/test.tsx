@@ -213,15 +213,15 @@ export default function TestPage() {
     //       console.log({ signer })
     //       const minterContractI = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, signer)
     //       console.log({ minterContractI })
-    //       const tokenURI = JSON.stringify({
-    //         name: 'MintMingles Logo',
-    //         description: 'MintMingles Logo ABCDEF',
-    //         image: uri,
-    //         attributes: [
-    //           { trait_type: 'Rarity', value: 'Common' },
-    //           { trait_type: 'Artist', value: 'Mingles' },
-    //         ],
-    //       })
+          // const tokenURI = JSON.stringify({
+          //   name: 'MintMingles Logo',
+          //   description: 'MintMingles Logo ABCDEF',
+          //   image: uri,
+          //   attributes: [
+          //     { trait_type: 'Rarity', value: 'Common' },
+          //     { trait_type: 'Artist', value: 'Mingles' },
+          //   ],
+          // })
     //       const transaction = await minterContractI.mint(tokenURI, {
     //         value: ethers.utils.parseEther('1'),
     //       })

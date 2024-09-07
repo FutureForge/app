@@ -1,22 +1,54 @@
 import { Icon, Loader } from '@/modules/app'
 import { Card, StakingLayout } from '@/modules/components/staking'
-import { useUserNFTsQuery } from '@/modules/query'
+import { useApprovedForAllStakingMutation, useStakingMutation } from '@/modules/mutation'
+import { useCheckApprovedForAllStakingQuery, useUserNFTsQuery } from '@/modules/query'
+import { CROSSFI_TEST_ASSET_ADDRESS } from '@/utils/configs'
 import Head from 'next/head'
+import { useMemo } from 'react'
 import { NFT } from 'thirdweb'
 
+type NFTHolding = {
+  address: string
+  balance: string
+  blockNumber: number
+  contractAddress: string
+  decimals: null
+  timestamp: string
+  tokenIds: string[]
+  tokenName: string
+  tokenSymbol: string
+  tokenType: string
+  nft: NFT
+}
+
 export default function Staking() {
+  const { data: checkApprovedForAllStaking } = useCheckApprovedForAllStakingQuery()
   const { data: staking, isLoading, isError } = useUserNFTsQuery()
 
-  if (isLoading) {
-    return <Loader />
+  const stakingData = useMemo(() => {
+    if (!staking) return []
+
+    return staking.filter(
+      (item: NFTHolding) =>
+        item.contractAddress.toLowerCase() === CROSSFI_TEST_ASSET_ADDRESS.toLowerCase(),
+    )
+  }, [staking]) as NFTHolding[]
+
+  const approvedForAllStakingMutation = useApprovedForAllStakingMutation()
+  const stakingMutation = useStakingMutation()
+
+  const isTxPending = approvedForAllStakingMutation.isPending || stakingMutation.isPending
+
+  const handleStakeNFT = async (tokenId: string) => {
+    stakingMutation.mutate({ tokenId })
   }
 
-  if (isError) {
-    return (
-      <div className="w-full h-[calc(100vh-349px)] flex items-center justify-center">
-        <p className="font-medium">Failed to load staking data. Please try again later.</p>
-      </div>
-    )
+  const handleApproveNFT = async (tokenId: string) => {
+    approvedForAllStakingMutation.mutate()
+  }
+
+  if (isLoading || isError) {
+    return <Loader />
   }
 
   return (
@@ -26,21 +58,25 @@ export default function Staking() {
       </Head>
       <StakingLayout>
         <div className="flex items-center justify-center">
-          {!staking || staking.length === 0 ? (
+          {!stakingData || stakingData.length === 0 ? (
             <div className="w-full h-[calc(100vh-349px)] flex items-center justify-center">
-              <p className="font-medium">When you stake an NFT, it&apos;ll appear here.</p>
+              <p className="font-medium">
+                You don&apos;t own any MINT MINGLE COLLECTION NFT NFT try buying one
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-7 2xl:grid-cols-6 max-lg:grid-cols-3 max-sm:grid-cols-1 max-xsm:grid-cols-2">
-              {staking?.map((item: NFT) => (
+              {stakingData?.map((item, index) => (
                 <Card
-                  key={item.metadata.name}
-                  title={item.metadata.name}
-                  src={item.metadata.image}
-                  onClick={() => {}}
+                  key={index}
+                  title={item.nft.metadata.name}
+                  src={item.nft.metadata.image || '/logo.svg'}
+                  onClick={checkApprovedForAllStaking ? handleStakeNFT : handleApproveNFT}
+                  tokenId={item.nft.id.toString()}
+                  disabled={isTxPending}
                   cta={
                     <span className="flex gap-2 items-center">
-                      Stake
+                      {checkApprovedForAllStaking ? 'Stake' : 'Approve'}
                       <Icon iconType="coins" className="w-4 text-white" />
                     </span>
                   }
@@ -53,66 +89,3 @@ export default function Staking() {
     </>
   )
 }
-
-type stakeProps = {
-  src: string
-  title: string
-}
-const stake = [
-  {
-    src: '/Image.png',
-    title: '1',
-  },
-  {
-    src: '/Image.png',
-    title: '2',
-  },
-  {
-    src: '/Image.png',
-    title: '3',
-  },
-  {
-    src: '/Image.png',
-    title: '4',
-  },
-  {
-    src: '/Image.png',
-    title: '5',
-  },
-  {
-    src: '/Image.png',
-    title: '6',
-  },
-  {
-    src: '/Image.png',
-    title: '7',
-  },
-  {
-    src: '/Image.png',
-    title: '8',
-  },
-  {
-    src: '/Image.png',
-    title: '9',
-  },
-  {
-    src: '/Image.png',
-    title: '10',
-  },
-  {
-    src: '/Image.png',
-    title: '11',
-  },
-  {
-    src: '/Image.png',
-    title: '12',
-  },
-  {
-    src: '/Image.png',
-    title: '13',
-  },
-  {
-    src: '/Image.png',
-    title: '14',
-  },
-]

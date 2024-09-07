@@ -16,7 +16,7 @@ export function useCheckApprovedForAllStakingQuery() {
   return useQuery({
     queryKey: ['approval-staking'],
     queryFn: async () => {
-      if (!activeAccount?.address) return false
+      if (!activeAccount?.address) throw new Error('Wallet not connected')
 
       const isApproved = await getCheckApprovedForAllStaking({
         walletAddress: activeAccount?.address,
@@ -25,7 +25,7 @@ export function useCheckApprovedForAllStakingQuery() {
       return isApproved
     },
     enabled: !!activeAccount,
-    refetchInterval: 6000,
+    refetchInterval: 5000,
   })
 }
 
@@ -33,9 +33,9 @@ export function useGetUserStakingInfoQuery() {
   const { activeAccount } = useUserChainInfo()
 
   return useQuery({
-    queryKey: ['user-staking'],
+    queryKey: ['staking', 'claim-stake-rewards', 'withdraw-staking'],
     queryFn: async () => {
-      if (!activeAccount?.address) return null // Return null if no active account
+      if (!activeAccount?.address) throw new Error('Wallet not connected')
 
       const contract = getContractCustom({
         contractAddress: CROSSFI_TEST_ASSET_ADDRESS,
@@ -64,6 +64,6 @@ export function useGetUserStakingInfoQuery() {
       return ensureSerializable({ tokensStaked, rewards, nftsTokenStaked })
     },
     enabled: !!activeAccount?.address,
-    refetchInterval: 6000,
+    refetchInterval: 5000,
   })
 }

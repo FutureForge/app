@@ -4,6 +4,7 @@ import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { ThirdwebProvider } from 'thirdweb/react'
 import { Inter } from 'next/font/google'
+import '../utils/suppressConsoleErrors'
 
 const inter = Inter({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--inter' })
 

@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { useCheckIfItsACollectionQuery, useFetchCollectionsQuery } from '@/modules/query'
 import { ICollection } from '@/utils/models'
 import { useToast } from '@/modules/app/hooks/useToast'
+import { isNFTContract } from '@/modules/mutation/collection'
 
 export function AddCollection() {
   const toast = useToast()
@@ -19,7 +20,8 @@ export function AddCollection() {
   const [description, setDescription] = useState('')
   const [collectionContractAddress, setCollectionContractAddress] = useState('')
   const [nftName, setNFTName] = useState('')
-  const [collectionExist, setCollectionExist] = useState(false)
+  const [NFTContract, setNFTContract] = useState<boolean>()
+  const [collectionExist, setCollectionExist] = useState<boolean>()
 
   const { data: collectionInfo } = useCheckIfItsACollectionQuery(collectionContractAddress)
 
@@ -69,8 +71,6 @@ export function AddCollection() {
     showToast()
   }, [addCollectionMutation.isPending, toast])
 
-  console.log('add collection', addCollectionMutation)
-
   useEffect(() => {
     if (collections) {
       const collectionExist = collections.some(
@@ -80,6 +80,17 @@ export function AddCollection() {
       setCollectionExist(collectionExist)
     }
   }, [collections, collectionContractAddress])
+
+  useEffect(() => {
+    const checkIfNFT721Contract = async () => {
+      if (collectionContractAddress) {
+        const result = await isNFTContract(collectionContractAddress)
+        console.log('result', result)
+        setNFTContract(result)
+      }
+    }
+    checkIfNFT721Contract()
+  }, [collectionContractAddress])
 
   return (
     <div className="h-[calc(100vh-120px)] w-full flex max-lg:flex-col justify-between max-lg:gap-8 gap-20">
@@ -155,7 +166,7 @@ export function AddCollection() {
                 id="contract"
                 placeholder="Contract Address"
               />
-              {collectionContractAddress && collectionInfo && !collectionInfo.isCFC721 && (
+              {collectionContractAddress && !NFTContract && (
                 <p style={{ color: 'red' }}>Not a Valid CFC-721 token</p>
               )}
               {collectionContractAddress && collectionExist && (

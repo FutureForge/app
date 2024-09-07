@@ -19,7 +19,6 @@ export function useFetchCollectionsQuery() {
     queryKey: ['collections'],
     queryFn: async () => {
       const response = await axios.get('/api/collection')
-      console.log('fetch collections', response)
       return response.data.data
     },
     initialData: [],
@@ -34,6 +33,7 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
       const response = await axios.get(
         `${CROSSFI_API}/contracts?contractAddress=${collectionAddress}&page=1&limit=10&sort=-blockNumber`,
       )
+      console.log({response})
       const nftData = response.data.docs
 
       // Check if any document is CFC-721 and if nftData is not empty
@@ -42,7 +42,7 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
       return { isCFC721, nftData }
     },
     enabled: !!collectionAddress,
-    refetchInterval: 60000,
+    refetchInterval: 5000,
   })
 }
 
@@ -55,66 +55,72 @@ export function useGetMarketplaceCollectionsQuery() {
       if (!collections || collections.length === 0) return []
 
       const collectionPromises = collections.map(async (collection: ICollection) => {
-        const contract = await getContractCustom({
-          contractAddress: collection.collectionContractAddress,
-        })
+        try {
+          const contract = await getContractCustom({
+            contractAddress: collection.collectionContractAddress,
+          })
 
-        let nfts: NFT[] = []
-        if (collection.nftType === 'ERC721') {
-          nfts = await getERC721NFTs({ contract })
-        } else if (collection.nftType === 'ERC1155') {
-          nfts = await getERC1155NFTs({ contract })
-        }
+          const nfts: NFT[] = ([] = await getERC721NFTs({
+            contract,
+            includeOwners: includeNFTOwner,
+          }))
 
-        const allListing = await getAllListing()
+          const allListing = await getAllListing()
 
-        const collectionListing = allListing.filter(
-          (listing) =>
-            listing.assetContract === collection.collectionContractAddress &&
-            listing.status === StatusType.CREATED,
-        )
+          const collectionListing = allListing.filter(
+            (listing) =>
+              listing.assetContract === collection.collectionContractAddress &&
+              listing.status === StatusType.CREATED,
+          )
 
-        const totalVolumeCollection = allListing.filter(
-          (listing) =>
-            listing.assetContract === collection.collectionContractAddress &&
-            listing.status === StatusType.COMPLETED,
-        )
+          const totalVolumeCollection = allListing.filter(
+            (listing) =>
+              listing.assetContract === collection.collectionContractAddress &&
+              listing.status === StatusType.COMPLETED,
+          )
 
-        const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
-          const price = parseFloat(decimalOffChain(listing.pricePerToken) || '0')
-          return acc + price
-        }, 0)
+          const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
+            const price = parseFloat(decimalOffChain(listing.pricePerToken) || '0')
+            return acc + price
+          }, 0)
 
-        const formattedPrices = await Promise.all(
-          collectionListing.map(async (listing) => {
-            if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-              return ethers.utils.formatUnits(listing.pricePerToken, 'ether')
-            } else {
-              const tokenContract = await getContractCustom({
-                contractAddress: listing.currency,
-              })
-              const tokenDecimals = await decimals({
-                contract: tokenContract,
-              })
-              return ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals)
-            }
-          }),
-        )
+          const formattedPrices = await Promise.all(
+            collectionListing.map(async (listing) => {
+              if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
+                return ethers.utils.formatUnits(listing.pricePerToken, 'ether')
+              } else {
+                const tokenContract = await getContractCustom({
+                  contractAddress: listing.currency,
+                })
+                const tokenDecimals = await decimals({
+                  contract: tokenContract,
+                })
+                return ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals)
+              }
+            }),
+          )
 
-        const floorPrice =
-          formattedPrices.length > 0
-            ? Math.min(...formattedPrices.map((price) => parseFloat(price)))
-            : 0
+          const floorPrice =
+            formattedPrices.length > 0
+              ? Math.min(...formattedPrices.map((price) => parseFloat(price)))
+              : 0
 
-        return {
-          collection,
-          nfts,
-          totalVolume,
-          floorPrice: floorPrice.toString(),
+          return {
+            collection,
+            nfts,
+            totalVolume,
+            floorPrice: floorPrice.toString(),
+          }
+        } catch (error) {
+          return null
         }
       })
 
-      const collectionsData = await Promise.all(collectionPromises)
+      const settledResults = await Promise.allSettled(collectionPromises)
+      const collectionsData = settledResults
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .map((result) => result.value)
+        .filter((value) => value !== null)
 
       return ensureSerializable(collectionsData)
     },

@@ -14,14 +14,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { sendAndConfirmTransaction } from 'thirdweb'
 import WXFIAbi from '@/utils/abi/wxfi.json'
 import { BigNumber } from 'ethers'
+import { useToast } from '@/modules/app/hooks/useToast'
 
 export function useMakeListingOfferMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ makeOffer }: { makeOffer: Partial<MakeOfferListingType> }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const WXFIContract = await getContractEthers({
         contractAddress: CROSSFI_WRAPPED_TOKEN_CONTRACT,
@@ -36,6 +38,7 @@ export function useMakeListingOfferMutation() {
       )
 
       if (BigNumber.from(wxfiBalanceRaw).lt(makeOfferValue!)) {
+        toast.loading('Wrapping XFI to WXFI')
         try {
           const depositTxData = await WXFIContract.populateTransaction.deposit({
             value: makeOfferValue,
@@ -50,6 +53,7 @@ export function useMakeListingOfferMutation() {
           }
 
           const newWxfiBalanceRaw = await WXFIContract.balanceOf(activeAccount.address)
+          toast.success('XFI wrapped to WXFI successfully')
           if (BigNumber.from(newWxfiBalanceRaw).lt(makeOfferValue!)) {
             throw new Error('Insufficient balance even after deposit')
           }
@@ -59,6 +63,7 @@ export function useMakeListingOfferMutation() {
       }
 
       if (BigNumber.from(wxfiAllowance).lt(makeOfferValue!)) {
+        toast.loading('Approving WXFI to spend')
         try {
           const approvalTxData = await WXFIContract.populateTransaction.approve(
             CROSSFI_MARKETPLACE_CONTRACT,
@@ -71,6 +76,8 @@ export function useMakeListingOfferMutation() {
           if (receipt.status === 'reverted') {
             throw new Error('Transaction failed')
           }
+
+          toast.success('Approval successful')
         } catch (error) {
           throw new Error('Approval failed')
         }
@@ -116,12 +123,13 @@ export function useMakeListingOfferMutation() {
 }
 
 export function useAcceptOfferMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ offerId }: { offerId: string }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getAcceptOffer({
         offerId: offerId,
@@ -156,12 +164,13 @@ export function useAcceptOfferMutation() {
 }
 
 export function useCancelOfferMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ offerId }: { offerId: string }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getCancelOffer({
         offerId: offerId,
@@ -196,12 +205,13 @@ export function useCancelOfferMutation() {
 }
 
 export function useBidInAuctionMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ auctionId, bidAmount }: { auctionId: string; bidAmount: string }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getBidInAuction({
         auctionId: auctionId,
@@ -237,12 +247,13 @@ export function useBidInAuctionMutation() {
 }
 
 export function useCollectAuctionPayoutMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ auctionId }: { auctionId: string }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getCollectAuctionPayout({
         auctionId: auctionId,
@@ -277,12 +288,13 @@ export function useCollectAuctionPayoutMutation() {
 }
 
 export function useCollectAuctionTokensMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ auctionId }: { auctionId: string }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getCollectAuctionTokens({
         auctionId: auctionId,

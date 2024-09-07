@@ -3,8 +3,10 @@ import { owner } from 'thirdweb/extensions/common'
 import axios from 'axios'
 import { getContractCustom } from '@/modules/blockchain'
 import { useUserChainInfo } from '@/modules/query'
+import { useToast } from '@/modules/app/hooks/useToast'
 
 export function useAddCollectionMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
@@ -15,6 +17,8 @@ export function useAddCollectionMutation() {
       description: string
       image: string
     }) => {
+      if (!activeAccount?.address) return toast.error('Please connect your wallet')
+
       const contract = await getContractCustom({
         contractAddress: newCollection.collectionContractAddress,
       })

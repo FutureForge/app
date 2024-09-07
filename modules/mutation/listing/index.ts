@@ -1,3 +1,4 @@
+import { useToast } from '@/modules/app/hooks/useToast'
 import {
   getBuyFromDirectListing,
   getCancelDirectListing,
@@ -10,12 +11,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { sendAndConfirmTransaction } from 'thirdweb'
 
 export function useCreateListingMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ directListing }: { directListing: Partial<CreateDirectListingType> }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getCreateDirectListing({
         params: {
@@ -57,6 +59,7 @@ export function useCreateListingMutation() {
 }
 
 export function useUpdateListingMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
@@ -68,7 +71,7 @@ export function useUpdateListingMutation() {
       listingId: string
       directListing: Partial<CreateDirectListingType>
     }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getUpdateDirectListing({
         listingId,
@@ -110,12 +113,13 @@ export function useUpdateListingMutation() {
 }
 
 export function useCancelDirectListingMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
   return useMutation({
     mutationFn: async ({ listingId }: { listingId: string }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getCancelDirectListing({
         listingId,
@@ -150,6 +154,7 @@ export function useCancelDirectListingMutation() {
 }
 
 export function useBuyFromDirectListingMutation() {
+  const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
 
@@ -159,7 +164,7 @@ export function useBuyFromDirectListingMutation() {
     }: {
       buyFromListing: Partial<BuyFromDirectListingType>
     }) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
 
       const transaction = await getBuyFromDirectListing({
         params: {

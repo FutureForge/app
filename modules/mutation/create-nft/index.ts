@@ -6,6 +6,7 @@ import { ethers } from 'ethers'
 import MinterABI from '@/utils/abi/minterABI.json'
 import { useUserChainInfo } from '@/modules/query'
 import { useRouter } from 'next/router'
+import { useToast } from '@/modules/app/hooks/useToast'
 
 type CreateNFTMetadata = {
   name: string
@@ -18,6 +19,7 @@ type CreateNFTMetadata = {
 }
 
 export function useCreateNFTMutation() {
+  const toast = useToast()
   const router = useRouter()
 
   const queryClient = useQueryClient()
@@ -25,7 +27,8 @@ export function useCreateNFTMutation() {
 
   return useMutation({
     mutationFn: async (createNFTData: CreateNFTMetadata) => {
-      if (!activeAccount) return
+      if (!activeAccount) return toast.error('Please connect your wallet')
+
       const minterContract = await getContractEthers({
         contractAddress: CROSSFI_MINTER_ADDRESS,
         abi: MinterABI,

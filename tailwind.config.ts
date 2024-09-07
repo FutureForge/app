@@ -18,6 +18,8 @@ const config: Config = {
         xs: '375px',
         sm: '425px' /* iPhone 12-15 */,
         xsm: '568px',
+        base: '968px' /* Xl Tablets */,
+        '2xl': '1980px' /* Larger Monitors */,
       },
       colors: {
         primary: '#3C3C434A',

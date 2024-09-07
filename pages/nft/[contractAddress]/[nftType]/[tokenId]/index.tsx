@@ -434,7 +434,7 @@ const NFTDetailPage = () => {
 
           {/* BUYER BUTTON */}
           {!isOwner && (
-            <>
+            <div className='flex items-center w-full gap-3 max-md:flex-col'>
               {id === 'listing' && (
                 <Button
                   onClick={handleBuyOutDirectListing}
@@ -551,7 +551,7 @@ const NFTDetailPage = () => {
                   </Dialog.Content>
                 </Dialog.Root>
               )}
-            </>
+            </div>
           )}
           {/* BUYER BUTTON */}
 

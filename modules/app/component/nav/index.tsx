@@ -1,21 +1,22 @@
 import Link from 'next/link'
 import { Icon } from '../icon-selector/icon-selector'
 import { useSearchStore } from '@/modules/stores'
-import { Button } from '../button'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { IoIosMenu } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { useDisableScroll } from '../../hooks/useDisableScroll'
 import { cn } from '../../utils'
-import { ConnectButton } from 'thirdweb/react'
+import { ConnectButton, MediaRenderer } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
-import { chainInfo, chainInfoV2, client } from '@/utils/configs'
+import { chainInfo, client } from '@/utils/configs'
 import { usePathname } from 'next/navigation'
 import {
-  useFetchCollectionsQuery,
   useGetGlobalListingOrAuctionQuery,
   useGetMarketplaceCollectionsQuery,
 } from '@/modules/query'
+import { ICollection } from '@/utils/models'
+import { NFT } from 'thirdweb'
+import { NewAuction, NewListing } from '@/modules/components/header/types/types'
 
 const Nav_Links = [
   {
@@ -35,17 +36,26 @@ const Nav_Links = [
   //   link: '/collections',
   // },
 ]
+
+type MarketplaceCollectionType = {
+  collection: ICollection
+  floorPrice: string
+  totalVolume: number
+  nfts: NFT[]
+}
+
 export function Nav() {
-  const collection = useFetchCollectionsQuery()
-  const { data: marketplaceCollection } = useGetMarketplaceCollectionsQuery()
+  const marketplaceCollection = useGetMarketplaceCollectionsQuery()
   const { data: global } = useGetGlobalListingOrAuctionQuery()
 
-  console.log({ marketplaceCollection })
-  console.log({ collection })
-  console.log({ global })
+  const marketplaceCollectionData: MarketplaceCollectionType[] = marketplaceCollection?.data
+  const allAuction: NewAuction[] = global?.allAuction
+  const allListing: NewListing[] = global?.allListing
 
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [showResults, setShowResults] = useState(false)
   const pathname = usePathname()
   useDisableScroll(isMobileNavOpen)
 
@@ -54,11 +64,64 @@ export function Nav() {
     setValue: state.setValue,
   }))
 
-  console.log({ value })
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value)
+    setIsSearching(true)
+    setShowResults(true)
   }
+
+  const clearSearch = () => {
+    setValue('')
+    setShowResults(false)
+  }
+
+  const searchResults = useMemo(() => {
+    setIsSearching(true)
+    if (!value) {
+      setIsSearching(false)
+      return []
+    }
+
+    const results = new Map()
+
+    // Search in global.allAuction
+    allAuction?.forEach((auction) => {
+      if (auction?.nft?.metadata?.name?.toLowerCase().includes(value.toLowerCase())) {
+        results.set(auction.nft.metadata.name.toLowerCase(), { ...auction, type: 'auction' })
+      }
+    })
+
+    // Search in global.allListed
+    allListing?.forEach((listing) => {
+      if (listing?.nft?.metadata?.name?.toLowerCase().includes(value.toLowerCase())) {
+        results.set(listing.nft.metadata.name.toLowerCase(), { ...listing, type: 'direct_listing' })
+      }
+    })
+
+    // Search in marketplaceCollection
+    marketplaceCollectionData?.forEach((item) => {
+      if (item.collection.name.toLowerCase().includes(value.toLowerCase())) {
+        if (!results.has(item.collection.name.toLowerCase())) {
+          results.set(item.collection.name.toLowerCase(), { ...item, type: 'collection' })
+        }
+      }
+      item.nfts?.forEach((nft) => {
+        if (nft?.metadata?.name?.toLowerCase().includes(value.toLowerCase())) {
+          if (!results.has(nft.metadata.name.toLowerCase())) {
+            results.set(nft.metadata.name.toLowerCase(), {
+              ...nft,
+              type: 'collection_nft',
+              collectionName: item.collection.name,
+              assetContract: item.collection.collectionContractAddress,
+            })
+          }
+        }
+      })
+    })
+
+    setIsSearching(false)
+    return Array.from(results.values())
+  }, [value, marketplaceCollectionData, allAuction, allListing])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,6 +134,7 @@ export function Nav() {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
+
   return (
     <nav
       className={cn(
@@ -105,7 +169,7 @@ export function Nav() {
           })}
         </ul>
       </div>
-      <div className="lg:flex items-center hidden justify-between w-1/3 bg-primary gap-3  h-10 px-4 rounded-xl border border-primary">
+      <div className="lg:flex items-center hidden justify-between w-1/3 bg-primary gap-3  h-10 px-4 rounded-xl border border-primary relative">
         <Icon iconType={'search'} className="w-5 cursor-pointer text-[#292D32]" />
 
         <input
@@ -115,6 +179,54 @@ export function Nav() {
           value={value}
           onChange={handleChange}
         />
+
+        {showResults && value && (
+          <div className="absolute top-full left-0 w-full mt-2 bg-black rounded-xl shadow-lg max-h-96 overflow-y-auto">
+            {isSearching ? (
+              <div className="p-4 text-white text-center">Searching...</div>
+            ) : searchResults.length > 0 ? (
+              searchResults.map((result, index) => (
+                <Link
+                  href={
+                    result.type === 'collection'
+                      ? ``
+                      : `/nft/${result.assetContract}/CFC-721/${
+                          result.tokenId || result.id || result.nft?.id
+                        }`
+                  }
+                  key={index}
+                  className="p-2 hover:bg-gray-800 flex items-center"
+                  onClick={clearSearch}
+                >
+                  <MediaRenderer
+                    client={client}
+                    src={
+                      result.nft?.metadata?.image ||
+                      result.metadata?.image ||
+                      result.collection?.image ||
+                      '/logo.svg'
+                    }
+                    className="rounded-2xl mr-2"
+                    style={{ maxHeight: '40px', width: '40px', height: '40px' }}
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-white">
+                      {result.collection?.name ||
+                        result.nfts?.name ||
+                        result.metadata?.name ||
+                        result?.nft?.metadata?.name}
+                    </span>
+                    <span className={`text-xs font-semibold ${getTagColor(result.type)}`}>
+                      {getTagText(result.type, result.collectionName)}
+                    </span>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="p-4 text-white text-center">No results found</div>
+            )}
+          </div>
+        )}
       </div>
       <div className="lg:w-1/6 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
         <Icon
@@ -176,4 +288,34 @@ function MobileNav() {
       </div>
     </div>
   )
+}
+
+function getTagText(type: string, collectionName?: string) {
+  switch (type) {
+    case 'collection':
+      return 'Collection'
+    case 'collection_nft':
+      return `NFT in ${collectionName}`
+    case 'auction':
+      return 'Live Auction'
+    case 'direct_listing':
+      return 'Direct Sale'
+    default:
+      return ''
+  }
+}
+
+function getTagColor(type: string) {
+  switch (type) {
+    case 'collection':
+      return 'text-blue-400'
+    case 'collection_nft':
+      return 'text-green-400'
+    case 'auction':
+      return 'text-purple-400'
+    case 'direct_listing':
+      return 'text-yellow-400'
+    default:
+      return 'text-gray-400'
+  }
 }

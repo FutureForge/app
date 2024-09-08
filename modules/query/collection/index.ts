@@ -261,17 +261,11 @@ export function useGetSingleNFTQuery({
   })
 }
 
-export function useGetSingleCollectionQuery({
-  contractAddress,
-  nftType,
-}: {
-  contractAddress: string
-  nftType: NFTType
-}) {
+export function useGetSingleCollectionQuery({ contractAddress }: { contractAddress: string }) {
   const { data: collections } = useFetchCollectionsQuery()
 
   return useQuery({
-    queryKey: ['collection', 'auction', contractAddress, nftType],
+    queryKey: ['collection', 'auction', contractAddress],
     queryFn: async () => {
       const [allListing, allOffers] = await Promise.all([getAllListing(), getAllOffers()])
 
@@ -279,15 +273,10 @@ export function useGetSingleCollectionQuery({
         contractAddress,
       })
 
-      let nfts: NFT[] = []
-      if (nftType === 'ERC721') {
-        nfts = await getERC721NFTs({
-          contract,
-          includeOwners: includeNFTOwner,
-        })
-      } else if (nftType === 'ERC1155') {
-        nfts = await getERC1155NFTs({ contract })
-      }
+      const nfts: NFT[] = await getERC721NFTs({
+        contract,
+        includeOwners: includeNFTOwner,
+      })
 
       const collectionListing = allListing.filter(
         (listing) =>
@@ -369,7 +358,7 @@ export function useGetSingleCollectionQuery({
       listedNFTs: 0,
       percentageOfListed: 0,
     },
-    enabled: !!collections && !!contractAddress && !!nftType,
+    enabled: !!collections && !!contractAddress,
     refetchInterval: 6000,
   })
 }

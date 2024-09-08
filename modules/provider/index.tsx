@@ -24,7 +24,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
 
             if (!successMessage) return toast.success('Transaction was Successfully')
 
-            toast.success(successMessage.description, {
+            toast.success(`${successMessage.description}: `, {
               title: successMessage.title,
             })
 
@@ -40,7 +40,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
 
             if (!errorMessage) return toast.error(error.message)
 
-            toast.error(`${errorMessage.description} ${error.message}`, {
+            toast.error(`${errorMessage.description} ${error.message}: `, {
               title: errorMessage.title,
             })
             console.log({ message: errorMessage, error: error.message })

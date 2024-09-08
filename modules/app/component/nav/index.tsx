@@ -6,10 +6,10 @@ import { IoIosMenu } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { useDisableScroll } from '../../hooks/useDisableScroll'
 import { cn } from '../../utils'
-import { ConnectButton, MediaRenderer } from 'thirdweb/react'
+import { ConnectButton, MediaRenderer, useActiveAccount } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
 import { chainInfo, client } from '@/utils/configs'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   useGetGlobalListingOrAuctionQuery,
   useGetMarketplaceCollectionsQuery,
@@ -52,6 +52,9 @@ export function Nav() {
   const allAuction: NewAuction[] = global?.allAuction
   const allListing: NewListing[] = global?.allListing
 
+  const activeAccount = useActiveAccount()
+  const router = useRouter()
+
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
@@ -69,7 +72,13 @@ export function Nav() {
     setIsSearching(true)
     setShowResults(true)
   }
-
+  const handleClick = () => {
+    if (activeAccount) {
+      router.push('/user-profile')
+    } else {
+      router.push('/')
+    }
+  }
   const clearSearch = () => {
     setValue('')
     setShowResults(false)
@@ -231,6 +240,7 @@ export function Nav() {
       <div className="lg:w-1/6 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
         <Icon
           iconType={'profile'}
+          onClick={handleClick}
           className="w-6 text-muted-foreground max-sm:hidden cursor-pointer hover:text-foreground duration-300 ease-in-out transition"
         />
 

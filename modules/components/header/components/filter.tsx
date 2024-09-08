@@ -1,15 +1,20 @@
-export type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
+import { cn } from "@/modules/app"
 
-type FilterButtonsProps = {
-  filter: FilterType
-  setFilter: (filter: FilterType) => void
+type FilterButtonsProps<T extends string> = {
+  filter: T
+  setFilter: (filter: T) => void
+  filters: T[]
+  className?: string
 }
 
-export function FilterButtons({ filter, setFilter }: FilterButtonsProps) {
-  const filters: FilterType[] = ['All', 'Recently Listed', 'Recently Sold', 'Recently Auctioned']
-
+export function FilterButtons<T extends string>({
+  filter,
+  setFilter,
+  filters,
+  className
+}: FilterButtonsProps<T>) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className={cn("flex items-center gap-3 overflow-x-auto whitespace-nowrap", className)}>
       {filters.map((f) => (
         <button
           key={f}

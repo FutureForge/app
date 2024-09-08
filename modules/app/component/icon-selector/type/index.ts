@@ -1,4 +1,4 @@
-import { Profile, Search, Logo, MintCoin, Download, Caret, Coins, Arrow } from "./svgs/svgs";
+import { Profile, Search, Logo, MintCoin, Download, Caret, Coins, Arrow, Cart } from "./svgs/svgs";
 
 export const ICON_TYPE: {
   [key: string]: {
@@ -13,7 +13,8 @@ export const ICON_TYPE: {
     download: Download,
     caret: Caret,
     coins: Coins,
-    arrow: Arrow
+    arrow: Arrow,
+    cart: Cart
 
 
   },

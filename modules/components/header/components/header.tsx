@@ -10,8 +10,11 @@ import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
 import Image from 'next/image'
 import { Loader } from '@/modules/app'
+import { useMediaQuery } from '@uidotdev/usehooks'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
+
+const filters: FilterType[] = ['All', 'Recently Listed', 'Recently Sold', 'Recently Auctioned']
 
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
@@ -56,8 +59,29 @@ export function Header() {
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 4,
+    arrows: false,
+    centerPadding: '60px',
     autoplay: true,
     autoplaySpeed: 3000,
+    responsive: [
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+          initialSlide: 2,
+          dots: true,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          dots: true,
+        },
+      },
+    ],
   }
 
   if (isLoading || isError) return <Loader />
@@ -88,17 +112,17 @@ export function Header() {
 
   return (
     <div>
-      <FilterButtons filter={filter} setFilter={setFilter} />
+      <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
 
-      <div className="">
+      <div className="px-4 max-xsm:mt-5">
         {filteredData.length === 0 ? (
           <div className="flex w-full items-center justify-center h-[320px]">
             <p>No data available</p>
           </div>
-        ) : filteredData.length > 4 ? (
+        ) : filteredData.length > 4? (
           <Slider {...sliderSettings}>{filteredData.map(renderItem)}</Slider>
         ) : (
-          <div className="flex mt-8 items-center gap-8">{filteredData.map(renderItem)}</div>
+          <div className="flex mt-8 items-center gap-8 flex-wrap">{filteredData.map(renderItem)}</div>
         )}
       </div>
     </div>

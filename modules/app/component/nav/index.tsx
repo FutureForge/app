@@ -239,7 +239,7 @@ export function Nav() {
           </div>
         )}
       </div>
-      <div className="lg:w-1/6 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
+      <div className="lg:w-1/5 w-1/2 flex lg:items-center justify-end lg:gap-6 gap-2 ">
         <Icon
           iconType={'profile'}
           onClick={handleClick}

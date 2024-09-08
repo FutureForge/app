@@ -60,6 +60,8 @@ export function Nav() {
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const pathname = usePathname()
+
+
   useDisableScroll(isMobileNavOpen)
 
   const { value, setValue } = useSearchStore((state) => ({
@@ -74,9 +76,9 @@ export function Nav() {
   }
   const handleClick = () => {
     if (activeAccount) {
-      router.push('/user-profile')
+      router.push('/user-profile') 
     } else {
-      router.push('/')
+      router.push('/') 
     }
   }
   const clearSearch = () => {

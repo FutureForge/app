@@ -5,10 +5,23 @@ import type { AppProps } from 'next/app'
 import { ThirdwebProvider } from 'thirdweb/react'
 import { Inter } from 'next/font/google'
 import '../utils/suppressConsoleErrors'
+import { ReactElement, ReactNode } from 'react'
+import type { NextPage } from 'next'
 
+
+type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode
+}
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout
+}
 const inter = Inter({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--inter' })
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
+ const getLayout = Component.getLayout ?? ((page) => <RootLayout>{page}</RootLayout>)
+
+
   return (
     <ThirdwebProvider>
       <style
@@ -20,11 +33,7 @@ export default function App({ Component, pageProps }: AppProps) {
             }`,
         }}
       />
-      <QueryProvider>
-        <RootLayout>
-          <Component {...pageProps} />
-        </RootLayout>
-      </QueryProvider>
+      <QueryProvider>{getLayout(<Component {...pageProps} />)}</QueryProvider>
     </ThirdwebProvider>
   )
 }

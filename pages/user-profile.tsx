@@ -1,11 +1,29 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { act, ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { MediaRenderer, useActiveAccount } from 'thirdweb/react'
 import { Header, ProfileLayout } from '@/modules/components/profile'
 import { FilterButtons } from '@/modules/components/header/components/filter'
-import { useUserNFTsQuery } from '@/modules/query'
+import {
+  useUserAuctionQuery,
+  useUserChainInfo,
+  useUserListingQuery,
+  useUserNFTsQuery,
+  useUserOffersMadeQuery,
+} from '@/modules/query'
 import { client } from '@/utils/configs'
-import { Button, cn, Icon } from '@/modules/app'
+import { Button, cn, Icon, Loader } from '@/modules/app'
+import { decimalOffChain } from '@/modules/blockchain'
+import { useToast } from '@/modules/app/hooks/useToast'
+import {
+  useCancelAuctionMutation,
+  useCancelDirectListingMutation,
+  useCancelOfferMutation,
+  useCreateAuctionMutation,
+  useCreateListingMutation,
+} from '@/modules/mutation'
+import { Dialog } from '@/modules/app/component/dialog'
+import { NFTDialog } from '@/modules/components/nft-details'
+import { NFT } from 'thirdweb'
 
 type FilterType = 'NFTs' | 'Listed' | "Offer's Made" | 'Auction'
 
@@ -150,22 +168,165 @@ const DATA = [
     ],
   },
 ]
+
+type NFTSelectedItem = {
+  address: string
+  balance: string
+  blockNumber: number
+  contractAddress: string
+  decimals: number | null
+  nft: NFT
+  timestamp: string
+  tokenIds: string[]
+  tokenName: string
+  tokenSymbol: string
+  tokenType: string
+  type: 'NFTs' | 'Listed' | "Offer's Made" | 'Auction' // Assuming these are the possible types
+}
+
 export default function UserProfile() {
   const router = useRouter()
-  const activeAccount = useActiveAccount()
+  const toast = useToast()
+  const { activeAccount, activeWallet } = useUserChainInfo()
+  const address = activeAccount?.address
+  const chain = activeWallet?.getChain()
+
   const [filter, setFilter] = useState<FilterType>('NFTs')
+  const [selectedNFT, setSelectedNFT] = useState<NFTSelectedItem>()
+  const [value, setValue] = useState('')
+  const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
+  const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
 
-  const { data } = useUserNFTsQuery()
+  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError } = useUserNFTsQuery()
+  const {
+    data: userOffersMade,
+    isLoading: userOffersMadeLoading,
+    isError: userOffersError,
+  } = useUserOffersMadeQuery()
+  const {
+    data: userListing,
+    isLoading: userListingLoading,
+    isError: userListingError,
+  } = useUserListingQuery()
+  const {
+    data: userAuction,
+    isLoading: userAuctionLoading,
+    isError: userAuctionError,
+  } = useUserAuctionQuery()
 
-  const filteredData = DATA.filter((item) => item.type === filter)
+  const isLoading =
+    userNFTLoading || userOffersMadeLoading || userListingLoading || userAuctionLoading
+  const isError = userNFTError || userOffersError || userListingError || userAuctionError
 
-  useEffect(() => {
-    if (!activeAccount) {
-      router.push('/')
-    }
-  }, [activeAccount, router])
+  const allData = [
+    ...(userNFTS || []),
+    ...(userOffersMade || []),
+    ...(userListing || []),
+    ...(userAuction || []),
+  ]
+  const filteredData = allData.filter((item) => item.type === filter)
 
-  const getCtaAndOnClick = (item: (typeof DATA)[0]) => {
+  const cancelDirectListingMutation = useCancelDirectListingMutation()
+  const cancelOfferMutation = useCancelOfferMutation()
+  const cancelAuctionMutation = useCancelAuctionMutation()
+  const createListingMutation = useCreateListingMutation()
+  const createAuctionMutation = useCreateAuctionMutation()
+
+  const isTxPending =
+    cancelAuctionMutation.isPending ||
+    cancelOfferMutation.isPending ||
+    createAuctionMutation.isPending ||
+    createListingMutation.isPending ||
+    cancelDirectListingMutation.isPending
+
+  const handleCancelDirectListing = (listingId: string) => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+
+    cancelDirectListingMutation.mutate({ listingId })
+  }
+
+  const handleCancelOffer = (offerId: string) => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+
+    cancelOfferMutation.mutate({ offerId })
+  }
+
+  const handleCancelAuction = (auctionId: string) => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+
+    cancelAuctionMutation.mutate({ auctionId })
+  }
+
+  const handleCreateListing = async () => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!value) return toast.error('Please enter a valid listing amount.')
+    if (!endTimestamp) return toast.error('Please select an end date')
+    if (!selectedNFT) return toast.error('Please select an NFT')
+
+    const contractAddress = selectedNFT?.contractAddress
+    const tokenId = selectedNFT?.nft?.id
+
+    createListingMutation.mutate(
+      {
+        directListing: {
+          assetContract: contractAddress as string,
+          tokenId: tokenId?.toString(),
+          quantity: '1',
+          pricePerToken: value,
+          endTimestamp: endTimestamp,
+        },
+      },
+      {
+        onSuccess: (data: any) => {
+          setValue('')
+        },
+        onError: (error: any) => {
+          setValue('')
+        },
+      },
+    )
+  }
+
+  const handleCreateAuction = async () => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+    if (!value) return toast.error('Please enter a valid auction amount.')
+    if (!buyOutAmount) return toast.error('Please enter a valid auction amount.')
+    if (!endTimestamp) return toast.error('Please select an end date')
+    if (!selectedNFT) return toast.error('Please select an NFT')
+
+    const contractAddress = selectedNFT?.contractAddress
+    const tokenId = selectedNFT?.nft?.id
+
+    createAuctionMutation.mutate(
+      {
+        auctionDetails: {
+          assetContract: contractAddress as string,
+          tokenId: tokenId?.toString(),
+          quantity: '1',
+          minimumBidAmount: value,
+          buyoutBidAmount: buyOutAmount,
+          endTimestamp: endTimestamp,
+        },
+      },
+      {
+        onSuccess: (data: any) => {
+          setBuyOutAmount('')
+          setValue('')
+        },
+        onError: (error: any) => {
+          setBuyOutAmount('')
+          setValue('')
+        },
+      },
+    )
+  }
+
+  const getCtaAndOnClick = (item: any) => {
     let ctaText = ''
     let icon = false
     let handleClick = () => {}
@@ -174,27 +335,37 @@ export default function UserProfile() {
       case 'NFTs':
         icon = true
         ctaText = 'List / Auction'
-        handleClick = () => console.log(`Viewing ${item.name}`)
+        handleClick = () => setSelectedNFT(item)
         break
       case 'Listed':
         ctaText = 'Cancel Listing'
-        handleClick = () => console.log(`Unlisting ${item.name}`)
+        handleClick = () => handleCancelDirectListing(item?.listingId)
         break
       case "Offer's Made":
-        ctaText = 'Cancel Offers'
-        handleClick = () => console.log(`Canceling offer for ${item.name}`)
+        ctaText = 'Cancel Offer'
+        handleClick = () => handleCancelOffer(item?.offerId)
         break
       case 'Auction':
         ctaText = 'Cancel Auction'
-        handleClick = () => console.log(`Placing bid on ${item.name}`)
+        handleClick = () => handleCancelAuction(item?.auctionId)
         break
       default:
         ctaText = 'Action'
-        handleClick = () => console.log(`Performing action on ${item.name}`)
+        handleClick = () => alert('Does nothing')
         break
     }
 
     return { ctaText, handleClick, icon }
+  }
+
+  // useEffect(() => {
+  //   if (!activeAccount) {
+  //     router.push('/')
+  //   }
+  // }, [activeAccount, router])
+
+  if (isLoading || isError) {
+    return <Loader />
   }
 
   return activeAccount ? (
@@ -204,31 +375,100 @@ export default function UserProfile() {
         <FilterButtons className="z-50" filter={filter} setFilter={setFilter} filters={filters} />
       </div>
       <div className="flex items-center justify-center">
-        {/* {!data || data.length === 0 ? (
-          <div className="w-full h-[calc(100vh-349px)] flex items-center justify-center">
-            <p className="font-medium">
-              You don&apos;t own any MINT MINGLE COLLECTION NFT NFT try buying one
-            </p>
-          </div>
-        ) : ( */}
-          <div className="w-full grid py-10 place-content-center grid-cols-4 gap-7 gap-y-10 2xl:grid-cols-6 max-lg:grid-cols-3 max-xsm:grid-cols-1 max-md:grid-cols-2">
-            {filteredData?.map((item) => {
+        <div className="w-full grid py-10 place-content-center grid-cols-4 gap-7 gap-y-10 2xl:grid-cols-6 max-lg:grid-cols-3 max-xsm:grid-cols-1 max-md:grid-cols-2">
+          {filteredData.length > 0 ? (
+            filteredData.map((item, index) => {
               const { ctaText, handleClick, icon } = getCtaAndOnClick(item)
+              const title = item?.nft?.metadata?.name
+              const src = item?.nft?.metadata?.image
+
+              let details: any = []
+              if (item.type === 'Listed') {
+                details = [
+                  {
+                    label: 'Price',
+                    value: `${decimalOffChain(item?.pricePerToken)} XFI`,
+                  },
+                  {
+                    label: 'Offers',
+                    value: `${item?.offersCount}`,
+                  },
+                ]
+              } else if (item.type === "Offer's Made") {
+                details = [
+                  {
+                    label: 'Price Offered',
+                    value: `${decimalOffChain(item?.totalPrice)} WXFI`,
+                  },
+                  {
+                    label: 'Offers',
+                    value: `${item?.offersCount}`,
+                  },
+                ]
+              } else if (item.type === 'Auction') {
+                details = [
+                  {
+                    label: 'Buy Out Price',
+                    value: `${decimalOffChain(item?.buyoutBidAmount)} XFI`,
+                  },
+                  {
+                    label: 'Min Price',
+                    value: `${decimalOffChain(item?.minimumBidAmount)} XFI`,
+                  },
+
+                  {
+                    label: 'Winning Bid',
+                    value: `${decimalOffChain(item?.winningBid?.bidAmount)} XFI`,
+                  },
+                ]
+              }
+
               return (
                 <Card
-                  key={item.id}
-                  title={item.name}
-                  src={item.imageUrl}
+                  key={index}
+                  title={title}
+                  src={src}
                   cta={ctaText}
                   onClick={handleClick}
                   icon={icon}
-                  details={item.details}
+                  details={details}
+                  disabled={isTxPending}
                 />
               )
-            })}
-          </div>
-        {/* )} */}
+            })
+          ) : (
+            <div className="col-span-full text-center py-20">
+              <p className="text-xl font-semibold text-gray-400">
+                No items found for this category.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
+      {selectedNFT && (
+        <Dialog.Root open={!!selectedNFT} onOpenChange={() => setSelectedNFT(undefined)}>
+          <Dialog.Content className="max-w-[690px] w-full p-6">
+            <NFTDialog
+              id={'none'}
+              type="create"
+              nftList={selectedNFT}
+              setTimestamp={setEndTimestamp}
+              onClick={handleCreateListing}
+              secondaryOnClick={handleCreateAuction}
+              onChange={setValue}
+              onBuyOutChange={setBuyOutAmount}
+              buyOutValue={buyOutAmount}
+              disabled={isTxPending}
+              value={value}
+              src={
+                selectedNFT.nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
+                '/logo.svg'
+              }
+              title={selectedNFT.nft?.metadata?.name || ''}
+            />
+          </Dialog.Content>
+        </Dialog.Root>
+      )}
     </div>
   ) : null
 }
@@ -237,6 +477,7 @@ type Detail = {
   label: string
   value: string
 }
+
 type CardProps = {
   src: string | undefined
   title: string | undefined
@@ -247,23 +488,28 @@ type CardProps = {
   disabled?: boolean
   details?: Detail[]
 }
+
 function Card(props: CardProps) {
   const { src, title, onClick, cta, tokenId, disabled, icon, details } = props
 
   return (
     <div className="max-w-[275px] w-full rounded-2xl max-h-[405px]">
       <div>
-        <MediaRenderer src={src} client={client} className="rounded-tr-2xl rounded-tl-2xl" />
+        <MediaRenderer
+          src={src || '/logo.svg'}
+          client={client}
+          className="rounded-tr-2xl rounded-tl-2xl"
+        />
       </div>
       <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl">
-        <p className={cn("font-semibold", {'pb-3':details})}>{title}</p>
+        <p className={cn('font-semibold', { 'pb-3': details })}>{title}</p>
         {details && (
           <div className="w-full border-t border-t-white/25 pt-3 flex items-center justify-between">
             {details.map((detail, index) => {
               const { label, value } = detail
 
               return (
-                <div key={index} className='flex flex-col gap-2'>
+                <div key={index} className="flex flex-col gap-2">
                   <p className="text-xs text-muted-foreground">{label}</p>
                   <p className="text-xm text-foreground font-semibold">{value}</p>
                 </div>

@@ -23,6 +23,7 @@ import {
   useCreateAuctionMutation,
   useBidInAuctionMutation,
   useMakeListingOfferMutation,
+  useCancelOfferMutation,
 } from '@/modules/mutation'
 import { useEffect, useState } from 'react'
 import { Dialog } from '@/modules/app/component/dialog'
@@ -55,6 +56,7 @@ const NFTDetailPage = () => {
   const buyFromDirectListingMutation = useBuyFromDirectListingMutation()
   const createListingMutation = useCreateListingMutation()
   const makeListingOfferMutation = useMakeListingOfferMutation()
+  const cancelOfferMutation = useCancelOfferMutation()
 
   const approvedForAllMutation = useApprovedForAllMutation()
 
@@ -128,16 +130,26 @@ const NFTDetailPage = () => {
     if (!value) return toast.error('Please enter a valid listing amount.')
     if (!endTimestamp) return toast.error('Please select an end date')
 
-    createListingMutation.mutate({
-      directListing: {
-        assetContract: contractAddress as string,
-        tokenId: tokenId as string,
-        quantity: '1',
-        pricePerToken: value,
-        endTimestamp: endTimestamp,
-        // endTimestamp: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    createListingMutation.mutate(
+      {
+        directListing: {
+          assetContract: contractAddress as string,
+          tokenId: tokenId as string,
+          quantity: '1',
+          pricePerToken: value,
+          endTimestamp: endTimestamp,
+          // endTimestamp: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        },
       },
-    })
+      {
+        onSuccess: (data: any) => {
+          setValue('')
+        },
+        onError: (error: any) => {
+          setValue('')
+        },
+      },
+    )
   }
 
   const handleCreateAuction = async () => {
@@ -147,16 +159,28 @@ const NFTDetailPage = () => {
     if (!buyOutAmount) return toast.error('Please enter a valid auction amount.')
     if (!endTimestamp) return toast.error('Please select an end date')
 
-    createAuctionMutation.mutate({
-      auctionDetails: {
-        assetContract: contractAddress as string,
-        tokenId: tokenId as string,
-        quantity: '1',
-        minimumBidAmount: value,
-        buyoutBidAmount: buyOutAmount,
-        endTimestamp: endTimestamp,
+    createAuctionMutation.mutate(
+      {
+        auctionDetails: {
+          assetContract: contractAddress as string,
+          tokenId: tokenId as string,
+          quantity: '1',
+          minimumBidAmount: value,
+          buyoutBidAmount: buyOutAmount,
+          endTimestamp: endTimestamp,
+        },
       },
-    })
+      {
+        onSuccess: (data: any) => {
+          setBuyOutAmount('')
+          setValue('')
+        },
+        onError: (error: any) => {
+          setBuyOutAmount('')
+          setValue('')
+        },
+      },
+    )
   }
 
   const handlePlaceBidAuction = async () => {
@@ -174,11 +198,9 @@ const NFTDetailPage = () => {
       },
       {
         onSuccess: (data: any) => {
-          alert('Bid placed successfully!')
           setValue('')
         },
         onError: (error: any) => {
-          alert(error.message)
           setValue('')
         },
       },
@@ -222,11 +244,9 @@ const NFTDetailPage = () => {
       },
       {
         onSuccess: (data: any) => {
-          alert('Bid placed successfully!')
           setValue('')
         },
         onError: (error: any) => {
-          alert(error.message)
           setValue('')
         },
       },
@@ -242,11 +262,10 @@ const NFTDetailPage = () => {
       { listingId: nftListingList?.listingId },
       {
         onSuccess: (data: any) => {
-          alert('Canceled Direct Listing Successfully!')
           setValue('')
         },
         onError: (error: any) => {
-          alert(error.message)
+          setValue('')
         },
       },
     )
@@ -261,11 +280,10 @@ const NFTDetailPage = () => {
       { auctionId: nftAuctionList?.auctionId },
       {
         onSuccess: (data: any) => {
-          alert('Cancelled Auction Successfully!')
           setValue('')
         },
         onError: (error: any) => {
-          alert(error.message)
+          setValue('')
         },
       },
     )
@@ -281,11 +299,10 @@ const NFTDetailPage = () => {
       { auctionId: nftAuctionList?.auctionId },
       {
         onSuccess: (data: any) => {
-          alert('Auction Reward claimed Successfully!')
           setValue('')
         },
         onError: (error: any) => {
-          alert(error.message)
+          setValue('')
         },
       },
     )
@@ -300,11 +317,10 @@ const NFTDetailPage = () => {
       { auctionId: nftAuctionList?.auctionId },
       {
         onSuccess: (data: any) => {
-          alert('Auction NFT claimed Successfully!')
           setValue('')
         },
         onError: (error: any) => {
-          alert(error.message)
+          setValue('')
         },
       },
     )
@@ -316,15 +332,32 @@ const NFTDetailPage = () => {
     if (owner === address) return toast.error('Owner is not allowed make offer ')
     if (!value) return toast.error('Please enter a valid auction amount.')
 
-    makeListingOfferMutation.mutate({
-      makeOffer: {
-        assetContract: contractAddress as string,
-        tokenId: tokenId as string,
-        quantity: '1',
-        totalPrice: value,
-        // expirationTimestamp: endTimestamp,
+    makeListingOfferMutation.mutate(
+      {
+        makeOffer: {
+          assetContract: contractAddress as string,
+          tokenId: tokenId as string,
+          quantity: '1',
+          totalPrice: value,
+          // expirationTimestamp: endTimestamp,
+        },
       },
-    })
+      {
+        onSuccess: (data: any) => {
+          setValue('')
+        },
+        onError: (error: any) => {
+          setValue('')
+        },
+      },
+    )
+  }
+
+  const handleCancelOffer = (offerId: string) => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+
+    cancelOfferMutation.mutate({ offerId })
   }
 
   console.log('mutation status', makeListingOfferMutation)
@@ -434,7 +467,7 @@ const NFTDetailPage = () => {
 
           {/* BUYER BUTTON */}
           {!isOwner && (
-            <div className='flex items-center w-full gap-3 max-md:flex-col'>
+            <div className="flex items-center w-full gap-3 max-md:flex-col">
               {id === 'listing' && (
                 <Button
                   onClick={handleBuyOutDirectListing}

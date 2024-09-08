@@ -68,7 +68,7 @@ export function useUserNFTsQuery() {
                 }
               }
 
-              return { ...nfts, nft: updatedNFT }
+              return { ...nfts, nft: updatedNFT, type: 'NFTs' }
             }),
           )
 
@@ -94,19 +94,56 @@ export function useUserOffersMadeQuery() {
     queryFn: async () => {
       const totalOffers = await getTotalOffers()
 
-      if (Number(totalOffers) === 0) {
+      if (Number(totalOffers) < 0) {
         return []
       } else {
         const allOffers = await getAllOffers()
 
-        const userOffers = allOffers.filter(
-          (offer) => offer.offeror === userAddress && offer.status === StatusType.CREATED,
+        const userOffers = allOffers
+          .filter((offer) => offer.offeror === userAddress && offer.status === StatusType.CREATED)
+          .map((offer) => {
+            const offersLength = allOffers.filter(
+              (offer) =>
+                offer.status === StatusType.CREATED &&
+                offer.assetContract === offer.assetContract &&
+                offer.tokenId === offer.tokenId,
+            ).length
+
+            return { ...offer, type: "Offer's Made", offersCount: offersLength }
+          })
+
+        const updatedUserOffers = await Promise.all(
+          userOffers.map(async (ids) => {
+            const contract = getContractCustom({ contractAddress: ids.assetContract })
+
+            const nft = await getCFC721NFT({
+              contract,
+              tokenId: BigInt(ids.tokenId),
+              includeOwner: includeNFTOwner,
+            })
+            let updatedNFT = nft
+
+            if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              const { uri } = nft.metadata
+              const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+              updatedNFT = {
+                ...nft,
+                tokenURI: parsedMetadata.image,
+                metadata: {
+                  ...parsedMetadata,
+                },
+              }
+            }
+
+            return { ...ids, nft: updatedNFT }
+          }),
         )
 
-        return ensureSerializable(userOffers)
+        return ensureSerializable(updatedUserOffers)
       }
     },
-    refetchInterval: 6000,
+    refetchInterval: 5000,
     enabled: !!userAddress,
   })
 }
@@ -124,16 +161,58 @@ export function useUserListingQuery() {
         return []
       } else {
         const allListings = await getAllListing()
+        const allOffers = await getAllOffers()
 
-        const userListings = allListings.filter(
-          (listing) =>
-            listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
+        const userListings = await Promise.all(
+          allListings
+            .filter(
+              (listing) =>
+                listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
+            )
+            .map((listing) => {
+              const offersLength = allOffers.filter(
+                (offer) =>
+                  offer.status === StatusType.CREATED &&
+                  offer.assetContract === listing.assetContract &&
+                  offer.tokenId === listing.tokenId,
+              ).length
+
+              return { ...listing, type: 'Listed', offersCount: offersLength }
+            }),
         )
 
-        return ensureSerializable(userListings)
+        const updatedUserListings = await Promise.all(
+          userListings.map(async (ids) => {
+            const contract = getContractCustom({ contractAddress: ids.assetContract })
+
+            const nft = await getCFC721NFT({
+              contract,
+              tokenId: BigInt(ids.tokenId),
+              includeOwner: includeNFTOwner,
+            })
+            let updatedNFT = nft
+
+            if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              const { uri } = nft.metadata
+              const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+              updatedNFT = {
+                ...nft,
+                tokenURI: parsedMetadata.image,
+                metadata: {
+                  ...parsedMetadata,
+                },
+              }
+            }
+
+            return { ...ids, nft: updatedNFT }
+          }),
+        )
+
+        return ensureSerializable(updatedUserListings)
       }
     },
-    refetchInterval: 6000,
+    refetchInterval: 5000,
     enabled: !!userAddress,
   })
 }
@@ -152,12 +231,42 @@ export function useUserAuctionQuery() {
       } else {
         const allAuctions = await getAllAuctions()
 
-        const userAuctions = allAuctions.filter(
-          (auction) =>
-            auction.auctionCreator === userAddress && auction.status === StatusType.CREATED,
+        const userAuctions = allAuctions
+          .filter(
+            (auction) =>
+              auction.auctionCreator === userAddress && auction.status === StatusType.CREATED,
+          )
+          .map((auction) => ({ ...auction, type: 'Auction' }))
+
+        const updatedUserAuction = await Promise.all(
+          userAuctions.map(async (ids) => {
+            const contract = getContractCustom({ contractAddress: ids.assetContract })
+
+            const nft = await getCFC721NFT({
+              contract,
+              tokenId: BigInt(ids.tokenId),
+              includeOwner: includeNFTOwner,
+            })
+            let updatedNFT = nft
+
+            if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              const { uri } = nft.metadata
+              const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+              updatedNFT = {
+                ...nft,
+                tokenURI: parsedMetadata.image,
+                metadata: {
+                  ...parsedMetadata,
+                },
+              }
+            }
+
+            return { ...ids, nft: updatedNFT }
+          }),
         )
 
-        return ensureSerializable(userAuctions)
+        return ensureSerializable(updatedUserAuction)
       }
     },
     refetchInterval: 6000,

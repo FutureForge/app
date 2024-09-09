@@ -15,6 +15,7 @@ import {
 } from '@/modules/blockchain'
 import { ensureSerializable } from '@/utils'
 import { includeNFTOwner } from '@/modules/blockchain/lib'
+import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 
 export function useUserChainInfo() {
   const activeAccount = useActiveAccount()
@@ -242,6 +243,23 @@ export function useUserAuctionQuery() {
           userAuctions.map(async (ids) => {
             const contract = getContractCustom({ contractAddress: ids.assetContract })
 
+            const winningBid = await getWinningBid({
+              auctionId: BigInt(ids.auctionId),
+            })
+
+            const isAuctionActive = await getIsAuctionExpired({
+              auctionId: ids.auctionId,
+            })
+
+            // Inverting the result to correct the naming mismatch
+            const isAuctionExpired = !isAuctionActive
+
+            const winningBidBody = {
+              bidder: winningBid[0],
+              currency: winningBid[1],
+              bidAmount: winningBid[2].toString(), // Convert BigInt to string
+            }
+
             const nft = await getCFC721NFT({
               contract,
               tokenId: BigInt(ids.tokenId),
@@ -262,7 +280,7 @@ export function useUserAuctionQuery() {
               }
             }
 
-            return { ...ids, nft: updatedNFT }
+            return { ...ids, nft: updatedNFT, isAuctionExpired, winningBid: winningBidBody }
           }),
         )
 

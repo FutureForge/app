@@ -106,7 +106,7 @@ export function useUserNFTsQuery() {
 
       return ensureSerializable(userNFTsNotListed)
     },
-    enabled: !!userAddress,
+    enabled: !!userAddress && !!activeAccount,
     refetchInterval: 5000,
   })
 }

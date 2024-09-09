@@ -14,6 +14,9 @@ export function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         defaultOptions: { queries: { retry: 0 } },
         mutationCache: new MutationCache({
+          onMutate: () => {
+            toast.loading('Transaction In Process...')
+          },
           onSuccess: (_data, _variables, _context, mutation) => {
             console.log('query provider success', _data, _variables, _context, mutation)
 

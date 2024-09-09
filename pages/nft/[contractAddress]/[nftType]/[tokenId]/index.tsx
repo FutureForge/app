@@ -103,16 +103,6 @@ const NFTDetailPage = () => {
     offers,
   })
 
-  useEffect(() => {
-    const showToast = async () => {
-      if (isTxPending) {
-        await toast.loading('Transaction in progress...')
-      }
-    }
-
-    showToast()
-  }, [toast, isTxPending])
-
   const owner =
     id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
   const isOwner = owner === address
@@ -178,13 +168,11 @@ const NFTDetailPage = () => {
           setBuyOutAmount('')
           setValue('')
           setIsDialogOpen(false)
-          toast.success('Auction created successfully')
         },
         onError: () => {
           setBuyOutAmount('')
           setValue('')
           setIsDialogOpen(false)
-          toast.error('Failed to create auction')
         },
       },
     )
@@ -207,12 +195,10 @@ const NFTDetailPage = () => {
         onSuccess: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.success('Bid placed successfully')
         },
         onError: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.error('Failed to place bid')
         },
       },
     )
@@ -237,12 +223,10 @@ const NFTDetailPage = () => {
         onSuccess: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.success('NFT bought successfully')
         },
         onError: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.error('Failed to buy NFT')
         },
       },
     )
@@ -261,12 +245,10 @@ const NFTDetailPage = () => {
         onSuccess: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.success('Auction bought out successfully')
         },
         onError: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.error('Failed to buy out auction')
         },
       },
     )
@@ -282,11 +264,9 @@ const NFTDetailPage = () => {
       {
         onSuccess: () => {
           setValue('')
-          toast.success('Listing cancelled successfully')
         },
         onError: () => {
           setValue('')
-          toast.error('Failed to cancel listing')
         },
       },
     )
@@ -302,11 +282,9 @@ const NFTDetailPage = () => {
       {
         onSuccess: () => {
           setValue('')
-          toast.success('Auction cancelled successfully')
         },
         onError: () => {
           setValue('')
-          toast.error('Failed to cancel auction')
         },
       },
     )
@@ -323,11 +301,9 @@ const NFTDetailPage = () => {
       {
         onSuccess: () => {
           setValue('')
-          toast.success('Auction payout claimed successfully')
         },
         onError: () => {
           setValue('')
-          toast.error('Failed to claim auction payout')
         },
       },
     )
@@ -370,12 +346,10 @@ const NFTDetailPage = () => {
         onSuccess: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.success('Offer made successfully')
         },
         onError: () => {
           setValue('')
           setIsDialogOpen(false)
-          toast.error('Failed to make offer')
         },
       },
     )
@@ -385,17 +359,7 @@ const NFTDetailPage = () => {
     if (!address) return toast.error('Please connect to a wallet.')
     if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
 
-    cancelOfferMutation.mutate(
-      { offerId },
-      {
-        onSuccess: () => {
-          toast.success('Offer cancelled successfully')
-        },
-        onError: () => {
-          toast.error('Failed to cancel offer')
-        },
-      },
-    )
+    cancelOfferMutation.mutate({ offerId })
   }
 
   console.log('mutation status', makeListingOfferMutation)

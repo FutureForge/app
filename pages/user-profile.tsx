@@ -32,146 +32,6 @@ type FilterType = 'NFTs' | 'Listed' | "Offer's Made" | 'Auction'
 
 const filters: FilterType[] = ['NFTs', 'Listed', "Offer's Made", 'Auction']
 
-const DATA = [
-  {
-    id: 1,
-    type: 'NFTs',
-    name: 'NFT #1',
-    description: 'First NFT description',
-    imageUrl: '/Image.png',
-    icon: true,
-  },
-  {
-    id: 2,
-    type: 'NFTs',
-    name: 'NFT #2',
-    description: 'Second NFT description',
-    imageUrl: '/Image.png',
-    icon: true,
-  },
-
-  {
-    id: 3,
-    type: 'Listed',
-    name: 'Listed NFT #1',
-    description: 'Listed NFT description',
-    imageUrl: '/Image.png',
-    icon: false,
-    details: [
-      {
-        label: 'Price',
-        value: '1.63 XFI',
-      },
-      {
-        label: 'No of Offers',
-        value: '300',
-      },
-    ],
-  },
-  {
-    id: 4,
-    type: 'Listed',
-    name: 'Listed NFT #2',
-    description: 'Second listed NFT description',
-    imageUrl: '/Image.png',
-    icon: false,
-    details: [
-      {
-        label: 'Price',
-        value: '1.63 XFI',
-      },
-      {
-        label: 'No of Offers',
-        value: '300',
-      },
-    ],
-  },
-
-  {
-    id: 5,
-    type: "Offer's Made",
-    name: 'Offer #1',
-    description: 'First offer made description',
-    imageUrl: '/Image.png',
-    icon: false,
-    details: [
-      {
-        label: 'Price',
-        value: '1.63 XFI',
-      },
-      {
-        label: 'No of Offers',
-        value: '300',
-      },
-    ],
-  },
-  {
-    id: 6,
-    type: "Offer's Made",
-    name: 'Offer #2',
-    description: 'Second offer made description',
-    imageUrl: '/Image.png',
-    icon: false,
-    details: [
-      {
-        label: 'Price',
-        value: '1.63 XFI',
-      },
-      {
-        label: 'No of Offers',
-        value: '300',
-      },
-    ],
-  },
-
-  {
-    id: 7,
-    type: 'Auction',
-    name: 'Auction NFT #1',
-    description: 'Auctioned NFT description',
-    imageUrl: '/Image.png',
-    icon: false,
-    details: [
-      {
-        label: 'Buy Out Price',
-        value: '1.63 XFI',
-      },
-      {
-        label: 'Min Price',
-        value: '1.63 XFI',
-      },
-
-      {
-        label: 'Current Bid',
-        value: '1.63 XFI',
-      },
-    ],
-  },
-  {
-    id: 8,
-    type: 'Auction',
-    name: 'Auction NFT #2',
-    description: 'Second auctioned NFT description',
-    imageUrl: '/Image.png',
-    icon: false,
-    details: [
-      {
-        label: 'Buy Out Price',
-        value: '1.63 XFI',
-      },
-      {
-        label: 'Min Price',
-        value: '1.63 XFI',
-      },
-
-      {
-        label: 'Current Bid',
-        value: '1.63 XFI',
-      },
-    ],
-  },
-]
-
 type NFTSelectedItem = {
   address: string
   balance: string
@@ -301,6 +161,8 @@ export default function UserProfile() {
     )
   }
 
+  console.log({ selectedNFT })
+
   const handleCreateAuction = async () => {
     if (!address) return toast.error('Please connect to a wallet.')
     if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
@@ -370,21 +232,11 @@ export default function UserProfile() {
     return { ctaText, handleClick, icon }
   }
 
-  // useEffect(() => {
-  //   if (!activeAccount) {
-  //     router.push('/')
-  //   }
-  // }, [activeAccount, router])
-
   useEffect(() => {
-    const showToast = async () => {
-      if (isTxPending) {
-        await toast.loading('Transaction in progress...')
-      }
+    if (!activeAccount) {
+      router.push('/')
     }
-
-    showToast()
-  }, [toast, isTxPending])
+  }, [activeAccount, router])
 
   if (isLoading || isError) {
     return <Loader />
@@ -538,16 +390,6 @@ function Card(props: CardProps) {
       collectionContractAddress: contractAddress,
     })
   }
-
-  useEffect(() => {
-    const showToast = async () => {
-      if (disabled) {
-        await toast.loading('Transaction in progress...')
-      }
-    }
-
-    showToast()
-  }, [toast, disabled])
 
   return (
     <div className="max-w-[275px] w-full rounded-2xl max-h-[405px]">

@@ -51,7 +51,7 @@ export function useCreateAuctionMutation() {
         description: 'Auction created successfully',
       },
       errorMessage: {
-        description: 'Failed to create auction',
+        description: 'Failed to create auction. This token cant be Auctioned try Listing.',
       },
     },
   })

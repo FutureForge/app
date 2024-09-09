@@ -95,6 +95,7 @@ export function Header() {
     const pricePerToken = isListing ? item.pricePerToken : undefined
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
+    const creator = isListing ? item.listingCreator : item.auctionCreator
 
     return (
       <NFTCard
@@ -106,6 +107,7 @@ export function Header() {
         tokenId={tokenId}
         contractAddress={assetContract}
         type={type}
+        creator={creator}
       />
     )
   }

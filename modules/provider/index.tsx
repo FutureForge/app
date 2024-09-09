@@ -8,6 +8,7 @@ type QueryProviderProps = {
 
 export function QueryProvider({ children }: QueryProviderProps) {
   const toast = useToast()
+  const [loadingToastId, setLoadingToastId] = useState<string | number | undefined>(undefined)
 
   const [queryClient] = useState(
     () =>
@@ -15,7 +16,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
         defaultOptions: { queries: { retry: 0 } },
         mutationCache: new MutationCache({
           onMutate: () => {
-            toast.loading('Transaction In Process...')
+            const id = toast.loading('Transaction In Process...', { duration: Infinity })
+            setLoadingToastId(id)
           },
           onSuccess: (_data, _variables, _context, mutation) => {
             console.log('query provider success', _data, _variables, _context, mutation)
@@ -25,12 +27,19 @@ export function QueryProvider({ children }: QueryProviderProps) {
               description: string
             }
 
-            if (!successMessage) return toast.success('Transaction was Successfully')
+            if (loadingToastId) {
+              toast.dismiss(loadingToastId)
+            }
 
-            toast.success(`${successMessage.description}: `, {
-              title: successMessage.title,
-            })
+            if (!successMessage) {
+              toast.success('Transaction was Successful')
+            } else {
+              toast.success(`${successMessage.description}`, {
+                title: successMessage.title,
+              })
+            }
 
+            setLoadingToastId(undefined)
             console.log({ message: successMessage, data: _data })
           },
           onError: (error, _variables, _context, mutation) => {
@@ -41,20 +50,20 @@ export function QueryProvider({ children }: QueryProviderProps) {
               description: string
             }
 
-            if (!errorMessage) return toast.error(error.message)
+            if (loadingToastId) {
+              toast.dismiss(loadingToastId)
+            }
 
-            toast.error(`${errorMessage.description} ${error.message}: `, {
-              title: errorMessage.title,
-            })
+            if (!errorMessage) {
+              toast.error(error.message)
+            } else {
+              toast.error(`${errorMessage.description} ${error.message}`, {
+                title: errorMessage.title,
+              })
+            }
+
+            setLoadingToastId(undefined)
             console.log({ message: errorMessage, error: error.message })
-
-            // if (errorMessage) {
-            //   toast.error(errorMessage.description, {
-            //     title: errorMessage.title,
-            //   });
-            // } else {
-            //   toast.error(error.message);
-            // }
           },
         }),
       }),

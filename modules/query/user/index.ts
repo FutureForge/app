@@ -37,6 +37,22 @@ export function useUserNFTsQuery() {
 
       const userNFTs = response.data.docs
 
+      //  const totalListings = await getTotalListings()
+
+      // if (Number(totalListings) < 0) {
+      //   return []
+      // } else {
+      //   const userListing = allListings
+      // }
+      const allListings = await getAllListing()
+
+      const userListings = await Promise.all(
+        allListings.filter(
+          (listing) =>
+            listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
+        ),
+      )
+
       const updatedNFTs = await Promise.all(
         userNFTs.map(async (nfts) => {
           const { tokenIds, contractAddress } = nfts
@@ -79,7 +95,16 @@ export function useUserNFTsQuery() {
 
       const flatNFTs = updatedNFTs.flat()
 
-      return ensureSerializable(flatNFTs)
+      const userNFTsNotListed = flatNFTs.filter((nft) => {
+        // Check if this NFT is not in the userListings
+        return !userListings.some(
+          (listing) =>
+            listing.assetContract.toLowerCase() === nft.contractAddress.toLowerCase() &&
+            listing.tokenId.toString() === nft.nft.id.toString(),
+        )
+      })
+
+      return ensureSerializable(userNFTsNotListed)
     },
     enabled: !!userAddress,
     refetchInterval: 5000,
@@ -91,7 +116,7 @@ export function useUserOffersMadeQuery() {
   const userAddress = activeAccount?.address
 
   return useQuery({
-    queryKey: ['userOffersMade', 'userProfile', 'profile'],
+    queryKey: ['userOffersMade', 'userProfile', 'profile', 'nfts'],
     queryFn: async () => {
       const totalOffers = await getTotalOffers()
 
@@ -154,11 +179,11 @@ export function useUserListingQuery() {
   const userAddress = activeAccount?.address
 
   return useQuery({
-    queryKey: ['userListing', 'userProfile', 'profile'],
+    queryKey: ['userListing', 'userProfile', 'profile', 'nft'],
     queryFn: async () => {
       const totalListings = await getTotalListings()
 
-      if (Number(totalListings) === 0) {
+      if (Number(totalListings) < 0) {
         return []
       } else {
         const allListings = await getAllListing()
@@ -223,7 +248,7 @@ export function useUserAuctionQuery() {
   const userAddress = activeAccount?.address
 
   return useQuery({
-    queryKey: ['userAuction', 'userProfile', 'profile', 'auction'],
+    queryKey: ['userAuction', 'userProfile', 'profile', 'auction', 'nfts'],
     queryFn: async () => {
       const totalAuctions = await getTotalAuctions()
 
@@ -287,7 +312,7 @@ export function useUserAuctionQuery() {
         return ensureSerializable(updatedUserAuction)
       }
     },
-    refetchInterval: 6000,
+    refetchInterval: 5000,
     enabled: !!userAddress,
   })
 }

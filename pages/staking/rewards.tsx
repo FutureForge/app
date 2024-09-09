@@ -33,7 +33,7 @@ export default function Rewards() {
             </p>
           </div>
           <Button
-            disabled={claimRewardsMutation.isPending}
+            disabled={claimRewardsMutation.isPending || !rewards || !tokensStaked}
             onClick={handleClaimRewards}
             variant="secondary"
             className="w-full h-10"

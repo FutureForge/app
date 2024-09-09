@@ -9,12 +9,14 @@ import {
   useUserListingQuery,
   useUserNFTsQuery,
   useUserOffersMadeQuery,
+  useCheckApprovedForAllQuery,
 } from '@/modules/query'
 import { client } from '@/utils/configs'
 import { Button, cn, Icon, Loader } from '@/modules/app'
 import { decimalOffChain } from '@/modules/blockchain'
 import { useToast } from '@/modules/app/hooks/useToast'
 import {
+  useApprovedForAllMutation,
   useCancelAuctionMutation,
   useCancelDirectListingMutation,
   useCancelOfferMutation,
@@ -24,6 +26,7 @@ import {
 import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
 import { NFT } from 'thirdweb'
+import Link from 'next/link'
 
 type FilterType = 'NFTs' | 'Listed' | "Offer's Made" | 'Auction'
 
@@ -192,10 +195,11 @@ export default function UserProfile() {
   const chain = activeWallet?.getChain()
 
   const [filter, setFilter] = useState<FilterType>('NFTs')
-  const [selectedNFT, setSelectedNFT] = useState<NFTSelectedItem>()
+  const [selectedNFT, setSelectedNFT] = useState<NFTSelectedItem | null>(null)
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
+  // const [contractAddress, setContractAddress] = useState<string | undefined>(undefined)
 
   const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError } = useUserNFTsQuery()
   const {
@@ -214,6 +218,8 @@ export default function UserProfile() {
     isError: userAuctionError,
   } = useUserAuctionQuery()
 
+  console.log({ userNFTS })
+
   const isLoading =
     userNFTLoading || userOffersMadeLoading || userListingLoading || userAuctionLoading
   const isError = userNFTError || userOffersError || userListingError || userAuctionError
@@ -231,13 +237,15 @@ export default function UserProfile() {
   const cancelAuctionMutation = useCancelAuctionMutation()
   const createListingMutation = useCreateListingMutation()
   const createAuctionMutation = useCreateAuctionMutation()
+  const approvedForAllMutation = useApprovedForAllMutation()
 
   const isTxPending =
     cancelAuctionMutation.isPending ||
     cancelOfferMutation.isPending ||
     createAuctionMutation.isPending ||
     createListingMutation.isPending ||
-    cancelDirectListingMutation.isPending
+    cancelDirectListingMutation.isPending ||
+    approvedForAllMutation.isPending
 
   const handleCancelDirectListing = (listingId: string) => {
     if (!address) return toast.error('Please connect to a wallet.')
@@ -283,9 +291,11 @@ export default function UserProfile() {
       {
         onSuccess: (data: any) => {
           setValue('')
+          setSelectedNFT(null)
         },
         onError: (error: any) => {
           setValue('')
+          setSelectedNFT(null)
         },
       },
     )
@@ -317,10 +327,12 @@ export default function UserProfile() {
         onSuccess: (data: any) => {
           setBuyOutAmount('')
           setValue('')
+          setSelectedNFT(null)
         },
         onError: (error: any) => {
           setBuyOutAmount('')
           setValue('')
+          setSelectedNFT(null)
         },
       },
     )
@@ -364,6 +376,16 @@ export default function UserProfile() {
   //   }
   // }, [activeAccount, router])
 
+  useEffect(() => {
+    const showToast = async () => {
+      if (isTxPending) {
+        await toast.loading('Transaction in progress...')
+      }
+    }
+
+    showToast()
+  }, [toast, isTxPending])
+
   if (isLoading || isError) {
     return <Loader />
   }
@@ -381,6 +403,10 @@ export default function UserProfile() {
               const { ctaText, handleClick, icon } = getCtaAndOnClick(item)
               const title = item?.nft?.metadata?.name
               const src = item?.nft?.metadata?.image
+              const contractAddress = item?.contractAddress || item?.assetContract
+              const tokenId = item?.nft?.id || item?.tokenId
+
+              console.log({ item })
 
               let details: any = []
               if (item.type === 'Listed') {
@@ -433,6 +459,8 @@ export default function UserProfile() {
                   icon={icon}
                   details={details}
                   disabled={isTxPending}
+                  contractAddress={contractAddress}
+                  tokenId={tokenId}
                 />
               )
             })
@@ -446,7 +474,7 @@ export default function UserProfile() {
         </div>
       </div>
       {selectedNFT && (
-        <Dialog.Root open={!!selectedNFT} onOpenChange={() => setSelectedNFT(undefined)}>
+        <Dialog.Root open={!!selectedNFT} onOpenChange={(open) => !open && setSelectedNFT(null)}>
           <Dialog.Content className="max-w-[690px] w-full p-6">
             <NFTDialog
               id={'none'}
@@ -487,20 +515,49 @@ type CardProps = {
   tokenId?: string
   disabled?: boolean
   details?: Detail[]
+  contractAddress: string
 }
 
 function Card(props: CardProps) {
-  const { src, title, onClick, cta, tokenId, disabled, icon, details } = props
+  const toast = useToast()
+  const { activeAccount, activeWallet } = useUserChainInfo()
+  const address = activeAccount?.address
+  const chain = activeWallet?.getChain()
+  const { src, title, onClick, cta, tokenId, disabled, icon, details, contractAddress } = props
+
+  const { data: isApproved } = useCheckApprovedForAllQuery({
+    collectionContractAddress: contractAddress,
+  })
+  const approvedForAllMutation = useApprovedForAllMutation()
+
+  const handleApproveNFT = async () => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+
+    approvedForAllMutation.mutate({
+      collectionContractAddress: contractAddress,
+    })
+  }
+
+  useEffect(() => {
+    const showToast = async () => {
+      if (disabled) {
+        await toast.loading('Transaction in progress...')
+      }
+    }
+
+    showToast()
+  }, [toast, disabled])
 
   return (
     <div className="max-w-[275px] w-full rounded-2xl max-h-[405px]">
-      <div>
+      <Link href={`/nft/${contractAddress}/CFC-721/${tokenId}`}>
         <MediaRenderer
           src={src || '/logo.svg'}
           client={client}
           className="rounded-tr-2xl rounded-tl-2xl"
         />
-      </div>
+      </Link>
       <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl">
         <p className={cn('font-semibold', { 'pb-3': details })}>{title}</p>
         {details && (
@@ -519,11 +576,11 @@ function Card(props: CardProps) {
         )}
         <Button
           disabled={disabled}
-          onClick={onClick}
+          onClick={isApproved ? onClick : handleApproveNFT}
           variant="secondary"
           className="h-10 mt-3 flex items-center gap-3"
         >
-          {cta}
+          {isApproved ? cta : 'Approve Spending'}
           {icon && <Icon iconType={'cart'} className="w-4 text-white" />}
         </Button>
       </div>

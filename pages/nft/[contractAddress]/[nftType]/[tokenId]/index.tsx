@@ -77,6 +77,7 @@ const NFTDetailPage = () => {
   const { data: isApproved } = useCheckApprovedForAllQuery({
     collectionContractAddress: contractAddress as string,
   })
+
   const {
     data: nftData,
     isLoading,
@@ -604,7 +605,7 @@ const NFTDetailPage = () => {
                     </Button>
                   ) : (
                     <Dialog.Root>
-                      <Dialog.Trigger>
+                      <Dialog.Trigger >
                         <Button
                           onClick={() => {}}
                           variant="secondary"

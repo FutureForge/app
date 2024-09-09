@@ -41,6 +41,7 @@ const NFTDetailPage = () => {
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // mutation
 
@@ -139,15 +140,16 @@ const NFTDetailPage = () => {
           quantity: '1',
           pricePerToken: value,
           endTimestamp: endTimestamp,
-          // endTimestamp: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          setIsDialogOpen(false)
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          setIsDialogOpen(false)
         },
       },
     )
@@ -172,13 +174,17 @@ const NFTDetailPage = () => {
         },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setBuyOutAmount('')
           setValue('')
+          setIsDialogOpen(false)
+          toast.success('Auction created successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setBuyOutAmount('')
           setValue('')
+          setIsDialogOpen(false)
+          toast.error('Failed to create auction')
         },
       },
     )
@@ -198,11 +204,15 @@ const NFTDetailPage = () => {
         bidAmount: value,
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.success('Bid placed successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.error('Failed to place bid')
         },
       },
     )
@@ -224,11 +234,15 @@ const NFTDetailPage = () => {
         },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.success('NFT bought successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.error('Failed to buy NFT')
         },
       },
     )
@@ -244,11 +258,15 @@ const NFTDetailPage = () => {
         bidAmount: decimalOffChain(nftAuctionList?.buyoutBidAmount)!,
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.success('Auction bought out successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.error('Failed to buy out auction')
         },
       },
     )
@@ -262,11 +280,13 @@ const NFTDetailPage = () => {
     cancelDirectListingMutation.mutate(
       { listingId: nftListingList?.listingId },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          toast.success('Listing cancelled successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          toast.error('Failed to cancel listing')
         },
       },
     )
@@ -280,11 +300,13 @@ const NFTDetailPage = () => {
     cancelAuctionMutation.mutate(
       { auctionId: nftAuctionList?.auctionId },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          toast.success('Auction cancelled successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          toast.error('Failed to cancel auction')
         },
       },
     )
@@ -299,11 +321,13 @@ const NFTDetailPage = () => {
     collectAuctionPayoutMutation.mutate(
       { auctionId: nftAuctionList?.auctionId },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          toast.success('Auction payout claimed successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          toast.error('Failed to claim auction payout')
         },
       },
     )
@@ -317,10 +341,10 @@ const NFTDetailPage = () => {
     collectAuctionTokensMutation.mutate(
       { auctionId: nftAuctionList?.auctionId },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
         },
       },
@@ -340,15 +364,18 @@ const NFTDetailPage = () => {
           tokenId: tokenId as string,
           quantity: '1',
           totalPrice: value,
-          // expirationTimestamp: endTimestamp,
         },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.success('Offer made successfully')
         },
-        onError: (error: any) => {
+        onError: () => {
           setValue('')
+          setIsDialogOpen(false)
+          toast.error('Failed to make offer')
         },
       },
     )
@@ -358,7 +385,17 @@ const NFTDetailPage = () => {
     if (!address) return toast.error('Please connect to a wallet.')
     if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
 
-    cancelOfferMutation.mutate({ offerId })
+    cancelOfferMutation.mutate(
+      { offerId },
+      {
+        onSuccess: () => {
+          toast.success('Offer cancelled successfully')
+        },
+        onError: () => {
+          toast.error('Failed to cancel offer')
+        },
+      },
+    )
   }
 
   console.log('mutation status', makeListingOfferMutation)
@@ -478,27 +515,6 @@ const NFTDetailPage = () => {
                 >
                   Buy Now
                 </Button>
-                // <Dialog.Root>
-                //   <Dialog.Trigger>
-                //     <Button
-                //       onClick={handleBuyOutDirectListing}
-                //       variant="secondary"
-                //       disabled={isTxPending}
-                //       className="text-sm font-medium h-8"
-                //     >
-                //       Buy Now
-                //     </Button>
-                //   </Dialog.Trigger>
-                //   <Dialog.Content className="max-w-[690px] w-full p-6">
-                //     <NFTDialog
-                //       id={id}
-                //       placeholder="1 month"
-                //       ctaText="Continue"
-                //       src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
-                //       title={nft?.metadata?.name}
-                //     />
-                //   </Dialog.Content>
-                // </Dialog.Root>
               )}
               {id === 'auction' && (
                 <>
@@ -526,13 +542,12 @@ const NFTDetailPage = () => {
                     </>
                   ) : (
                     <div className="flex items-center w-full max-md:flex-col gap-3">
-                      <Dialog.Root>
+                      <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <Dialog.Trigger>
                           <Button variant="secondary" className="text-sm font-medium h-8">
                             Place Bid
                           </Button>
                         </Dialog.Trigger>
-
                         <Dialog.Content className="max-w-[690px] w-full p-6">
                           <NFTDialog
                             id={id}
@@ -549,7 +564,6 @@ const NFTDetailPage = () => {
                           />
                         </Dialog.Content>
                       </Dialog.Root>
-
                       <Button
                         onClick={handleBuyOutAuction}
                         variant="secondary"
@@ -564,7 +578,7 @@ const NFTDetailPage = () => {
               )}
 
               {(id === 'none' || id === 'listing') && (
-                <Dialog.Root>
+                <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <Dialog.Trigger>
                     <Button variant="secondary" className="text-sm font-medium h-8">
                       Make Offer
@@ -604,8 +618,8 @@ const NFTDetailPage = () => {
                       Approve Spending
                     </Button>
                   ) : (
-                    <Dialog.Root>
-                      <Dialog.Trigger >
+                    <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <Dialog.Trigger>
                         <Button
                           onClick={() => {}}
                           variant="secondary"

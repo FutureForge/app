@@ -15,11 +15,14 @@ import { sendAndConfirmTransaction } from 'thirdweb'
 import WXFIAbi from '@/utils/abi/wxfi.json'
 import { BigNumber } from 'ethers'
 import { useToast } from '@/modules/app/hooks/useToast'
+import { useIncreaseAllowanceMutation, useConvertXFIToWXFIMutation } from '..'
 
 export function useMakeListingOfferMutation() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
+  const increaseAllowanceMutation = useIncreaseAllowanceMutation()
+  const convertXFIToWXFIMutation = useConvertXFIToWXFIMutation()
 
   return useMutation({
     mutationFn: async ({ makeOffer }: { makeOffer: Partial<MakeOfferListingType> }) => {
@@ -39,48 +42,12 @@ export function useMakeListingOfferMutation() {
 
       if (BigNumber.from(wxfiBalanceRaw).lt(makeOfferValue!)) {
         await toast.loading('Wrapping XFI to WXFI')
-        try {
-          const depositTxData = await WXFIContract.populateTransaction.deposit({
-            value: makeOfferValue,
-          })
-
-          // @ts-ignore
-          const tx = await activeAccount.sendTransaction(depositTxData)
-          const receipt = await waitForTransaction(tx.transactionHash)
-
-          if (receipt.status === 'reverted') {
-            throw new Error('Transaction failed')
-          }
-
-          const newWxfiBalanceRaw = await WXFIContract.balanceOf(activeAccount.address)
-          toast.success('XFI wrapped to WXFI successfully')
-          if (BigNumber.from(newWxfiBalanceRaw).lt(makeOfferValue!)) {
-            throw new Error('Insufficient balance even after deposit')
-          }
-        } catch (error) {
-          throw new Error('Failed to wrapper XFI to WXFI')
-        }
+        convertXFIToWXFIMutation.mutate({ amount: makeOffer.totalPrice! })
       }
 
       if (BigNumber.from(wxfiAllowance).lt(makeOfferValue!)) {
         await toast.loading('Approving WXFI to spend')
-        try {
-          const approvalTxData = await WXFIContract.populateTransaction.approve(
-            CROSSFI_MARKETPLACE_CONTRACT,
-            makeOfferValue,
-          )
-          // @ts-ignore
-          const tx = await activeAccount.sendTransaction(approvalTxData)
-          const receipt = await waitForTransaction(tx.transactionHash)
-
-          if (receipt.status === 'reverted') {
-            throw new Error('Transaction failed')
-          }
-
-          toast.success('Approval successful')
-        } catch (error) {
-          throw new Error('Approval failed')
-        }
+        increaseAllowanceMutation.mutate({ amount: makeOffer.totalPrice! })
       }
 
       const transaction = await getMakeOffer({

@@ -42,12 +42,16 @@ import {
   CROSSFI_MARKETPLACE_CONTRACT,
   CROSSFI_MINTER_ADDRESS,
   CROSSFI_TEST_ASSET_ADDRESS,
+  CROSSFI_WRAPPED_TOKEN_CONTRACT,
 } from '@/utils/configs'
 import {
   getContractCustom,
   getCurrentBlockNumber,
   ETHERS_CONTRACT,
   provider,
+  getContractEthers,
+  decimalOnChain,
+  waitForTransaction,
 } from '@/modules/blockchain/lib'
 import { ConnectButton, MediaRenderer } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
@@ -59,6 +63,7 @@ import { useRef, useState } from 'react'
 import MinterABI from '@/utils/abi/minterABI.json'
 import { upload } from 'thirdweb/storage'
 import { sendAndConfirmTransaction } from 'thirdweb'
+import WXFIAbi from '@/utils/abi/wxfi.json'
 
 export default function TestPage() {
   //  mutation
@@ -74,8 +79,8 @@ export default function TestPage() {
   const { activeAccount } = useUserChainInfo()
   console.log({ address: activeAccount?.address })
 
-  //   const { data: fetchCollection } = useFetchCollectionsQuery()
-  //   const { data: getMarketplaceCollection } = useGetMarketplaceCollectionsQuery()
+  // const { data: fetchCollection } = useFetchCollectionsQuery()
+  // const { data: getMarketplaceCollection } = useGetMarketplaceCollectionsQuery()
   //   const { data: getSingleCollection } = useGetSingleCollectionQuery({
   //     contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
   //     nftType: 'ERC721',
@@ -95,7 +100,7 @@ export default function TestPage() {
   //   const { data: userAuction } = useUserAuctionQuery()
 
   //   console.log({ fetchCollection })
-  //   console.log({ getMarketplaceCollection })
+  // console.log({ getMarketplaceCollection })
   //   console.log({ getSingleCollection })
   //   console.log({ getSingleNFT })
   //   console.log({ datagetSingleNFT })
@@ -213,21 +218,21 @@ export default function TestPage() {
     //       console.log({ signer })
     //       const minterContractI = new ethers.Contract(CROSSFI_MINTER_ADDRESS, MinterABI, signer)
     //       console.log({ minterContractI })
-          // const tokenURI = JSON.stringify({
-          //   name: 'MintMingles Logo',
-          //   description: 'MintMingles Logo ABCDEF',
-          //   image: uri,
-          //   attributes: [
-          //     { trait_type: 'Rarity', value: 'Common' },
-          //     { trait_type: 'Artist', value: 'Mingles' },
-          //   ],
-          // })
+    // const tokenURI = JSON.stringify({
+    //   name: 'MintMingles Logo',
+    //   description: 'MintMingles Logo ABCDEF',
+    //   image: uri,
+    //   attributes: [
+    //     { trait_type: 'Rarity', value: 'Common' },
+    //     { trait_type: 'Artist', value: 'Mingles' },
+    //   ],
+    // })
     //       const transaction = await minterContractI.mint(tokenURI, {
     //         value: ethers.utils.parseEther('1'),
     //       })
     //       await transaction.wait()
     //       console.log('Token minted successfully:', transaction)
-          // console.log('token uri', tokenURI )
+    // console.log('token uri', tokenURI )
     //     } else {
     //       alert('no uri')
     //     }
@@ -237,7 +242,7 @@ export default function TestPage() {
     // } catch (error) {
     //   console.log(error)
     // }
-    stakingMutation.mutate({ tokenId: '0' })
+    // stakingMutation.mutate({ tokenId: '0' })
     // updateListingMutation.mutate({
     //   listingId: '0',
     //   directListing: {
@@ -256,9 +261,27 @@ export default function TestPage() {
     //     totalPrice: '1', // pass the listed(buy out price)
     //   },
     // })
-  }
+    const WXFIContract = await getContractEthers({
+      contractAddress: CROSSFI_WRAPPED_TOKEN_CONTRACT,
+      abi: WXFIAbi,
+    })
 
-  console.log('stakingMutation mutation', stakingMutation)
+    const withdraw = await WXFIContract.populateTransaction.withdraw(decimalOnChain(1))
+    console.log({ withdraw })
+
+    // @ts-ignore
+    const tx = await activeAccount.sendTransaction(withdraw)
+    const receipt = await waitForTransaction(tx.transactionHash)
+
+    if (receipt.status === 'reverted') {
+      throw new Error('Transaction failed')
+    }
+
+    console.log({ receipt })
+    console.log({ tx })
+    console.log('withdraw success ')
+  }
+  // console.log('stakingMutation mutation', stakingMutation)
 
   // console.log({ file })
 

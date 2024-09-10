@@ -29,18 +29,15 @@ export function QueryProvider({ children }: QueryProviderProps) {
 
             if (loadingToastId) {
               toast.dismiss(loadingToastId)
-            }
-
-            if (!successMessage) {
-              toast.success('Transaction was Successful')
-            } else {
-              toast.success(`${successMessage.description}`, {
-                title: successMessage.title,
-              })
+              toast.success(
+                successMessage ? successMessage.description : 'Transaction was Successful',
+                {
+                  duration: 5000,
+                },
+              )
             }
 
             setLoadingToastId(undefined)
-            console.log({ message: successMessage, data: _data })
           },
           onError: (error, _variables, _context, mutation) => {
             console.log('query provider error: ', error)
@@ -52,18 +49,15 @@ export function QueryProvider({ children }: QueryProviderProps) {
 
             if (loadingToastId) {
               toast.dismiss(loadingToastId)
-            }
-
-            if (!errorMessage) {
-              toast.error(error.message)
-            } else {
-              toast.error(`${errorMessage.description} ${error.message}`, {
-                title: errorMessage.title,
-              })
+              toast.error(
+                errorMessage ? `${errorMessage.description} ${error.message}` : error.message,
+                {
+                  duration: 5000,
+                },
+              )
             }
 
             setLoadingToastId(undefined)
-            console.log({ message: errorMessage, error: error.message })
           },
         }),
       }),

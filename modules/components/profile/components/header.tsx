@@ -32,31 +32,36 @@ export function Header() {
 
   return (
     <div className="w-full">
-      <div className="relative h-48 md:h-64 overflow-hidden">
-        <div className="absolute inset-0">
-          <Image 
-            src={backgroundImage} 
-            alt="background" 
-            layout="fill" 
-            objectFit="cover" 
-            quality={100} 
+      <div className="relative">
+        <div className="h-48 md:h-64 w-full overflow-hidden" >
+          <Image
+            src={backgroundImage}
+            alt="background"
+            width={2000}
+            height={1000}
+            quality={100}
+            className=""
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50" />
+          <Image
+            src="/gradients.png"
+            alt="gradient"
+            width={2000}
+            height={1000}
+            className="absolute bottom-0"
+          />
         </div>
-      </div>
-      <div className="relative z-10 px-6 -mt-16 md:-mt-20">
-        <div className="flex items-end space-x-5">
+
+        <div className="absolute lg:-bottom-20 -bottom-14 items-start left-6 flex gap-4 text-3xl font-semibold z-10">
           <Image
             src={profileImage}
             alt="profile"
-            width={isMobile ? 100 : 140}
-            height={isMobile ? 100 : 140}
+            width={isMobile ? 100 : 170}
+            height={isMobile ? 100 : 170}
             quality={100}
-            className="rounded-2xl border-4 border-white shadow-lg"
+            className="rounded-2xl"
           />
-          <h3 className="text-2xl md:text-3xl font-semibold text-white mb-4">
-            {getFormatAddress(address)}
-          </h3>
+
+          <h3>{getFormatAddress(address)}</h3>
         </div>
       </div>
     </div>

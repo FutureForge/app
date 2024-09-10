@@ -8,7 +8,6 @@ type QueryProviderProps = {
 
 export function QueryProvider({ children }: QueryProviderProps) {
   const toast = useToast()
-  const [loadingToastId, setLoadingToastId] = useState<string | number | undefined>(undefined)
 
   const [queryClient] = useState(
     () =>
@@ -16,8 +15,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
         defaultOptions: { queries: { retry: 0 } },
         mutationCache: new MutationCache({
           onMutate: () => {
-            const id = toast.loading('Transaction In Process...', { duration: Infinity })
-            setLoadingToastId(id)
+            toast.loading('Transaction In Process...', { duration: 30000 })
           },
           onSuccess: (_data, _variables, _context, mutation) => {
             console.log('query provider success', _data, _variables, _context, mutation)
@@ -27,17 +25,12 @@ export function QueryProvider({ children }: QueryProviderProps) {
               description: string
             }
 
-            if (loadingToastId) {
-              toast.dismiss(loadingToastId)
-              toast.success(
-                successMessage ? successMessage.description : 'Transaction was Successful',
-                {
-                  duration: 5000,
-                },
-              )
-            }
-
-            setLoadingToastId(undefined)
+            toast.success(
+              successMessage ? successMessage.description : 'Transaction was Successful',
+              {
+                duration: 5000,
+              },
+            )
           },
           onError: (error, _variables, _context, mutation) => {
             console.log('query provider error: ', error)
@@ -47,17 +40,14 @@ export function QueryProvider({ children }: QueryProviderProps) {
               description: string
             }
 
-            if (loadingToastId) {
-              toast.dismiss(loadingToastId)
-              toast.error(
-                errorMessage ? `${errorMessage.description} ${error.message}` : error.message,
-                {
-                  duration: 5000,
-                },
-              )
-            }
+            console.log({ errorMessage, error })
 
-            setLoadingToastId(undefined)
+            toast.error(
+              errorMessage ? `${errorMessage.description} ${error.message}` : error.message,
+              {
+                duration: 5000,
+              },
+            )
           },
         }),
       }),

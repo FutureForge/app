@@ -35,19 +35,34 @@ export function useMakeListingOfferMutation() {
 
       const makeOfferValue = decimalOnChain(makeOffer.totalPrice!)
       const wxfiBalanceRaw = await WXFIContract.balanceOf(activeAccount.address)
-      const wxfiAllowance = await WXFIContract.allowance(
+
+      // Step 1: Convert XFI to WXFI if needed
+      if (BigNumber.from(wxfiBalanceRaw).lt(makeOfferValue!)) {
+        await toast.loading('Wrapping XFI to WXFI')
+        await convertXFIToWXFIMutation.mutateAsync({ amount: makeOffer.totalPrice! })
+
+        const updatedWxfiBalance = await WXFIContract.balanceOf(activeAccount.address)
+        if (BigNumber.from(updatedWxfiBalance).lt(makeOfferValue!)) {
+          throw new Error('Insufficient WXFI balance after conversion')
+        }
+      }
+
+      // Step 2: Increase allowance if needed
+      const currentAllowance = await WXFIContract.allowance(
         activeAccount?.address,
         CROSSFI_MARKETPLACE_CONTRACT,
       )
-
-      if (BigNumber.from(wxfiBalanceRaw).lt(makeOfferValue!)) {
-        await toast.loading('Wrapping XFI to WXFI')
-        convertXFIToWXFIMutation.mutate({ amount: makeOffer.totalPrice! })
-      }
-
-      if (BigNumber.from(wxfiAllowance).lt(makeOfferValue!)) {
+      if (BigNumber.from(currentAllowance).lt(makeOfferValue!)) {
         await toast.loading('Approving WXFI to spend')
-        increaseAllowanceMutation.mutate({ amount: makeOffer.totalPrice! })
+        await increaseAllowanceMutation.mutateAsync({ amount: makeOffer.totalPrice! })
+
+        const updatedAllowance = await WXFIContract.allowance(
+          activeAccount?.address,
+          CROSSFI_MARKETPLACE_CONTRACT,
+        )
+        if (BigNumber.from(updatedAllowance).lt(makeOfferValue!)) {
+          throw new Error('Insufficient allowance after approval')
+        }
       }
 
       const transaction = await getMakeOffer({

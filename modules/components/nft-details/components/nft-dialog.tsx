@@ -170,7 +170,7 @@ export function NFTDialog({
             </li>
             <li>
               You can also{' '}
-              <Link href="/swap" className="hover:underline text-blue-500">
+              <Link href="/swap" className="cursor-pointer hover:underline text-blue-500">
                 swap for WXFI
               </Link>{' '}
               manually.

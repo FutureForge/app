@@ -135,7 +135,7 @@ export function CreateNFT() {
         <div className="mt-4 flex items-center justify-between gap-3">
           <Button
             onClick={handleCreateNFT}
-            disabled={createNFTMutation.isPending}
+            disabled={createNFTMutation.isPending || !name || !description || !file}
             variant="secondary"
             className="h-10 font-medium text-sm font-inter"
           >

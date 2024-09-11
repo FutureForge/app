@@ -4,6 +4,7 @@ import { useApprovedForAllStakingMutation, useStakingMutation } from '@/modules/
 import { useCheckApprovedForAllStakingQuery, useUserNFTsQuery } from '@/modules/query'
 import { CROSSFI_TEST_ASSET_ADDRESS } from '@/utils/configs'
 import Head from 'next/head'
+import Link from 'next/link'
 import { useMemo } from 'react'
 import { NFT } from 'thirdweb'
 
@@ -61,7 +62,10 @@ export default function Staking() {
           {!stakingData || stakingData.length === 0 ? (
             <div className="w-full h-[calc(100vh-349px)] flex items-center justify-center">
               <p className="font-medium">
-                You don&apos;t own any MINT MINGLE COLLECTION NFT NFT try buying one
+                You don&apos;t own any MINT MINGLE COLLECTION NFT. Try buying one{' '}
+                <Link href="/collection/mint-mingle-collection" className="hover:underline text-blue-500">
+                  here
+                </Link>
               </p>
             </div>
           ) : (

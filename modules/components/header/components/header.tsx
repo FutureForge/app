@@ -19,6 +19,7 @@ const filters: FilterType[] = ['All', 'Recently Listed', 'Recently Sold', 'Recen
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
+  console.log({ global })
 
   const getFilteredData = () => {
     if (!global) return []
@@ -28,10 +29,7 @@ export function Header() {
       .reverse()
       .slice(0, 20) as NewListing[]
 
-    const recentlySold = global.allListing
-      .filter((item: NewListing) => item.status === StatusType.COMPLETED)
-      .reverse()
-      .slice(0, 20) as NewListing[]
+    const recentlySold = global.recentlySold.reverse().slice(0, 20) as (NewListing | NewAuction)[]
 
     const recentlyAuctioned = global.allAuction
       .filter((item: NewAuction) => item.status === StatusType.CREATED)
@@ -121,10 +119,16 @@ export function Header() {
           <div className="flex w-full items-center justify-center h-[320px]">
             <p>No data available</p>
           </div>
-        ) : filteredData.length > 4? (
+        ) : filteredData.length > 4 ? (
           <Slider {...sliderSettings}>{filteredData.map(renderItem)}</Slider>
         ) : (
-          <div className="flex mt-8 items-center gap-8 flex-wrap">{filteredData.map(renderItem)}</div>
+          <div className="flex mt-8 items-center gap-8 flex-wrap">
+            {filteredData.map((item, index) => (
+              <React.Fragment key={index}>
+                {renderItem(item, index)}
+              </React.Fragment>
+            ))}
+          </div>
         )}
       </div>
     </div>

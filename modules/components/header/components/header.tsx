@@ -1,16 +1,20 @@
 import React, { useState } from 'react'
-import { useGetGlobalListingOrAuctionQuery } from '@/modules/query'
-
-import { NFTTypeV2, StatusType } from '@/utils/lib/types'
-import Slider from 'react-slick'
+import {
+  useGetGlobalListingOrAuctionQuery,
+  useGetMarketplaceCollectionsQuery,
+} from '@/modules/query'
+import { NFTType, NFTTypeV2, StatusType } from '@/utils/lib/types'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
 import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
-import Image from 'next/image'
 import { Loader } from '@/modules/app'
-import { useMediaQuery } from '@uidotdev/usehooks'
+import { FilteredContent } from './filtered-data'
+import { NFT } from 'thirdweb'
+import Link from 'next/link'
+import { MediaRenderer } from 'thirdweb/react'
+import { client } from '@/utils/configs'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
@@ -19,6 +23,11 @@ const filters: FilterType[] = ['All', 'Recently Listed', 'Recently Sold', 'Recen
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
+
+  const { data: collections, isLoading: loading, isError: error} = useGetMarketplaceCollectionsQuery()
+  console.log('====================================')
+  console.log(collections, 'Look here')
+  console.log('====================================')
 
   const getFilteredData = () => {
     if (!global) return []
@@ -84,7 +93,7 @@ export function Header() {
     ],
   }
 
-  if (isLoading || isError) return <Loader />
+  // if (isLoading || isError) return <Loader />
 
   const renderItem = (item: NewListing | NewAuction, index: number) => {
     const isListing = 'listingId' in item
@@ -114,19 +123,76 @@ export function Header() {
 
   return (
     <div>
-      <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
-
-      <div className="px-4 max-xsm:mt-5">
-        {filteredData.length === 0 ? (
-          <div className="flex w-full items-center justify-center h-[320px]">
-            <p>No data available</p>
-          </div>
-        ) : filteredData.length > 4? (
-          <Slider {...sliderSettings}>{filteredData.map(renderItem)}</Slider>
+      <div>
+        <div>
+          <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
+        </div>
+        {isLoading || isError ? (
+          <Loader className="!h-[40vh]" />
         ) : (
-          <div className="flex mt-8 items-center gap-8 flex-wrap">{filteredData.map(renderItem)}</div>
+          <FilteredContent
+            filteredData={filteredData}
+            sliderSettings={sliderSettings}
+            renderItem={renderItem}
+          />
+        )}
+      </div>
+
+      <div className="mt-14">
+        <h2 className="text-2xl font-semibold">Featured Collections</h2>
+
+        {loading || error ? (
+          <Loader className="!h-[40vh]" />
+        ) : (
+          <div className="grid grid-cols-6 gap-7 mt-3">
+            {collections?.map((item: CollectionData) => (
+              <>
+                <CollectionCard
+                  _id={item.collection._id}
+                  name={item.collection.name}
+                  description={item.collection.description}
+                  image={item.collection.image}
+                  contractAddress={item.collection.contractAddress}
+                />
+              </>
+            ))}
+          </div>
         )}
       </div>
     </div>
+  )
+}
+
+type Collection = {
+  _id: string
+  contractAddress?: string
+  name: string
+  description?: string
+  nftType?: NFTType
+  image?: string
+}
+
+type CollectionData = {
+  collection: Collection
+  nfts: NFT
+  totalVolume: number
+  floorPrice: string
+}
+
+function CollectionCard({ image, contractAddress }: Collection) {
+  return (
+    <Link
+      href={`/collection/${contractAddress}`}
+      className="relative cursor-pointer w-fit max-w-[320px] h-[320px] border border-red-500 rounded-[20px] group overflow-hidden"
+    >
+      <MediaRenderer
+        client={client}
+        src={image}
+        className="w-full h-full rounded-2xl group-hover:scale-105 transition duration-300 ease-in-out"
+      />
+      <div className="absolute bottom-0 left-0 w-full flex justify-end flex-col h-[180px] p-4 bg-gradient-to-t from-black/95 via-black/85 to-transparent">
+        <p>{contractAddress}</p>
+      </div>
+    </Link>
   )
 }

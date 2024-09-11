@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <main className="md:px-14">
       <Head>
-        <title>MintMingle, marketplace for NFTs</title>
+        <title>MintMingle, Marketplace for NFTs</title>
       </Head>
 
       <div>

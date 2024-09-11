@@ -93,14 +93,8 @@ const NFTDetailPage = () => {
     tokenId: tokenId as string,
   })
 
-  const {
-    id,
-    isAuctionExpired,
-    nftAuctionList,
-    winningBid,
-    message,
-    nftListingList,
-  } = nftData || {}
+  const { id, isAuctionExpired, nftAuctionList, winningBid, message, nftListingList } =
+    nftData || {}
 
   const nft = nftData?.nft as SingleNFTResponse
   const nftActivity = nftData?.nftActivity as NFTActivity[]
@@ -487,7 +481,14 @@ const NFTDetailPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-400">Contract Address</p>
-                <p className="font-semibold">{getFormatAddress(contractAddress as string)}</p>
+                <Link
+                  href={`https://test.xfiscan.com/token/${contractAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className=" font-semibold hover:underline cursor-pointer text-blue-500"
+                >
+                  {getFormatAddress(contractAddress as string)}
+                </Link>
               </div>
               <div>
                 <p className="text-sm text-gray-400">Token ID</p>

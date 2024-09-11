@@ -379,7 +379,7 @@ const NFTDetailPage = () => {
 
   if (isLoading || isError) return <Loader />
 
-  const imageUrl = nft?.metadata.image
+  const imageUrl = nft?.metadata?.image || nft?.tokenURI
 
   const getListingStatus = () => {
     if (id === 'listing') return { type: 'Direct Listing', color: 'text-green-500' }
@@ -521,6 +521,12 @@ const NFTDetailPage = () => {
                     <p className="text-sm text-gray-400">Available From</p>
                     <p className="text-md font-semibold">
                       {formatBlockchainTimestamp(nftListingList?.startTimestamp)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Expires On</p>
+                    <p className="text-md font-semibold">
+                      {formatBlockchainTimestamp(nftListingList?.endTimestamp)}
                     </p>
                   </div>
                 </>

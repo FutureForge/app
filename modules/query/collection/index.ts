@@ -52,7 +52,7 @@ export function useGetMarketplaceCollectionsQuery() {
   const { data: collections } = useFetchCollectionsQuery()
 
   return useQuery({
-    queryKey: ['collections', 'marketplace'],
+    queryKey: ['collections', 'marketplace', collections],
     queryFn: async () => {
       if (!collections || collections.length === 0) return []
 
@@ -140,7 +140,7 @@ export function useGetSingleNFTQuery({
   const { activeAccount } = useUserChainInfo()
 
   return useQuery({
-    queryKey: ['nft', contractAddress, nftType, tokenId],
+    queryKey: ['nft', contractAddress, nftType, tokenId, activeAccount?.address],
     queryFn: async () => {
       try {
         // get nft activity
@@ -270,7 +270,7 @@ export function useGetSingleNFTQuery({
         throw new Error(`Failed to fetch NFT data: ${error.message}`)
       }
     },
-    enabled: !!contractAddress && !!nftType && !!tokenId && !!activeAccount?.address,
+    enabled: !!contractAddress && !!nftType && !!tokenId,
     refetchInterval: 5000,
   })
 }

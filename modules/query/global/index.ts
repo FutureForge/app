@@ -29,11 +29,28 @@ export function useGetGlobalListingOrAuctionQuery() {
           )
           const nftData = response.data
 
+          let updatedNFT = nftData
+
+          if (
+            listing.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+          ) {
+            const uri = nftData.tokenURI
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            updatedNFT = {
+              ...nftData,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          }
+
           return ensureSerializable({
             ...listing,
             soldType: 'listing',
             nft: {
-              ...nftData,
+              ...updatedNFT,
               type: 'CFC-721',
             },
           })
@@ -47,10 +64,27 @@ export function useGetGlobalListingOrAuctionQuery() {
           )
           const nftData = response.data
 
+          let updatedNFT = nftData
+
+          if (
+            listing.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+          ) {
+            const uri = nftData.tokenURI
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            updatedNFT = {
+              ...nftData,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          }
+
           return ensureSerializable({
             ...listing,
             nft: {
-              ...nftData,
+              ...updatedNFT,
               type: 'CFC-721',
             },
           })
@@ -78,12 +112,29 @@ export function useGetGlobalListingOrAuctionQuery() {
           )
           const nftData = response.data
 
+          let updatedNFT = nftData
+
+          if (
+            auction.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+          ) {
+            const uri = nftData.tokenURI
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            updatedNFT = {
+              ...nftData,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          }
+
           return ensureSerializable({
             ...auction,
             soldType: 'auction',
             winningBid: winningBidBody,
             nft: {
-              ...nftData,
+              ...updatedNFT,
               type: 'CFC-721',
             },
           })
@@ -111,11 +162,28 @@ export function useGetGlobalListingOrAuctionQuery() {
           )
           const nftData = response.data
 
+          let updatedNFT = nftData
+
+          if (
+            auction.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+          ) {
+            const uri = nftData.tokenURI
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            updatedNFT = {
+              ...nftData,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          }
+
           return ensureSerializable({
             ...auction,
             winningBid: winningBidBody,
             nft: {
-              ...nftData,
+              ...updatedNFT,
               type: 'CFC-721',
             },
           })

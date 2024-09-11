@@ -50,10 +50,6 @@ export function useUserNFTsQuery() {
 
           const uniqueTokenIds = Array.from(new Set(tokenIds))
 
-          const contract = await getContractCustom({
-            contractAddress,
-          })
-
           const tokenIdNFTs = await Promise.all(
             uniqueTokenIds.map(async (ids) => {
               const response = await axios.get<SingleNFTResponse>(
@@ -63,7 +59,7 @@ export function useUserNFTsQuery() {
 
               let updatedNFT = nft
 
-              if (contractAddress === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
                 const uri = nft.tokenURI
                 const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -138,7 +134,7 @@ export function useUserOffersMadeQuery() {
             let updatedNFT = nft
 
             if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-              const uri = nft.metadata
+              const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
               updatedNFT = {
@@ -203,8 +199,8 @@ export function useUserListingQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-              const uri = nft.metadata
+            if (ids.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
               updatedNFT = {
@@ -251,8 +247,6 @@ export function useUserAuctionQuery() {
 
         const updatedUserAuction = await Promise.all(
           userAuctions.map(async (ids) => {
-            const contract = getContractCustom({ contractAddress: ids.assetContract })
-
             const winningBid = await getWinningBid({
               auctionId: BigInt(ids.auctionId),
             })
@@ -276,8 +270,8 @@ export function useUserAuctionQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-              const uri = nft.metadata
+            if (ids.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
               updatedNFT = {

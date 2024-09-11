@@ -19,7 +19,7 @@ export const CROSSFI_TOKEN_CONTRACT = '0x63019ee1b42737E262145F767946cC2A7846253
 export const CROSSFI_WRAPPED_TOKEN_CONTRACT = '0x10e6414ddea2e2be27e23584c651bc0a49e11e07'
 
 export const client = createThirdwebClient({
-  clientId: process.env.THIRDWEB_CLIENT_ID!,
+  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 })
 
 export const chainInfo = defineChain({

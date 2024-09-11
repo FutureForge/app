@@ -45,7 +45,7 @@ export function Header() {
         return recentlyAuctioned
       case 'All':
       default:
-        return [...recentlyListed, ...recentlySold, ...recentlyAuctioned]
+        return [...recentlyListed, ...recentlyAuctioned]
     }
   }
 
@@ -94,6 +94,7 @@ export function Header() {
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
     const creator = isListing ? item.listingCreator : item.auctionCreator
+    const soldType = 'soldType' in item ? item?.soldType : undefined
 
     return (
       <NFTCard
@@ -106,6 +107,8 @@ export function Header() {
         contractAddress={assetContract}
         type={type}
         creator={creator}
+        soldType={soldType}
+        viewType={soldType !== undefined ? 'sold' : undefined}
       />
     )
   }
@@ -124,9 +127,7 @@ export function Header() {
         ) : (
           <div className="flex mt-8 items-center gap-8 flex-wrap">
             {filteredData.map((item, index) => (
-              <React.Fragment key={index}>
-                {renderItem(item, index)}
-              </React.Fragment>
+              <React.Fragment key={index}>{renderItem(item, index)}</React.Fragment>
             ))}
           </div>
         )}

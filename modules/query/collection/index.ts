@@ -2,10 +2,9 @@ import axios from 'axios'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getNFTs as getERC721NFTs, getNFT as getERC721NFT } from 'thirdweb/extensions/erc721'
 import { decimals } from 'thirdweb/extensions/erc20'
-import { getNFTs as getERC1155NFTs, getNFT as getERC1155NFT } from 'thirdweb/extensions/erc1155'
-import { getAllAuctions, getAllListing, getAllOffers, getTotalOffers } from '@/modules/blockchain'
+import { getAllAuctions, getAllListing, getAllOffers } from '@/modules/blockchain'
 import { ICollection } from '@/utils/models'
-import { NFTType, NFTTypeV2, StatusType } from '@/utils/lib/types'
+import { NFTActivity, NFTActivityResponse, NFTTypeV2, StatusType } from '@/utils/lib/types'
 import { NFT } from 'thirdweb'
 import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
@@ -142,6 +141,17 @@ export function useGetSingleNFTQuery({
     queryKey: ['nft', contractAddress, nftType, tokenId],
     queryFn: async () => {
       try {
+        // get nft activity
+        let nftActivity: NFTActivity[] = []
+        try {
+          const response = await axios.get<NFTActivityResponse>(
+            `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenId=${tokenId}&tokenType=${nftType}&page=1&limit=10&sort=-blockNumber`,
+          )
+          nftActivity = response.data.docs
+        } catch (error) {
+          nftActivity = []
+        }
+
         const contract = await getContractCustom({ contractAddress })
         let nftList: NFT | null = null
 
@@ -212,6 +222,7 @@ export function useGetSingleNFTQuery({
             nftAuctionList,
             isAuctionExpired,
             winningBid: winningBidBody,
+            nftActivity,
           }
         } else if (nftListingList) {
           const allOffers = await getAllOffers()
@@ -231,6 +242,7 @@ export function useGetSingleNFTQuery({
                 ...offer,
                 tokenId: offer.tokenId.toString(),
               })) || [],
+            nftActivity,
           }
         } else {
           const allOffers = await getAllOffers()
@@ -248,6 +260,7 @@ export function useGetSingleNFTQuery({
                 ...offer,
                 tokenId: offer.tokenId.toString(),
               })) || [],
+            nftActivity,
           }
         }
 

@@ -1,10 +1,4 @@
-import {
-  getAllAuctions,
-  getAllListing,
-  getContractCustom,
-  getNewSaleListing,
-  getRecentlySoldAuction,
-} from '@/modules/blockchain'
+import { getAllAuctions, getAllListing, getContractCustom, getAllOffers } from '@/modules/blockchain'
 import { getWinningBid } from '@/modules/blockchain/auction'
 import { decimalOffChain, includeNFTOwner } from '@/modules/blockchain/lib'
 import { StatusType, TokenType } from '@/utils/lib/types'

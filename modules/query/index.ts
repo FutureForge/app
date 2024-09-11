@@ -12,7 +12,6 @@ export {
   useUserListingQuery,
   useUserAuctionQuery,
 } from './user'
-export { useMarketplaceEventQuery } from './events'
 export { useCheckApprovedForAllQuery } from './lib'
 export { useCheckApprovedForAllStakingQuery, useGetUserStakingInfoQuery } from './staking'
 export { useGetGlobalListingOrAuctionQuery } from './global'

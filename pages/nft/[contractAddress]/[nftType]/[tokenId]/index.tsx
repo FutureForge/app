@@ -3,7 +3,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
-import { NFTTypeV2 } from '@/utils/lib/types'
+import { NFTActivity, NFTTypeV2 } from '@/utils/lib/types'
 import {
   useCheckApprovedForAllQuery,
   useGetSingleNFTQuery,
@@ -31,6 +31,7 @@ import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
 import { useToast } from '@/modules/app/hooks/useToast'
 import Link from 'next/link'
+import { formatDistanceToNow } from 'date-fns'
 
 const NFTDetailPage = () => {
   const toast = useToast()
@@ -91,8 +92,17 @@ const NFTDetailPage = () => {
     tokenId: tokenId as string,
   })
 
-  const { id, isAuctionExpired, nft, nftAuctionList, winningBid, message, nftListingList, offers } =
-    nftData || {}
+  const {
+    id,
+    isAuctionExpired,
+    nft,
+    nftAuctionList,
+    winningBid,
+    message,
+    nftListingList,
+    offers,
+    nftActivity,
+  } = nftData || {}
 
   console.log({
     isAuctionExpired,
@@ -103,6 +113,7 @@ const NFTDetailPage = () => {
     message,
     nftListingList,
     offers,
+    nftActivity,
   })
 
   const owner =
@@ -364,16 +375,20 @@ const NFTDetailPage = () => {
     cancelOfferMutation.mutate({ offerId })
   }
 
-  console.log('mutation status', makeListingOfferMutation)
+  console.log('mutation status')
 
   if (isLoading || isError) return <Loader />
 
   const imageUrl = nft?.metadata.image
 
   const getListingStatus = () => {
-    if (id === 'listing') return { type: 'Fixed Price', color: 'text-green-500' }
+    if (id === 'listing') return { type: 'Direct Listing', color: 'text-green-500' }
     if (id === 'auction') return { type: 'English Auction', color: 'text-blue-500' }
     return { type: 'Not Listed', color: 'text-gray-500' }
+  }
+
+  const getActivityAge = (timestamp: string) => {
+    return formatDistanceToNow(new Date(timestamp), { addSuffix: true })
   }
 
   return (
@@ -388,12 +403,25 @@ const NFTDetailPage = () => {
       <div className="container h-full mx-auto items-start gap-8 md:px-14 px-4 max-md:flex-col justify-center flex mt-5 max-w-[1550px]">
         <div className="md:w-1/2 w-full">
           <div className="h-[500px] relative mb-8">
-            <MediaRenderer
-              client={client}
-              src={nft?.metadata?.image || '/logo.svg'}
-              className="rounded-2xl"
-              style={{ maxHeight: '100%', width: '100%', height: '100%' }}
-            />
+            {/* Decorative frame */}
+            <div className="absolute inset-0 border-8 border-gold-gradient rounded-2xl z-10 pointer-events-none"></div>
+            <div className="absolute inset-2 border-2 border-gold-gradient rounded-xl z-10 pointer-events-none"></div>
+            
+            {/* Corner decorations */}
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-gold-gradient rounded-tl-lg z-20"></div>
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-gold-gradient rounded-tr-lg z-20"></div>
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-gold-gradient rounded-bl-lg z-20"></div>
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-gold-gradient rounded-br-lg z-20"></div>
+            
+            {/* Image */}
+            <div className="absolute inset-4 rounded-lg overflow-hidden">
+              <MediaRenderer
+                client={client}
+                src={nft?.metadata?.image || '/logo.svg'}
+                className="rounded-2xl"
+                style={{ maxHeight: '100%', width: '100%', height: '100%' }}
+              />
+            </div>
           </div>
 
           {/* Traits Section */}
@@ -433,7 +461,8 @@ const NFTDetailPage = () => {
                   id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
                 }`}
                 target="_blank"
-                className="text-primary hover:underline cursor-pointer text-blue-500"
+                rel="noopener noreferrer"
+                className="hover:underline cursor-pointer text-blue-500"
               >
                 {getFormatAddress(id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner)}
               </Link>
@@ -718,9 +747,40 @@ const NFTDetailPage = () => {
 
           {/* Recent Activity */}
           <div className="bg-special-bg p-6 rounded-2xl">
-            <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-            {/* Add your recent activity component here */}
-            <p className="text-gray-400">No recent activity</p>
+            <h3 className="text-xl font-semibold mb-4">Recent Transfers</h3>
+            {nftActivity && nftActivity.length > 0 ? (
+              <div className="space-y-4">
+                {nftActivity.map((activity: NFTActivity) => (
+                  <div key={activity.uniqueHash} className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm">
+                        From:{' '}
+                        <span className="font-medium">
+                          {getFormatAddress(activity.addressFrom)}
+                        </span>
+                      </p>
+                      <p className="text-sm">
+                        To:{' '}
+                        <span className="font-medium">{getFormatAddress(activity.addressTo)}</span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-400">{getActivityAge(activity.timestamp)}</p>
+                      <a
+                        href={`https://test.xfiscan.com/tx/${activity.txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-500 hover:underline"
+                      >
+                        View Transaction
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400">No recent activity</p>
+            )}
           </div>
         </div>
       </div>

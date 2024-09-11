@@ -18,6 +18,8 @@ type NFTCardProps = {
   contractAddress?: string
   type?: NFTTypeV2
   creator: string
+  soldType: 'listing' | 'auction' | unknown
+  viewType?: 'sold' | undefined
 }
 
 export function NFTCard(props: NFTCardProps) {
@@ -30,12 +32,25 @@ export function NFTCard(props: NFTCardProps) {
     contractAddress,
     type = 'CFC-721',
     creator,
+    soldType,
+    viewType,
   } = props
 
   const router = useRouter()
   const imageUrl = nft?.metadata.image
 
   if (!tokenId || !contractAddress || !type) return router.push('/')
+
+  const getSoldTypeTag = () => {
+    switch (soldType) {
+      case 'listing':
+        return <span className="px-2 py-1 bg-green-500 text-white rounded-full text-xs">Direct Sale</span>
+      case 'auction':
+        return <span className="px-2 py-1 bg-blue-500 text-white rounded-full text-xs">Auction Sale</span>
+      default:
+        return null
+    }
+  }
 
   return (
     <Link
@@ -51,40 +66,61 @@ export function NFTCard(props: NFTCardProps) {
         <div className="flex flex-col gap-2">
           <h3 className="text-foreground font-semibold text-xl truncate">{nft?.metadata.name}</h3>
 
-          {pricePerToken && (
+          {viewType === 'sold' ? (
             <div className="flex flex-col gap-1">
+              {getSoldTypeTag()}
               <span className="flex items-center gap-1">
                 <Icon iconType={'mint-coin'} className="w-4 h-4 flex-shrink-0" />
                 <p className="text-foreground/75 text-sm truncate">
-                  Listed Price: {decimalOffChain(pricePerToken)}{' '}
+                  Sold for: {decimalOffChain(pricePerToken || buyoutBidAmount || 0)}{' '}
                   {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
                 </p>
               </span>
               <span className="flex items-center gap-1">
                 <Icon iconType={'profile'} className="w-4 h-4 flex-shrink-0" />
                 <p className="text-foreground/75 text-sm truncate">
-                  Listed By: {getFormatAddress(creator)}
+                  Bought by: {getFormatAddress(nft?.owner!)}
                 </p>
               </span>
             </div>
-          )}
+          ) : (
+            <>
+              {pricePerToken && (
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-1">
+                    <Icon iconType={'mint-coin'} className="w-4 h-4 flex-shrink-0" />
+                    <p className="text-foreground/75 text-sm truncate">
+                      Listed Price: {decimalOffChain(pricePerToken)}{' '}
+                      {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
+                    </p>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icon iconType={'profile'} className="w-4 h-4 flex-shrink-0" />
+                    <p className="text-foreground/75 text-sm truncate">
+                      Listed By: {getFormatAddress(creator)}
+                    </p>
+                  </span>
+                </div>
+              )}
 
-          {buyoutBidAmount !== undefined && (
-            <div className="flex flex-col gap-1">
-              <span className="flex items-center gap-1">
-                <Icon iconType={'mint-coin'} className="w-4 h-4 flex-shrink-0" />
-                <p className="text-foreground/75 text-sm truncate">
-                  Buyout Price: {decimalOffChain(buyoutBidAmount)}{' '}
-                  {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
-                </p>
-              </span>
-              <span className="flex items-center gap-1">
-                <Icon iconType={'profile'} className="w-4 h-4 flex-shrink-0" />
-                <p className="text-foreground/75 text-sm truncate">
-                  Auctioned By: {getFormatAddress(creator)}
-                </p>
-              </span>
-            </div>
+              {buyoutBidAmount !== undefined && (
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-1">
+                    <Icon iconType={'mint-coin'} className="w-4 h-4 flex-shrink-0" />
+                    <p className="text-foreground/75 text-sm truncate">
+                      Buyout Price: {decimalOffChain(buyoutBidAmount)}{' '}
+                      {currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? 'XFI' : currency}
+                    </p>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icon iconType={'profile'} className="w-4 h-4 flex-shrink-0" />
+                    <p className="text-foreground/75 text-sm truncate">
+                      Auctioned By: {getFormatAddress(creator)}
+                    </p>
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

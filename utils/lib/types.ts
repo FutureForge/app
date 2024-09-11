@@ -1,3 +1,5 @@
+import { GetBalanceResult } from "thirdweb/extensions/erc20"
+
 export enum Status {
   UNSET,
   CREATED,
@@ -86,7 +88,7 @@ interface NFTData {
   tokenType: string
 }
 
-export interface NFTResponse {
+export interface UserNFTResponse {
   docs: NFTData[]
   hasNext: boolean
   limit: number
@@ -110,6 +112,41 @@ export type NFTActivity = {
 
 export type NFTActivityResponse = {
   docs: NFTActivity[]
+  hasNext: boolean
+  limit: number
+  page: number
+}
+
+export type NFTMetadata = {
+  image: string
+  external_url: string
+  description: string
+  name: string
+  attributes: Array<{
+    trait_type: string
+    value: string
+  }>
+  background_color: string
+  animation_url: string
+}
+
+export type SingleNFTResponse = {
+  contractAddress: string
+  tokenId: string
+  blockNumber: number
+  creatorAddress: string
+  ownerAddress: string
+  timestamp: string
+  tokenName: string
+  tokenSymbol: string
+  tokenType: string
+  tokenURI: string
+  transferCount: number
+  metadata: NFTMetadata
+}
+
+export type CollectionNFTResponse = {
+  docs: SingleNFTResponse[]
   hasNext: boolean
   limit: number
   page: number

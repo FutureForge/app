@@ -3,7 +3,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
-import { NFTActivity, NFTTypeV2 } from '@/utils/lib/types'
+import { NFTActivity, NFTTypeV2, SingleNFTResponse } from '@/utils/lib/types'
 import {
   useCheckApprovedForAllQuery,
   useGetSingleNFTQuery,
@@ -32,6 +32,7 @@ import { NFTDialog } from '@/modules/components/nft-details'
 import { useToast } from '@/modules/app/hooks/useToast'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { Offer } from 'thirdweb/extensions/marketplace'
 
 const NFTDetailPage = () => {
   const toast = useToast()
@@ -95,14 +96,15 @@ const NFTDetailPage = () => {
   const {
     id,
     isAuctionExpired,
-    nft,
     nftAuctionList,
     winningBid,
     message,
     nftListingList,
-    offers,
-    nftActivity,
   } = nftData || {}
+
+  const nft = nftData?.nft as SingleNFTResponse
+  const nftActivity = nftData?.nftActivity as NFTActivity[]
+  const offers = nftData?.offers as Offer[]
 
   console.log({
     isAuctionExpired,
@@ -117,7 +119,11 @@ const NFTDetailPage = () => {
   })
 
   const owner =
-    id === 'listing' ? nft?.owner : id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
+    id === 'listing'
+      ? nft?.ownerAddress
+      : id === 'auction'
+      ? nftAuctionList?.auctionCreator
+      : nft?.ownerAddress
   const isOwner = owner === address
 
   const handleApproveNFT = async () => {
@@ -406,13 +412,13 @@ const NFTDetailPage = () => {
             {/* Decorative frame */}
             <div className="absolute inset-0 border-8 border-gold-gradient rounded-2xl z-10 pointer-events-none"></div>
             <div className="absolute inset-2 border-2 border-gold-gradient rounded-xl z-10 pointer-events-none"></div>
-            
+
             {/* Corner decorations */}
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-gold-gradient rounded-tl-lg z-20"></div>
             <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-gold-gradient rounded-tr-lg z-20"></div>
             <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-gold-gradient rounded-bl-lg z-20"></div>
             <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-gold-gradient rounded-br-lg z-20"></div>
-            
+
             {/* Image */}
             <div className="absolute inset-4 rounded-lg overflow-hidden">
               <MediaRenderer
@@ -446,7 +452,7 @@ const NFTDetailPage = () => {
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h3 className="text-3xl font-bold">
-                {nft?.metadata?.name} #{nft?.id}
+                {nft?.metadata?.name} #{nft?.tokenId}
               </h3>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${getListingStatus().color}`}
@@ -457,14 +463,12 @@ const NFTDetailPage = () => {
             <p className="text-gray-400">
               Owned by{' '}
               <Link
-                href={`https://test.xfiscan.com/address/${
-                  id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner
-                }`}
+                href={`https://test.xfiscan.com/address/${nft?.ownerAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline cursor-pointer text-blue-500"
               >
-                {getFormatAddress(id === 'auction' ? nftAuctionList?.auctionCreator : nft?.owner)}
+                {getFormatAddress(nft?.ownerAddress)}
               </Link>
             </p>
           </div>
@@ -487,7 +491,7 @@ const NFTDetailPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Token ID</p>
-                <p className="font-semibold">{nft?.id}</p>
+                <p className="font-semibold">{nft?.tokenId}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-400">Token Standard</p>

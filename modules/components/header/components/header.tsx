@@ -1,16 +1,14 @@
 import React, { useState } from 'react'
 import { useGetGlobalListingOrAuctionQuery } from '@/modules/query'
 
-import { NFTTypeV2, StatusType } from '@/utils/lib/types'
+import { StatusType } from '@/utils/lib/types'
 import Slider from 'react-slick'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
 import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
-import Image from 'next/image'
 import { Loader } from '@/modules/app'
-import { useMediaQuery } from '@uidotdev/usehooks'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
@@ -89,7 +87,6 @@ export function Header() {
     const nft = item.nft
     const tokenId = item.tokenId
     const assetContract = item.assetContract
-    const type = nft?.type as NFTTypeV2
     const pricePerToken = isListing ? item.pricePerToken : undefined
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
@@ -105,7 +102,7 @@ export function Header() {
         buyoutBidAmount={buyOutAmount}
         tokenId={tokenId}
         contractAddress={assetContract}
-        type={type}
+        type={'CFC-721'}
         creator={creator}
         soldType={soldType}
         viewType={soldType !== undefined ? 'sold' : undefined}

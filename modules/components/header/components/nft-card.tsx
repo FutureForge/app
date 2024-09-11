@@ -3,14 +3,13 @@ import { MediaRenderer } from 'thirdweb/react'
 import { client } from '@/utils/configs'
 import { Icon } from '@/modules/app'
 import { decimalOffChain } from '@/modules/blockchain'
-import { NFT } from 'thirdweb'
 import Link from 'next/link'
-import { NFTTypeV2 } from '@/utils/lib/types'
+import { NFTTypeV2, SingleNFTResponse } from '@/utils/lib/types'
 import { useRouter } from 'next/router'
 import { getFormatAddress } from '@/utils'
 
 type NFTCardProps = {
-  nft: NFT | undefined
+  nft: SingleNFTResponse | undefined
   pricePerToken?: bigint
   currency?: string
   buyoutBidAmount?: bigint
@@ -37,7 +36,7 @@ export function NFTCard(props: NFTCardProps) {
   } = props
 
   const router = useRouter()
-  const imageUrl = nft?.metadata.image
+  const imageUrl = nft?.metadata?.image
 
   if (!tokenId || !contractAddress || !type) return router.push('/')
 
@@ -64,7 +63,7 @@ export function NFTCard(props: NFTCardProps) {
       />
       <div className="absolute bottom-0 left-0 w-full flex justify-end flex-col h-[180px] p-4 bg-gradient-to-t from-black/95 via-black/85 to-transparent">
         <div className="flex flex-col gap-2">
-          <h3 className="text-foreground font-semibold text-xl truncate">{nft?.metadata.name}</h3>
+          <h3 className="text-foreground font-semibold text-xl truncate">{nft?.metadata?.name}</h3>
 
           {viewType === 'sold' ? (
             <div className="flex flex-col gap-1">
@@ -79,7 +78,7 @@ export function NFTCard(props: NFTCardProps) {
               <span className="flex items-center gap-1">
                 <Icon iconType={'profile'} className="w-4 h-4 flex-shrink-0" />
                 <p className="text-foreground/75 text-sm truncate">
-                  Bought by: {getFormatAddress(nft?.owner!)}
+                  Bought by: {getFormatAddress(nft?.ownerAddress!)}
                 </p>
               </span>
             </div>

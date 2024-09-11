@@ -1,7 +1,6 @@
-import { getNFT as getCFC721NFT } from 'thirdweb/extensions/erc721'
 import { useActiveAccount, useActiveWallet } from 'thirdweb/react'
-import { CROSSFI_API, TEST_WALLET_ADDRESS } from '@/utils/configs'
-import { NFTResponse, StatusType } from '@/utils/lib/types'
+import { CROSSFI_API } from '@/utils/configs'
+import { UserNFTResponse, StatusType, SingleNFTResponse } from '@/utils/lib/types'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import {
@@ -14,7 +13,6 @@ import {
   getTotalAuctions,
 } from '@/modules/blockchain'
 import { ensureSerializable } from '@/utils'
-import { includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 
 export function useUserChainInfo() {
@@ -31,19 +29,12 @@ export function useUserNFTsQuery() {
   return useQuery({
     queryKey: ['userNFTs', 'userProfile', 'profile'],
     queryFn: async () => {
-      const response = await axios.get<NFTResponse>(
+      const response = await axios.get<UserNFTResponse>(
         `${CROSSFI_API}/token-holders?address=${userAddress}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`,
       )
 
       const userNFTs = response.data.docs
 
-      //  const totalListings = await getTotalListings()
-
-      // if (Number(totalListings) < 0) {
-      //   return []
-      // } else {
-      //   const userListing = allListings
-      // }
       const allListings = await getAllListing()
 
       const userListings = await Promise.all(
@@ -65,15 +56,15 @@ export function useUserNFTsQuery() {
 
           const tokenIdNFTs = await Promise.all(
             uniqueTokenIds.map(async (ids) => {
-              const nft = await getCFC721NFT({
-                contract,
-                tokenId: BigInt(ids),
-                includeOwner: includeNFTOwner,
-              })
+              const response = await axios.get<SingleNFTResponse>(
+                `${CROSSFI_API}/token-inventory/${contractAddress}/${ids}`,
+              )
+              const nft = response.data
+
               let updatedNFT = nft
 
               if (contractAddress === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-                const { uri } = nft.metadata
+                const uri = nft.tokenURI
                 const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
                 updatedNFT = {
@@ -100,7 +91,7 @@ export function useUserNFTsQuery() {
         return !userListings.some(
           (listing) =>
             listing.assetContract.toLowerCase() === nft.contractAddress.toLowerCase() &&
-            listing.tokenId.toString() === nft.nft.id.toString(),
+            listing.tokenId.toString() === nft.nft.tokenId.toString(),
         )
       })
 
@@ -140,17 +131,14 @@ export function useUserOffersMadeQuery() {
 
         const updatedUserOffers = await Promise.all(
           userOffers.map(async (ids) => {
-            const contract = getContractCustom({ contractAddress: ids.assetContract })
-
-            const nft = await getCFC721NFT({
-              contract,
-              tokenId: BigInt(ids.tokenId),
-              includeOwner: includeNFTOwner,
-            })
+            const response = await axios.get<SingleNFTResponse>(
+              `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
+            )
+            const nft = response.data
             let updatedNFT = nft
 
             if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-              const { uri } = nft.metadata
+              const uri = nft.metadata
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
               updatedNFT = {
@@ -209,17 +197,14 @@ export function useUserListingQuery() {
 
         const updatedUserListings = await Promise.all(
           userListings.map(async (ids) => {
-            const contract = getContractCustom({ contractAddress: ids.assetContract })
-
-            const nft = await getCFC721NFT({
-              contract,
-              tokenId: BigInt(ids.tokenId),
-              includeOwner: includeNFTOwner,
-            })
+            const response = await axios.get<SingleNFTResponse>(
+              `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
+            )
+            const nft = response.data
             let updatedNFT = nft
 
             if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-              const { uri } = nft.metadata
+              const uri = nft.metadata
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
               updatedNFT = {
@@ -285,15 +270,14 @@ export function useUserAuctionQuery() {
               bidAmount: winningBid[2].toString(), // Convert BigInt to string
             }
 
-            const nft = await getCFC721NFT({
-              contract,
-              tokenId: BigInt(ids.tokenId),
-              includeOwner: includeNFTOwner,
-            })
+            const response = await axios.get<SingleNFTResponse>(
+              `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
+            )
+            const nft = response.data
             let updatedNFT = nft
 
             if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-              const { uri } = nft.metadata
+              const uri = nft.metadata
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
               updatedNFT = {

@@ -66,6 +66,45 @@ export function useGetMarketplaceCollectionsQuery() {
 
           const nfts = response.data.docs
 
+          const updatedNFTs = await Promise.all(
+            nfts.map(async (nft) => {
+              const metadata = nft?.metadata
+              if (
+                collection.collectionContractAddress.toLowerCase() ===
+                '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+              ) {
+                const uri = nft.tokenURI
+                const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+                return {
+                  ...nft,
+                  tokenURI: parsedMetadata.image,
+                  metadata: {
+                    ...parsedMetadata,
+                  },
+                }
+              } else if (metadata === undefined || null) {
+                const contract = getContractCustom({
+                  contractAddress: nft.contractAddress,
+                })
+                const tokenId = nft.tokenId
+
+                const newUpdatedNFTs = await getNFT({
+                  contract: contract,
+                  tokenId: BigInt(tokenId),
+                  includeOwner: includeNFTOwner,
+                })
+
+                return {
+                  ...nft,
+                  ...newUpdatedNFTs,
+                }
+              } else {
+                return nft
+              }
+            }),
+          )
+
           const allListing = await getAllListing()
 
           const collectionListing = allListing.filter(
@@ -108,7 +147,7 @@ export function useGetMarketplaceCollectionsQuery() {
 
           return {
             collection,
-            nfts,
+            nfts: updatedNFTs,
             totalVolume,
             floorPrice: floorPrice.toString(),
           }

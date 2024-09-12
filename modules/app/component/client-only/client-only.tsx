@@ -1,17 +1,36 @@
-import React from 'react'
+// import React from 'react'
+
+// type ClientOnlyProps = {
+//   children: React.ReactNode
+// }
+
+// const emptySubscribe = () => () => {}
+
+// export const ClientOnly: React.FC<ClientOnlyProps> = ({ children }) => {
+//   const isServer = React.useSyncExternalStore(
+//     emptySubscribe,
+//     () => false,
+//     () => true,
+//   )
+
+//   return isServer ? null : children
+// }
+import React, { useState, useEffect } from 'react'
 
 type ClientOnlyProps = {
   children: React.ReactNode
 }
 
-const emptySubscribe = () => () => {}
-
 export const ClientOnly: React.FC<ClientOnlyProps> = ({ children }) => {
-  const isServer = React.useSyncExternalStore(
-    emptySubscribe,
-    () => false,
-    () => true,
-  )
+  const [isClient, setIsClient] = useState(false)
 
-  return isServer ? null : children
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) {
+    return null
+  }
+
+  return <>{children}</>
 }

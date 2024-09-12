@@ -1,10 +1,17 @@
-'use Client'
+'use client'
 import { useUserChainInfo } from '@/modules/query'
 import { getFormatAddress } from '@/utils'
-import { useMediaQuery } from '@uidotdev/usehooks'
+import { useWindowSize } from '@uidotdev/usehooks'
 import Image from 'next/image'
 import { createHash } from 'crypto'
 import { ClientOnly } from '@/modules/app'
+
+type HeaderProps = {
+  collection?: boolean
+  floorPrice?: string | undefined
+  totalVolume?: number
+  listed?: number
+}
 
 // Function to generate a color based on hash
 function generateColor(hash: string, index: number): string {
@@ -31,13 +38,18 @@ function generatePixelatedImage(address: string, size: number): string {
   </svg>`
 }
 
-export function Header() {
+export function Header({ collection = false, floorPrice, totalVolume, listed }: HeaderProps) {
   const { activeAccount } = useUserChainInfo()
   const address = activeAccount?.address || ''
-  const isMobile = useMediaQuery('(max-width: 440px)')
+  const {width} = useWindowSize()
+  const isMobile = width && width <= 440
 
   const backgroundImage = generatePixelatedImage(address, 100)
   const profileImage = generatePixelatedImage(address, 10)
+
+  // Ensure floorPrice and listed are properly rounded
+  const roundedFloorPrice = floorPrice ? parseFloat(floorPrice).toFixed(2) : '0.00'
+  const roundedPercentage = listed ? Number(listed).toFixed(2) : '0.00'
 
   return (
     <ClientOnly>
@@ -47,10 +59,9 @@ export function Header() {
             <Image
               src={backgroundImage}
               alt="background"
-              width={2000}
+              width={2500}
               height={1000}
               quality={100}
-              className=""
             />
             <Image
               src="/gradients.png"
@@ -61,17 +72,41 @@ export function Header() {
             />
           </div>
 
-          <div className="absolute lg:-bottom-20 -bottom-14 items-start left-6 flex gap-4 text-3xl font-semibold z-10">
+          <div className="absolute lg:-bottom-20 -bottom-0 w-full items-start lg:left-6 flex gap-4 text-3xl font-semibold z-10">
             <Image
               src={profileImage}
               alt="profile"
               width={isMobile ? 100 : 170}
               height={isMobile ? 100 : 170}
               quality={100}
-              className="rounded-2xl"
+              className="rounded-2xl max-md:hidden"
             />
+            <div className="flex justify-between w-full max-md:flex-col gap-4">
+              <span>
+                <h3 className="text-2xl">{getFormatAddress(address)}</h3>
+              </span>
 
-            <h3>{getFormatAddress(address)}</h3>
+              {collection && (
+                <div className="flex items-center gap-5 mr-20">
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">{roundedFloorPrice} XFI</h3>
+                    <p className="text-base font-normal max-md:text-xs">Floor Price</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">{totalVolume || 0}</h3>
+                    <p className="text-base font-normal max-md:text-xs">Volume</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">3000+</h3>
+                    <p className="text-base font-normal max-md:text-xs">Holders</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">{roundedPercentage}%</h3>
+                    <p className="text-base font-normal max-md:text-xs">Listed</p>
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

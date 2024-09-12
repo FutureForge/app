@@ -1,6 +1,6 @@
 'use Client'
 import React from 'react'
-import Slider from 'react-slick'
+import Slider, { Settings } from 'react-slick'
 import { ClientOnly } from '@/modules/app'
 import { NFTCard } from './nft-card'
 import { NewListing, NewAuction } from '../types/types'
@@ -8,23 +8,16 @@ import { useMediaQuery } from '@uidotdev/usehooks'
 
 type FilteredContentProps = {
   filteredData: (NewListing | NewAuction)[]
-  sliderSettings: any
   renderItem: (item: NewListing | NewAuction, index: number) => JSX.Element
+  sliderSettings: Settings
 }
 
-export function FilteredContent({
-  filteredData,
-  sliderSettings,
-  renderItem,
-}: FilteredContentProps) {
+export function FilteredContent({ filteredData, renderItem, sliderSettings }: FilteredContentProps) {
   const isMobile = useMediaQuery('only screen and (max-width: 600px)')
 
-  console.log('====================================');
-  console.log(filteredData, 'How far');
-  console.log('====================================');
   return (
     <ClientOnly>
-      <div className="px-4 max-xsm:mt-5">
+      <div className="max-xsm:mt-5 max-md:px-3">
         {filteredData.length === 0 ? (
           <div className="flex w-full items-center justify-center h-[320px]">
             <p>No data available</p>

@@ -1,3 +1,4 @@
+"use Client"
 import React, { useState } from 'react'
 import {
   useGetGlobalListingOrAuctionQuery,
@@ -9,12 +10,16 @@ import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
 import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
-import { Loader } from '@/modules/app'
+import { ClientOnly, Icon, Loader } from '@/modules/app'
 import { FilteredContent } from './filtered-data'
 import { NFT } from 'thirdweb'
 import Link from 'next/link'
 import { MediaRenderer } from 'thirdweb/react'
 import { client } from '@/utils/configs'
+import { useMediaQuery } from '@uidotdev/usehooks'
+import Slider from 'react-slick'
+import { useWindowSize } from '@uidotdev/usehooks'
+import { CollectionCard, CollectionData } from './collection-card'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
@@ -23,6 +28,10 @@ const filters: FilterType[] = ['All', 'Recently Listed', 'Recently Sold', 'Recen
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
+    const { width } = useWindowSize()
+    const isMobile = width && width <= 440
+    const isDesktop = width && width >= 1024
+
 
   const {
     data: collections,
@@ -30,6 +39,8 @@ export function Header() {
     isError: error,
   } = useGetMarketplaceCollectionsQuery()
 
+  // Determine whether to use slider based on number of collections
+  const useSlider = (collections?.length ?? 0) > (isMobile ? 1 : isDesktop ? 4 : 1)
   const getFilteredData = () => {
     if (!global) return []
 
@@ -51,9 +62,6 @@ export function Header() {
         return [...recentlyListed, ...recentlyAuctioned]
     }
   }
-
-  const filteredData = getFilteredData()
-
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -84,8 +92,7 @@ export function Header() {
       },
     ],
   }
-
-  // if (isLoading || isError) return <Loader />
+  const filteredData = getFilteredData()
 
   const renderItem = (item: NewListing | NewAuction, index: number) => {
     const isListing = 'listingId' in item
@@ -116,78 +123,58 @@ export function Header() {
   }
 
   return (
-    <div>
-      <div className='border border-red-500'>
+    <div className="flex flex-col gap-20">
+      <div>
         <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
 
-        {isLoading || isError ? (
-          <Loader className="!h-[40vh]" />
-        ) : (
-          <FilteredContent
-            filteredData={filteredData}
-            sliderSettings={sliderSettings}
-            renderItem={renderItem}
-          />
-        )}
+        <div className="mt-8 w-full">
+          {isLoading || isError ? (
+            <Loader className="!h-[40vh]" />
+          ) : (
+            <FilteredContent
+              sliderSettings={sliderSettings}
+              filteredData={filteredData}
+              renderItem={renderItem}
+            />
+          )}
+        </div>
       </div>
 
       <div className="mt-14">
-        <h2 className="text-2xl font-semibold">Featured Collections</h2>
+        <div className='px-4'>
+          <h2 className="text-2xl font-semibold mb-8">Featured Collections</h2>
+        </div>
 
         {loading || error ? (
           <Loader className="!h-[40vh]" />
         ) : (
-          <div className="grid grid-cols-6 gap-7 mt-3">
-            {collections?.map((item: CollectionData) => (
-              <>
-                <CollectionCard
-                  _id={item.collection._id}
-                  name={item.collection.name}
-                  description={item.collection.description}
-                  image={item.collection.image}
-                  collectionContractAddress={item.collection.collectionContractAddress}
-                />
-              </>
-            ))}
-          </div>
+          <ClientOnly>
+            {useSlider ? (
+              <Slider {...sliderSettings}>
+                {collections?.map((item: CollectionData) => (
+                  <CollectionCard
+                    key={item.collection?._id}
+                    collection={item.collection}
+                    floorPrice={item.floorPrice}
+                  />
+                ))}
+              </Slider>
+            ) : (
+              <div className="flex flex-wrap gap-7 mt-3">
+                {collections?.map((item: CollectionData) => (
+                  <CollectionCard
+                    key={item.collection?._id}
+                    collection={item.collection}
+                    floorPrice={item.floorPrice}
+                  />
+                ))}
+              </div>
+            )}
+          </ClientOnly>
         )}
       </div>
     </div>
   )
 }
 
-type Collection = {
-  _id: string
-  collectionContractAddress?: string
-  name: string
-  description?: string
-  nftType?: NFTType
-  image?: string
-}
 
-type CollectionData = {
-  collection: Collection
-  nfts: NFT
-  totalVolume: number
-  floorPrice: string
-}
-
-function CollectionCard({ image, collectionContractAddress }: Collection) {
-  const href = `/collections/${collectionContractAddress}`
-
-  return (
-    <Link
-      href={href}
-      className="relative cursor-pointer w-fit max-w-[320px] h-[320px] border border-red-500 rounded-[20px] group overflow-hidden"
-    >
-      <MediaRenderer
-        client={client}
-        src={image}
-        className="w-full h-full rounded-2xl group-hover:scale-105 transition duration-300 ease-in-out"
-      />
-      <div className="absolute bottom-0 left-0 w-full flex justify-end flex-col h-[180px] p-4 bg-gradient-to-t from-black/95 via-black/85 to-transparent">
-        <p>{collectionContractAddress}</p>
-      </div>
-    </Link>
-  )
-}

@@ -384,7 +384,7 @@ const NFTDetailPage = () => {
 
   console.log('mutation status')
 
-  if (isLoading || isError) return <Loader />
+  if (isLoading || isError) return <Loader className='!h-[80vh]'/>
 
   const imageUrl = nft?.metadata?.image || nft?.tokenURI
 

@@ -14,6 +14,8 @@ import {
 } from '@/modules/blockchain'
 import { ensureSerializable } from '@/utils'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
+import { includeNFTOwner } from '@/modules/blockchain/lib'
+import { getNFT } from 'thirdweb/extensions/erc721'
 
 export function useUserChainInfo() {
   const activeAccount = useActiveAccount()
@@ -72,7 +74,23 @@ export function useUserNFTsQuery() {
                 }
               }
 
-              return { ...nfts, nft: updatedNFT, type: 'NFTs' }
+              const metadata = updatedNFT?.metadata
+              if (metadata === undefined) {
+                const contract = getContractCustom({
+                  contractAddress: updatedNFT?.contractAddress,
+                })
+                const tokenId = updatedNFT?.tokenId
+
+                const newUpdatedNFTs = await getNFT({
+                  contract: contract,
+                  tokenId: BigInt(tokenId),
+                  includeOwner: includeNFTOwner,
+                })
+
+                return { ...nfts, nft: newUpdatedNFTs, type: 'NFTs' }
+              } else {
+                return { ...nfts, nft: updatedNFT, type: 'NFTs' }
+              }
             }),
           )
 
@@ -82,12 +100,13 @@ export function useUserNFTsQuery() {
 
       const flatNFTs = updatedNFTs.flat()
 
-      const userNFTsNotListed = flatNFTs.filter((nft) => {
+      const userNFTsNotListed = flatNFTs.filter((nft: any) => {
         // Check if this NFT is not in the userListings
+        const nftTokenId = nft.nft.tokenId || nft?.nft?.id?.toString()
         return !userListings.some(
           (listing) =>
             listing.assetContract.toLowerCase() === nft.contractAddress.toLowerCase() &&
-            listing.tokenId.toString() === nft.nft.tokenId.toString(),
+            listing.tokenId.toString() === nftTokenId,
         )
       })
 
@@ -146,7 +165,22 @@ export function useUserOffersMadeQuery() {
               }
             }
 
-            return { ...ids, nft: updatedNFT }
+            const metadata = updatedNFT?.metadata
+            if (metadata === undefined) {
+              const contract = getContractCustom({
+                contractAddress: updatedNFT?.contractAddress,
+              })
+              const tokenId = updatedNFT?.tokenId
+
+              const newUpdatedNFTs = await getNFT({
+                contract: contract,
+                tokenId: BigInt(tokenId),
+                includeOwner: includeNFTOwner,
+              })
+              return { ...ids, nft: newUpdatedNFTs }
+            } else {
+              return { ...ids, nft: updatedNFT }
+            }
           }),
         )
 
@@ -212,7 +246,22 @@ export function useUserListingQuery() {
               }
             }
 
-            return { ...ids, nft: updatedNFT }
+            const metadata = updatedNFT?.metadata
+            if (metadata === undefined) {
+              const contract = getContractCustom({
+                contractAddress: updatedNFT?.contractAddress,
+              })
+              const tokenId = updatedNFT?.tokenId
+
+              const newUpdatedNFTs = await getNFT({
+                contract: contract,
+                tokenId: BigInt(tokenId),
+                includeOwner: includeNFTOwner,
+              })
+              return { ...ids, nft: newUpdatedNFTs }
+            } else {
+              return { ...ids, nft: updatedNFT }
+            }
           }),
         )
 
@@ -283,7 +332,32 @@ export function useUserAuctionQuery() {
               }
             }
 
-            return { ...ids, nft: updatedNFT, isAuctionExpired, winningBid: winningBidBody }
+            const metadata = updatedNFT?.metadata
+            if (metadata === undefined) {
+              const contract = getContractCustom({
+                contractAddress: updatedNFT?.contractAddress,
+              })
+              const tokenId = updatedNFT?.tokenId
+
+              const newUpdatedNFTs = await getNFT({
+                contract: contract,
+                tokenId: BigInt(tokenId),
+                includeOwner: includeNFTOwner,
+              })
+              return {
+                ...ids,
+                nft: newUpdatedNFTs,
+                isAuctionExpired,
+                winningBid: winningBidBody,
+              }
+            } else {
+              return {
+                ...ids,
+                nft: updatedNFT,
+                isAuctionExpired,
+                winningBid: winningBidBody,
+              }
+            }
           }),
         )
 

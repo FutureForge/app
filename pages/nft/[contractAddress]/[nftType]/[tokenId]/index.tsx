@@ -3,7 +3,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
-import { NFTActivity, NFTTypeV2, SingleNFTResponse } from '@/utils/lib/types'
+import { NFTActivity, NFTTypeV2, OfferType, SingleNFTResponse } from '@/utils/lib/types'
 import {
   useCheckApprovedForAllQuery,
   useGetSingleNFTQuery,
@@ -25,6 +25,7 @@ import {
   useBidInAuctionMutation,
   useMakeListingOfferMutation,
   useCancelOfferMutation,
+  useAcceptOfferMutation,
 } from '@/modules/mutation'
 import { useEffect, useState } from 'react'
 import { Dialog } from '@/modules/app/component/dialog'
@@ -32,7 +33,6 @@ import { NFTDialog } from '@/modules/components/nft-details'
 import { useToast } from '@/modules/app/hooks/useToast'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import { Offer } from 'thirdweb/extensions/marketplace'
 
 const NFTDetailPage = () => {
   const toast = useToast()
@@ -62,6 +62,7 @@ const NFTDetailPage = () => {
   const createListingMutation = useCreateListingMutation()
   const makeListingOfferMutation = useMakeListingOfferMutation()
   const cancelOfferMutation = useCancelOfferMutation()
+  const acceptOfferMutation = useAcceptOfferMutation()
 
   const approvedForAllMutation = useApprovedForAllMutation()
 
@@ -93,12 +94,11 @@ const NFTDetailPage = () => {
     tokenId: tokenId as string,
   })
 
-  const { id, isAuctionExpired, nftAuctionList, winningBid, message, nftListingList } =
+  const { id, isAuctionExpired, nftAuctionList, winningBid, message, nftListingList, offers } =
     nftData || {}
 
-  const nft = nftData?.nft as SingleNFTResponse
+  const nft = nftData?.nft
   const nftActivity = nftData?.nftActivity as NFTActivity[]
-  const offers = nftData?.offers as Offer[]
 
   console.log({
     isAuctionExpired,
@@ -114,11 +114,11 @@ const NFTDetailPage = () => {
 
   const owner =
     id === 'listing'
-      ? nft?.ownerAddress
+      ? nft?.ownerAddress || nft?.owner
       : id === 'auction'
       ? nftAuctionList?.auctionCreator
-      : nft?.ownerAddress
-  const isOwner = owner === address
+      : nft?.ownerAddress || nft?.owner
+  const isOwner = owner?.toLowerCase() === address?.toLowerCase()
 
   const handleApproveNFT = async () => {
     if (!address) return toast.error('Please connect to a wallet.')
@@ -375,6 +375,13 @@ const NFTDetailPage = () => {
     cancelOfferMutation.mutate({ offerId })
   }
 
+  const handleAcceptOffer = (offerId: string) => {
+    if (!address) return toast.error('Please connect to a wallet.')
+    if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
+
+    acceptOfferMutation.mutate({ offerId })
+  }
+
   console.log('mutation status')
 
   if (isLoading || isError) return <Loader />
@@ -417,7 +424,7 @@ const NFTDetailPage = () => {
             <div className="absolute inset-4 rounded-lg overflow-hidden">
               <MediaRenderer
                 client={client}
-                src={nft?.metadata?.image || '/logo.svg'}
+                src={nft?.metadata?.image || nft?.tokenURI || '/logo.svg'}
                 className="rounded-2xl"
                 style={{ maxHeight: '100%', width: '100%', height: '100%' }}
               />
@@ -440,6 +447,54 @@ const NFTDetailPage = () => {
               )}
             </div>
           </div>
+
+          {/* Recent Transfers */}
+          <div className="bg-special-bg p-6 rounded-2xl mt-8">
+            <h3 className="text-xl font-semibold mb-4">Recent Transfers</h3>
+            {nftActivity && nftActivity.length > 0 ? (
+              <div className="space-y-4">
+                {nftActivity.map((activity: NFTActivity) => (
+                  <div key={activity.uniqueHash} className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm flex items-center">
+                        From:{' '}
+                        <span className="font-medium">
+                          {getFormatAddress(activity.addressFrom)}
+                        </span>
+                        {activity.addressFrom.toLowerCase() === owner?.toLowerCase() && (
+                          <span className="ml-2 px-1.5 py-0.5 text-xs font-semibold text-blue-500 bg-blue-500 bg-opacity-20 rounded">
+                            YOU
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-sm flex items-center">
+                        To:{' '}
+                        <span className="font-medium">{getFormatAddress(activity.addressTo)}</span>
+                        {activity.addressTo.toLowerCase() === owner?.toLowerCase() && (
+                          <span className="ml-2 px-1.5 py-0.5 text-xs font-semibold text-blue-500 bg-blue-500 bg-opacity-20 rounded">
+                            YOU
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-400">{getActivityAge(activity.timestamp)}</p>
+                      <a
+                        href={`https://test.xfiscan.com/tx/${activity.txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-500 hover:underline"
+                      >
+                        View Transaction
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400">No recent activity</p>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-8 h-full md:w-1/2 w-full">
@@ -457,12 +512,12 @@ const NFTDetailPage = () => {
             <p className="text-gray-400">
               Owned by{' '}
               <Link
-                href={`https://test.xfiscan.com/address/${nft?.ownerAddress}`}
+                href={`https://test.xfiscan.com/address/${owner}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline cursor-pointer text-blue-500"
               >
-                {getFormatAddress(nft?.ownerAddress)}
+                {getFormatAddress(owner)}
               </Link>
             </p>
           </div>
@@ -470,7 +525,7 @@ const NFTDetailPage = () => {
           {/* Description Section */}
           <div className="bg-special-bg p-6 rounded-2xl">
             <h4 className="text-xl font-semibold mb-4">Description</h4>
-            <p className="text-sm text-gray-300 whitespace-pre-wrap">
+            <p className="text-2xl text-gray-300 whitespace-pre-wrap">
               {nft?.metadata?.description || 'No description available'}
             </p>
           </div>
@@ -492,7 +547,7 @@ const NFTDetailPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Token ID</p>
-                <p className="font-semibold">{nft?.tokenId}</p>
+                <p className="font-semibold">{nft?.tokenId || nft?.id}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-400">Token Standard</p>
@@ -756,41 +811,60 @@ const NFTDetailPage = () => {
             {/* SELLER BUTTON */}
           </div>
 
-          {/* Recent Activity */}
+          {/* Offers Table */}
           <div className="bg-special-bg p-6 rounded-2xl">
-            <h3 className="text-xl font-semibold mb-4">Recent Transfers</h3>
-            {nftActivity && nftActivity.length > 0 ? (
-              <div className="space-y-4">
-                {nftActivity.map((activity: NFTActivity) => (
-                  <div key={activity.uniqueHash} className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm">
-                        From:{' '}
-                        <span className="font-medium">
-                          {getFormatAddress(activity.addressFrom)}
-                        </span>
-                      </p>
-                      <p className="text-sm">
-                        To:{' '}
-                        <span className="font-medium">{getFormatAddress(activity.addressTo)}</span>
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-400">{getActivityAge(activity.timestamp)}</p>
-                      <a
-                        href={`https://test.xfiscan.com/tx/${activity.txHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-500 hover:underline"
-                      >
-                        View Transaction
-                      </a>
-                    </div>
-                  </div>
-                ))}
+            <h3 className="text-xl font-semibold mb-4">Offers</h3>
+            {offers && offers.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-full divide-y divide-gray-700">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Offeror
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {offers.map((offer: OfferType) => (
+                      <tr key={offer.tokenId} className="hover:bg-gray-800 transition-colors">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {getFormatAddress(offer?.offeror)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {decimalOffChain(offer?.totalPrice)} WXFI
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right">
+                          {isOwner ? (
+                            <Button
+                              onClick={() => handleAcceptOffer(offer.offerId)}
+                              variant="secondary"
+                              className="text-xs font-medium px-2 py-1"
+                            >
+                              Accept
+                            </Button>
+                          ) : offer.offeror === address ? (
+                            <Button
+                              onClick={() => handleCancelOffer(offer.offerId)}
+                              variant="secondary"
+                              className="text-xs font-medium px-2 py-1"
+                            >
+                              Cancel
+                            </Button>
+                          ) : null}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
-              <p className="text-gray-400">No recent activity</p>
+              <p className="text-gray-400">No offers available</p>
             )}
           </div>
         </div>

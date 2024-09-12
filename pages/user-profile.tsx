@@ -62,9 +62,8 @@ export default function UserProfile() {
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
-  // const [contractAddress, setContractAddress] = useState<string | undefined>(undefined)
 
-  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError } = useUserNFTsQuery()
+  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError, error } = useUserNFTsQuery()
   const {
     data: userOffersMade,
     isLoading: userOffersMadeLoading,
@@ -153,6 +152,7 @@ export default function UserProfile() {
         onSuccess: (data: any) => {
           setValue('')
           setSelectedNFT(null)
+          router.push(`/nft/${contractAddress}/CFC-721/${tokenId}`)
         },
         onError: (error: any) => {
           setValue('')
@@ -189,6 +189,7 @@ export default function UserProfile() {
           setBuyOutAmount('')
           setValue('')
           setSelectedNFT(null)
+          router.push(`/nft/${contractAddress}/CFC-721/${tokenId}`)
         },
         onError: (error: any) => {
           setBuyOutAmount('')
@@ -243,7 +244,7 @@ export default function UserProfile() {
         <title>Mint Mingle - {address ? getFormatAddress(address!) : 'No User'}</title>
       </Head>
       <div className="md:px-14 px-4 flex flex-col max-xsm:items-center gap-8 relative w-full h-full">
-        <Header />
+        {/* <Header /> */}
         <div className="lg:ml-52 z-50 max-md:mt-10 max-w-[90%]">
           <FilterButtons
             className="z-50"
@@ -254,15 +255,15 @@ export default function UserProfile() {
           />
         </div>
         {isUserActive ? (
-          <div className="flex items-center justify-center">
-            <div className="w-full grid py-10 place-content-center grid-cols-4 gap-7 gap-y-10 2xl:grid-cols-6 max-lg:grid-cols-3 max-xsm:grid-cols-1 max-md:grid-cols-2">
+          <div className="flex items-center justify-center w-full">
+            <div className="w-full grid py-10 grid-cols-4 gap-x-7 gap-y-24 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 max-xsm:grid-cols-1">
               {filteredData.length > 0 ? (
                 filteredData.map((item, index) => {
                   const { ctaText, handleClick, icon } = getCtaAndOnClick(item)
                   const title = item?.nft?.metadata?.name
                   const src = item?.nft?.metadata?.image || item?.nft?.tokenURI
                   const contractAddress = item?.contractAddress || item?.assetContract
-                  const tokenId = item?.nft?.tokenId || item?.tokenId
+                  const tokenId = item?.nft?.tokenId || item?.tokenId || item?.nft?.id
 
                   let details: any = []
                   if (item.type === 'Listed') {
@@ -365,10 +366,10 @@ export default function UserProfile() {
                 buyOutValue={buyOutAmount}
                 disabled={isTxPending}
                 value={value}
-                src={
+                src={`${
                   selectedNFT.nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
                   '/logo.svg'
-                }
+                }`}
                 title={selectedNFT.nft?.metadata?.name || ''}
               />
             </Dialog.Content>
@@ -418,30 +419,32 @@ function Card(props: CardProps) {
   }
 
   return (
-    <div className="max-w-[275px] w-full rounded-2xl max-h-[405px]">
-      <Link href={`/nft/${contractAddress}/CFC-721/${tokenId}`}>
+    <div className="max-w-[275px] w-full rounded-2xl flex flex-col">
+      <Link href={`/nft/${contractAddress}/CFC-721/${tokenId}`} className="flex-grow">
         <MediaRenderer
-          src={src || '/logo.svg'}
+          src={`${src || '/logo.svg'}`}
           client={client}
-          className="rounded-tr-2xl rounded-tl-2xl"
+          className="rounded-tr-2xl rounded-tl-2xl h-[275px] w-full object-cover"
         />
       </Link>
-      <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl">
-        <p className={cn('font-semibold', { 'pb-3': details })}>{title}</p>
-        {details && (
-          <div className="w-full border-t border-t-white/25 pt-3 flex items-center justify-between">
-            {details.map((detail, index) => {
-              const { label, value } = detail
+      <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl flex flex-col justify-between">
+        <div>
+          <p className={cn('font-semibold', { 'pb-3': details })}>{title}</p>
+          {details && (
+            <div className="w-full border-t border-t-white/25 pt-3 flex items-center justify-between">
+              {details.map((detail, index) => {
+                const { label, value } = detail
 
-              return (
-                <div key={index} className="flex flex-col gap-2">
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="text-xm text-foreground font-semibold">{value}</p>
-                </div>
-              )
-            })}
-          </div>
-        )}
+                return (
+                  <div key={index} className="flex flex-col gap-2">
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="text-xm text-foreground font-semibold">{value}</p>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
         <Button
           disabled={disabled}
           onClick={isApproved ? onClick : handleApproveNFT}

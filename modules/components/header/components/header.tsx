@@ -22,17 +22,11 @@ export function Header() {
   const getFilteredData = () => {
     if (!global) return []
 
-    const recentlyListed = global.allListing
-      .filter((item: NewListing) => item.status === StatusType.CREATED)
-      .reverse()
-      .slice(0, 20) as NewListing[]
+    const recentlyListed = global.allListing as NewListing[]
 
-    const recentlySold = global.recentlySold.reverse().slice(0, 20) as (NewListing | NewAuction)[]
+    const recentlySold = global.recentlySold as (NewListing | NewAuction)[]
 
-    const recentlyAuctioned = global.allAuction
-      .filter((item: NewAuction) => item.status === StatusType.CREATED)
-      .reverse()
-      .slice(0, 20) as NewAuction[]
+    const recentlyAuctioned = global.allAuction as NewAuction[]
 
     switch (filter) {
       case 'Recently Listed':
@@ -84,13 +78,13 @@ export function Header() {
 
   const renderItem = (item: NewListing | NewAuction, index: number) => {
     const isListing = 'listingId' in item
-    const nft = item.nft
-    const tokenId = item.tokenId
-    const assetContract = item.assetContract
-    const pricePerToken = isListing ? item.pricePerToken : undefined
-    const currency = isListing ? item.currency : item.winningBid.currency
-    const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
-    const creator = isListing ? item.listingCreator : item.auctionCreator
+    const nft = item?.nft
+    const tokenId = item?.tokenId
+    const assetContract = item?.assetContract
+    const pricePerToken = isListing ? item?.pricePerToken : undefined
+    const currency = isListing ? item?.currency : item?.winningBid?.currency
+    const buyOutAmount = !isListing ? item?.buyoutBidAmount : undefined
+    const creator = isListing ? item?.listingCreator : item?.auctionCreator
     const soldType = 'soldType' in item ? item?.soldType : undefined
 
     return (

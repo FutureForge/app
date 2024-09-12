@@ -12,11 +12,13 @@ import {
   StatusType,
 } from '@/utils/lib/types'
 import { ethers } from 'ethers'
-import { decimalOffChain, getContractCustom } from '@/modules/blockchain/lib'
+import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 import { CROSSFI_API } from '@/utils/configs'
 import { ensureSerializable } from '@/utils'
 import { useUserChainInfo } from '../user'
+import { getNFT } from 'thirdweb/extensions/erc721'
+import { NFT } from 'thirdweb'
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -154,7 +156,7 @@ export function useGetSingleNFTQuery({
           nftActivity = []
         }
 
-        let nftList: SingleNFTResponse | null = null
+        let nftList: SingleNFTResponse | NFT | null = null
 
         if (nftType === 'CFC-721') {
           const response = await axios.get<SingleNFTResponse>(
@@ -162,6 +164,7 @@ export function useGetSingleNFTQuery({
           )
           const nft = response.data
 
+          const metadata = nft?.metadata
           if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
             const uri = nft.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
@@ -173,6 +176,19 @@ export function useGetSingleNFTQuery({
                 ...parsedMetadata,
               },
             }
+          } else if (metadata === undefined || null) {
+            const contract = getContractCustom({
+              contractAddress: nft.contractAddress,
+            })
+            const tokenId = nft.tokenId
+
+            const newUpdatedNFTs = await getNFT({
+              contract: contract,
+              tokenId: BigInt(tokenId),
+              includeOwner: includeNFTOwner,
+            })
+
+            nftList = { ...nft, ...newUpdatedNFTs }
           } else {
             nftList = nft
           }
@@ -249,7 +265,9 @@ export function useGetSingleNFTQuery({
           const allOffers = await getAllOffers()
           const filteredOffers = allOffers.filter(
             (offers) =>
-              offers.assetContract === contractAddress && offers.tokenId === BigInt(tokenId),
+              offers.assetContract === contractAddress &&
+              offers.tokenId === BigInt(tokenId) &&
+              offers.status === StatusType.CREATED,
           )
 
           result = {
@@ -311,13 +329,46 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         listingMap.set(listing.tokenId.toString(), listing)
       })
 
-      const updatedNFTs = nfts.map((nft) => {
-        const listing = listingMap.get(nft.tokenId.toString())
-        return {
-          ...nft,
-          listing: listing || null,
-        }
-      })
+      const updatedNFTs = await Promise.all(
+        nfts.map(async (nft) => {
+          let nftList: SingleNFTResponse | NFT | null = null
+          const listing = listingMap.get(nft.tokenId.toString())
+          const metadata = nft?.metadata
+
+          if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+            const uri = nft.tokenURI
+            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+
+            nftList = {
+              ...nft,
+              tokenURI: parsedMetadata.image,
+              metadata: {
+                ...parsedMetadata,
+              },
+            }
+          } else if (metadata === undefined || null) {
+            const contract = getContractCustom({
+              contractAddress: nft.contractAddress,
+            })
+            const tokenId = nft.tokenId
+
+            const newUpdatedNFTs = await getNFT({
+              contract: contract,
+              tokenId: BigInt(tokenId),
+              includeOwner: includeNFTOwner,
+            })
+
+            nftList = { ...nft, ...newUpdatedNFTs }
+          } else {
+            nftList = nft
+          }
+
+          return {
+            ...nftList,
+            listing: listing || null,
+          }
+        }),
+      )
 
       // Calculate formatted prices and floor price
       let totalFormattedPrice = ethers.BigNumber.from(0)
@@ -348,10 +399,9 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           : '0'
 
       return ensureSerializable({
-        nfts,
+        nfts: updatedNFTs,
         collectionListing,
         collectionOffers,
-        updatedNFTs,
         totalVolume,
         floorPrice,
         listedNFTs,
@@ -362,7 +412,6 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       nfts: [],
       collectionListing: [],
       collectionOffers: [],
-      updatedNFTs: [],
       totalVolume: 0,
       floorPrice: '0',
       listedNFTs: 0,

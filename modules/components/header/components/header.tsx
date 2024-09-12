@@ -67,7 +67,7 @@ export function Header() {
     infinite: true,
     speed: 500,
     slidesToShow: 4,
-    slidesToScroll: 4,
+    slidesToScroll: 1,
     arrows: false,
     centerPadding: '60px',
     autoplay: true,

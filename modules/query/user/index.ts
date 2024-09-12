@@ -42,7 +42,8 @@ export function useUserNFTsQuery() {
       const userListings = await Promise.all(
         allListings.filter(
           (listing) =>
-            listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
+            listing.listingCreator.toLowerCase() === userAddress?.toLowerCase() &&
+            listing.status === StatusType.CREATED,
         ),
       )
 
@@ -61,7 +62,10 @@ export function useUserNFTsQuery() {
 
               let updatedNFT = nft
 
-              if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+              if (
+                contractAddress.toLowerCase() ===
+                '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+              ) {
                 const uri = nft.tokenURI
                 const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -132,12 +136,16 @@ export function useUserOffersMadeQuery() {
         const allOffers = await getAllOffers()
 
         const userOffers = allOffers
-          .filter((offer) => offer.offeror === userAddress && offer.status === StatusType.CREATED)
+          .filter(
+            (offer) =>
+              offer.offeror.toLowerCase() === userAddress?.toLowerCase() &&
+              offer.status === StatusType.CREATED,
+          )
           .map((offer) => {
             const offersLength = allOffers.filter(
               (offer) =>
                 offer.status === StatusType.CREATED &&
-                offer.assetContract === offer.assetContract &&
+                offer.assetContract.toLowerCase() === offer.assetContract.toLowerCase() &&
                 offer.tokenId === offer.tokenId,
             ).length
 
@@ -152,7 +160,10 @@ export function useUserOffersMadeQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+            if (
+              ids.assetContract.toLowerCase() ===
+              '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+            ) {
               const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -211,13 +222,14 @@ export function useUserListingQuery() {
           allListings
             .filter(
               (listing) =>
-                listing.listingCreator === userAddress && listing.status === StatusType.CREATED,
+                listing.listingCreator.toLowerCase() === userAddress?.toLowerCase() &&
+                listing.status === StatusType.CREATED,
             )
             .map((listing) => {
               const offersLength = allOffers.filter(
                 (offer) =>
                   offer.status === StatusType.CREATED &&
-                  offer.assetContract === listing.assetContract &&
+                  offer.assetContract.toLowerCase() === listing.assetContract.toLowerCase() &&
                   offer.tokenId === listing.tokenId,
               ).length
 
@@ -290,7 +302,8 @@ export function useUserAuctionQuery() {
         const userAuctions = allAuctions
           .filter(
             (auction) =>
-              auction.auctionCreator === userAddress && auction.status === StatusType.CREATED,
+              auction.auctionCreator.toLowerCase() === userAddress?.toLowerCase() &&
+              auction.status === StatusType.CREATED,
           )
           .map((auction) => ({ ...auction, type: 'Auction' }))
 
@@ -319,7 +332,10 @@ export function useUserAuctionQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+            if (
+              ids.assetContract.toLowerCase() ===
+              '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+            ) {
               const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 

@@ -54,7 +54,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (offer.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+          if (
+            offer.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -110,7 +113,8 @@ export function useGetGlobalListingOrAuctionQuery() {
           let updatedNFT = nftData
 
           if (
-            listing.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+            listing.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
           ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
@@ -167,7 +171,8 @@ export function useGetGlobalListingOrAuctionQuery() {
           let updatedNFT = nftData
 
           if (
-            listing.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+            listing.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
           ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
@@ -232,7 +237,8 @@ export function useGetGlobalListingOrAuctionQuery() {
           let updatedNFT = nftData
 
           if (
-            auction.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+            auction.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
           ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
@@ -301,7 +307,8 @@ export function useGetGlobalListingOrAuctionQuery() {
           let updatedNFT = nftData
 
           if (
-            auction.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'
+            auction.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
           ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri

@@ -109,13 +109,15 @@ export function useGetMarketplaceCollectionsQuery() {
 
           const collectionListing = allListing.filter(
             (listing) =>
-              listing.assetContract === collection.collectionContractAddress &&
+              listing.assetContract.toLowerCase() ===
+                collection.collectionContractAddress.toLowerCase() &&
               listing.status === StatusType.CREATED,
           )
 
           const totalVolumeCollection = allListing.filter(
             (listing) =>
-              listing.assetContract === collection.collectionContractAddress &&
+              listing.assetContract.toLowerCase() ===
+                collection.collectionContractAddress.toLowerCase() &&
               listing.status === StatusType.COMPLETED,
           )
 
@@ -204,7 +206,10 @@ export function useGetSingleNFTQuery({
           const nft = response.data
 
           const metadata = nft?.metadata
-          if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+          if (
+            contractAddress.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nft.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -240,14 +245,14 @@ export function useGetSingleNFTQuery({
 
         const nftAuctionList = allAuctions.find(
           (auction) =>
-            auction.assetContract === contractAddress &&
+            auction.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
             auction.tokenId === BigInt(tokenId) &&
             auction.status === StatusType.CREATED,
         )
 
         const nftListingList = allListing.find(
           (listing) =>
-            listing.assetContract === contractAddress &&
+            listing.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
             listing.tokenId === BigInt(tokenId) &&
             listing.status === StatusType.CREATED,
         )
@@ -284,7 +289,7 @@ export function useGetSingleNFTQuery({
           const allOffers = await getAllOffers()
           const filteredOffers = allOffers.filter(
             (offers) =>
-              offers.assetContract === contractAddress &&
+              offers.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
               offers.tokenId === BigInt(tokenId) &&
               offers.status === StatusType.CREATED,
           )
@@ -304,7 +309,7 @@ export function useGetSingleNFTQuery({
           const allOffers = await getAllOffers()
           const filteredOffers = allOffers.filter(
             (offers) =>
-              offers.assetContract === contractAddress &&
+              offers.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
               offers.tokenId === BigInt(tokenId) &&
               offers.status === StatusType.CREATED,
           )
@@ -347,7 +352,8 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
 
       const collectionListing = allListing.filter(
         (listing) =>
-          listing.assetContract === contractAddress && listing.status === StatusType.CREATED,
+          listing.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          listing.status === StatusType.CREATED,
       )
 
       const totalVolumeCollection = allListing.filter(
@@ -360,7 +366,9 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       }, 0)
 
       const collectionOffers = allOffers.filter(
-        (offer) => offer.assetContract === contractAddress && offer.status === StatusType.CREATED,
+        (offer) =>
+          offer.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          offer.status === StatusType.CREATED,
       )
 
       const listingMap = new Map<string, any>()
@@ -374,7 +382,10 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           const listing = listingMap.get(nft.tokenId.toString())
           const metadata = nft?.metadata
 
-          if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
+          if (
+            contractAddress.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nft.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 

@@ -80,10 +80,9 @@ export default function TestPage() {
 
   // const { data: fetchCollection } = useFetchCollectionsQuery()
   const { data: getMarketplaceCollection } = useGetMarketplaceCollectionsQuery()
-  //   const { data: getSingleCollection } = useGetSingleCollectionQuery({
-  //     contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
-  //     nftType: 'ERC721',
-  //   })
+  const { data: getSingleCollection } = useGetSingleCollectionQuery({
+    contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
+  })
 
   //   const { data: getSingleNFT } = useGetSingleNFTQuery({
   //     contractAddress: '0x544C945415066564B0Fb707C7457590c0585e838',
@@ -100,7 +99,7 @@ export default function TestPage() {
 
   //   console.log({ fetchCollection })
   console.log({ getMarketplaceCollection })
-  //   console.log({ getSingleCollection })
+  console.log({ getSingleCollection })
   //   console.log({ getSingleNFT })
   //   console.log({ datagetSingleNFT })
   //   console.log({ userAuction })

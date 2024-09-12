@@ -1,6 +1,7 @@
-import { act, ReactNode, useEffect, useState } from 'react'
+import Head from 'next/head'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { MediaRenderer, useActiveAccount } from 'thirdweb/react'
+import { ConnectButton, MediaRenderer } from 'thirdweb/react'
 import { Header, ProfileLayout } from '@/modules/components/profile'
 import { FilterButtons } from '@/modules/components/header/components/filter'
 import {
@@ -11,7 +12,7 @@ import {
   useUserOffersMadeQuery,
   useCheckApprovedForAllQuery,
 } from '@/modules/query'
-import { client } from '@/utils/configs'
+import { chainInfo, client } from '@/utils/configs'
 import { Button, cn, Icon, Loader } from '@/modules/app'
 import { decimalOffChain } from '@/modules/blockchain'
 import { useToast } from '@/modules/app/hooks/useToast'
@@ -25,8 +26,10 @@ import {
 } from '@/modules/mutation'
 import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
-import { NFT } from 'thirdweb'
 import Link from 'next/link'
+import { SingleNFTResponse } from '@/utils/lib/types'
+import { createWallet } from 'thirdweb/wallets'
+import { getFormatAddress } from '@/utils'
 
 type FilterType = 'NFTs' | 'Listed' | "Offer's Made" | 'Auction'
 
@@ -38,7 +41,7 @@ type NFTSelectedItem = {
   blockNumber: number
   contractAddress: string
   decimals: number | null
-  nft: NFT
+  nft: SingleNFTResponse
   timestamp: string
   tokenIds: string[]
   tokenName: string
@@ -59,9 +62,8 @@ export default function UserProfile() {
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
-  // const [contractAddress, setContractAddress] = useState<string | undefined>(undefined)
 
-  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError } = useUserNFTsQuery()
+  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError, error } = useUserNFTsQuery()
   const {
     data: userOffersMade,
     isLoading: userOffersMadeLoading,
@@ -77,8 +79,6 @@ export default function UserProfile() {
     isLoading: userAuctionLoading,
     isError: userAuctionError,
   } = useUserAuctionQuery()
-
-  console.log({ userNFTS })
 
   const isLoading =
     userNFTLoading || userOffersMadeLoading || userListingLoading || userAuctionLoading
@@ -136,7 +136,7 @@ export default function UserProfile() {
     if (!selectedNFT) return toast.error('Please select an NFT')
 
     const contractAddress = selectedNFT?.contractAddress
-    const tokenId = selectedNFT?.nft?.id
+    const tokenId = selectedNFT?.nft?.tokenId
 
     createListingMutation.mutate(
       {
@@ -152,6 +152,7 @@ export default function UserProfile() {
         onSuccess: (data: any) => {
           setValue('')
           setSelectedNFT(null)
+          router.push(`/nft/${contractAddress}/CFC-721/${tokenId}`)
         },
         onError: (error: any) => {
           setValue('')
@@ -160,8 +161,6 @@ export default function UserProfile() {
       },
     )
   }
-
-  console.log({ selectedNFT })
 
   const handleCreateAuction = async () => {
     if (!address) return toast.error('Please connect to a wallet.')
@@ -172,7 +171,7 @@ export default function UserProfile() {
     if (!selectedNFT) return toast.error('Please select an NFT')
 
     const contractAddress = selectedNFT?.contractAddress
-    const tokenId = selectedNFT?.nft?.id
+    const tokenId = selectedNFT?.nft?.tokenId
 
     createAuctionMutation.mutate(
       {
@@ -190,6 +189,7 @@ export default function UserProfile() {
           setBuyOutAmount('')
           setValue('')
           setSelectedNFT(null)
+          router.push(`/nft/${contractAddress}/CFC-721/${tokenId}`)
         },
         onError: (error: any) => {
           setBuyOutAmount('')
@@ -232,125 +232,152 @@ export default function UserProfile() {
     return { ctaText, handleClick, icon }
   }
 
-  useEffect(() => {
-    if (!activeAccount) {
-      router.push('/')
-    }
-  }, [activeAccount, router])
+  const isUserActive = !!activeAccount
 
   if (isLoading || isError) {
     return <Loader />
   }
 
-  return activeAccount ? (
-    <div className="md:px-14 px-4 flex flex-col max-xsm:items-center gap-8 relative w-full h-full">
-      <Header />
-      <div className="lg:ml-52 z-50 max-md:mt-10 max-w-[90%]">
-        <FilterButtons className="z-50" filter={filter} setFilter={setFilter} filters={filters} />
-      </div>
-      <div className="flex items-center justify-center">
-        <div className="w-full grid py-10 place-content-center grid-cols-4 gap-7 gap-y-10 2xl:grid-cols-6 max-lg:grid-cols-3 max-xsm:grid-cols-1 max-md:grid-cols-2">
-          {filteredData.length > 0 ? (
-            filteredData.map((item, index) => {
-              const { ctaText, handleClick, icon } = getCtaAndOnClick(item)
-              const title = item?.nft?.metadata?.name
-              const src = item?.nft?.metadata?.image
-              const contractAddress = item?.contractAddress || item?.assetContract
-              const tokenId = item?.nft?.id || item?.tokenId
-
-              console.log({ item })
-
-              let details: any = []
-              if (item.type === 'Listed') {
-                details = [
-                  {
-                    label: 'Price',
-                    value: `${decimalOffChain(item?.pricePerToken)} XFI`,
-                  },
-                  {
-                    label: 'Offers',
-                    value: `${item?.offersCount}`,
-                  },
-                ]
-              } else if (item.type === "Offer's Made") {
-                details = [
-                  {
-                    label: 'Price Offered',
-                    value: `${decimalOffChain(item?.totalPrice)} WXFI`,
-                  },
-                  {
-                    label: 'Offers',
-                    value: `${item?.offersCount}`,
-                  },
-                ]
-              } else if (item.type === 'Auction') {
-                details = [
-                  {
-                    label: 'Buy Out Price',
-                    value: `${decimalOffChain(item?.buyoutBidAmount)} XFI`,
-                  },
-                  {
-                    label: 'Min Price',
-                    value: `${decimalOffChain(item?.minimumBidAmount)} XFI`,
-                  },
-
-                  {
-                    label: 'Winning Bid',
-                    value: `${decimalOffChain(item?.winningBid?.bidAmount)} XFI`,
-                  },
-                ]
-              }
-
-              return (
-                <Card
-                  key={index}
-                  title={title}
-                  src={src}
-                  cta={ctaText}
-                  onClick={handleClick}
-                  icon={icon}
-                  details={details}
-                  disabled={isTxPending}
-                  contractAddress={contractAddress}
-                  tokenId={tokenId}
-                />
-              )
-            })
-          ) : (
-            <div className="col-span-full text-center py-20">
-              <p className="text-xl font-semibold text-gray-400">
-                No items found for this category.
-              </p>
-            </div>
-          )}
+  return (
+    <>
+      <Head>
+        <title>Mint Mingle - {address ? getFormatAddress(address!) : 'No User'}</title>
+      </Head>
+      <div className="md:px-14 px-4 flex flex-col max-xsm:items-center gap-8 relative w-full h-full">
+        {/* <Header /> */}
+        <div className="lg:ml-52 z-50 max-md:mt-10 max-w-[90%]">
+          <FilterButtons
+            className="z-50"
+            filter={filter}
+            setFilter={setFilter}
+            filters={filters}
+            disabled={!isUserActive}
+          />
         </div>
-      </div>
-      {selectedNFT && (
-        <Dialog.Root open={!!selectedNFT} onOpenChange={(open) => !open && setSelectedNFT(null)}>
-          <Dialog.Content className="max-w-[690px] w-full p-6">
-            <NFTDialog
-              id={'none'}
-              type="create"
-              nftList={selectedNFT}
-              setTimestamp={setEndTimestamp}
-              onClick={handleCreateListing}
-              secondaryOnClick={handleCreateAuction}
-              onChange={setValue}
-              onBuyOutChange={setBuyOutAmount}
-              buyOutValue={buyOutAmount}
-              disabled={isTxPending}
-              value={value}
-              src={
-                selectedNFT.nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
-                '/logo.svg'
-              }
-              title={selectedNFT.nft?.metadata?.name || ''}
+        {isUserActive ? (
+          <div className="flex items-center justify-center w-full">
+            <div className="w-full grid py-10 grid-cols-4 gap-x-7 gap-y-24 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 max-xsm:grid-cols-1">
+              {filteredData.length > 0 ? (
+                filteredData.map((item, index) => {
+                  const { ctaText, handleClick, icon } = getCtaAndOnClick(item)
+                  const title = item?.nft?.metadata?.name
+                  const src = item?.nft?.metadata?.image || item?.nft?.tokenURI
+                  const contractAddress = item?.contractAddress || item?.assetContract
+                  const tokenId = item?.nft?.tokenId || item?.tokenId || item?.nft?.id
+
+                  let details: any = []
+                  if (item.type === 'Listed') {
+                    details = [
+                      {
+                        label: 'Price',
+                        value: `${decimalOffChain(item?.pricePerToken)} XFI`,
+                      },
+                      {
+                        label: 'Offers',
+                        value: `${item?.offersCount}`,
+                      },
+                    ]
+                  } else if (item.type === "Offer's Made") {
+                    details = [
+                      {
+                        label: 'Price Offered',
+                        value: `${decimalOffChain(item?.totalPrice)} WXFI`,
+                      },
+                      {
+                        label: 'Offers',
+                        value: `${item?.offersCount}`,
+                      },
+                    ]
+                  } else if (item.type === 'Auction') {
+                    details = [
+                      {
+                        label: 'Buy Out Price',
+                        value: `${decimalOffChain(item?.buyoutBidAmount)} XFI`,
+                      },
+                      {
+                        label: 'Min Price',
+                        value: `${decimalOffChain(item?.minimumBidAmount)} XFI`,
+                      },
+
+                      {
+                        label: 'Winning Bid',
+                        value: `${decimalOffChain(item?.winningBid?.bidAmount)} XFI`,
+                      },
+                    ]
+                  }
+
+                  return (
+                    <Card
+                      key={index}
+                      title={title}
+                      src={src}
+                      cta={ctaText}
+                      onClick={handleClick}
+                      icon={icon}
+                      details={details}
+                      disabled={isTxPending}
+                      contractAddress={contractAddress}
+                      tokenId={tokenId}
+                    />
+                  )
+                })
+              ) : (
+                <div className="col-span-full text-center py-20">
+                  <p className="text-xl font-semibold text-gray-400">
+                    No items found for this category.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20">
+            <p className="text-xl font-semibold text-gray-400 mb-4">No active user</p>
+            <p className="text-lg text-gray-300 mb-8">
+              Please connect your wallet to view your profile
+            </p>
+            <ConnectButton
+              client={client}
+              chain={chainInfo}
+              wallets={[createWallet('io.metamask')]}
+              connectButton={{
+                label: 'Connect Wallet',
+                className:
+                  '!font-inter !rounded-xl lg:!w-36 !w-[75%] max-sm:!w-full !flex !items-center !justify-center hover:!bg-primary/65 hover:!text-foreground !duration-300 !ease-in-out !transition !bg-primary !text-muted-foreground !h-10 !mt-4',
+              }}
             />
-          </Dialog.Content>
-        </Dialog.Root>
-      )}
-    </div>
-  ) : null
+          </div>
+        )}
+        {selectedNFT && (
+          <Dialog.Root
+            open={!!selectedNFT}
+            onOpenChange={(open: boolean) => !open && setSelectedNFT(null)}
+          >
+            <Dialog.Content className="max-w-[690px] w-full p-6">
+              <NFTDialog
+                id={'none'}
+                type="create"
+                nftList={selectedNFT}
+                setTimestamp={setEndTimestamp}
+                onClick={handleCreateListing}
+                secondaryOnClick={handleCreateAuction}
+                onChange={setValue}
+                onBuyOutChange={setBuyOutAmount}
+                buyOutValue={buyOutAmount}
+                disabled={isTxPending}
+                value={value}
+                src={`${
+                  selectedNFT.nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
+                  '/logo.svg'
+                }`}
+                title={selectedNFT.nft?.metadata?.name || ''}
+              />
+            </Dialog.Content>
+          </Dialog.Root>
+        )}
+      </div>
+    </>
+  )
 }
 
 type Detail = {
@@ -392,30 +419,32 @@ function Card(props: CardProps) {
   }
 
   return (
-    <div className="max-w-[275px] w-full rounded-2xl max-h-[405px]">
-      <Link href={`/nft/${contractAddress}/CFC-721/${tokenId}`}>
+    <div className="max-w-[275px] w-full rounded-2xl flex flex-col">
+      <Link href={`/nft/${contractAddress}/CFC-721/${tokenId}`} className="flex-grow">
         <MediaRenderer
-          src={src || '/logo.svg'}
+          src={`${src || '/logo.svg'}`}
           client={client}
-          className="rounded-tr-2xl rounded-tl-2xl"
+          className="rounded-tr-2xl rounded-tl-2xl h-[275px] w-full object-cover"
         />
       </Link>
-      <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl">
-        <p className={cn('font-semibold', { 'pb-3': details })}>{title}</p>
-        {details && (
-          <div className="w-full border-t border-t-white/25 pt-3 flex items-center justify-between">
-            {details.map((detail, index) => {
-              const { label, value } = detail
+      <div className="p-4 bg-primary rounded-br-2xl rounded-bl-2xl flex flex-col justify-between">
+        <div>
+          <p className={cn('font-semibold', { 'pb-3': details })}>{title}</p>
+          {details && (
+            <div className="w-full border-t border-t-white/25 pt-3 flex items-center justify-between">
+              {details.map((detail, index) => {
+                const { label, value } = detail
 
-              return (
-                <div key={index} className="flex flex-col gap-2">
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="text-xm text-foreground font-semibold">{value}</p>
-                </div>
-              )
-            })}
-          </div>
-        )}
+                return (
+                  <div key={index} className="flex flex-col gap-2">
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="text-xm text-foreground font-semibold">{value}</p>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
         <Button
           disabled={disabled}
           onClick={isApproved ? onClick : handleApproveNFT}

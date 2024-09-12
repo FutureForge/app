@@ -15,11 +15,14 @@ import { sendAndConfirmTransaction } from 'thirdweb'
 import WXFIAbi from '@/utils/abi/wxfi.json'
 import { BigNumber } from 'ethers'
 import { useToast } from '@/modules/app/hooks/useToast'
+import { useIncreaseAllowanceMutation, useConvertXFIToWXFIMutation } from '..'
 
 export function useMakeListingOfferMutation() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
+  const increaseAllowanceMutation = useIncreaseAllowanceMutation()
+  const convertXFIToWXFIMutation = useConvertXFIToWXFIMutation()
 
   return useMutation({
     mutationFn: async ({ makeOffer }: { makeOffer: Partial<MakeOfferListingType> }) => {
@@ -32,54 +35,33 @@ export function useMakeListingOfferMutation() {
 
       const makeOfferValue = decimalOnChain(makeOffer.totalPrice!)
       const wxfiBalanceRaw = await WXFIContract.balanceOf(activeAccount.address)
-      const wxfiAllowance = await WXFIContract.allowance(
-        activeAccount?.address,
-        CROSSFI_MARKETPLACE_CONTRACT,
-      )
 
+      // Step 1: Convert XFI to WXFI if needed
       if (BigNumber.from(wxfiBalanceRaw).lt(makeOfferValue!)) {
         await toast.loading('Wrapping XFI to WXFI')
-        try {
-          const depositTxData = await WXFIContract.populateTransaction.deposit({
-            value: makeOfferValue,
-          })
+        await convertXFIToWXFIMutation.mutateAsync({ amount: makeOffer.totalPrice! })
 
-          // @ts-ignore
-          const tx = await activeAccount.sendTransaction(depositTxData)
-          const receipt = await waitForTransaction(tx.transactionHash)
-
-          if (receipt.status === 'reverted') {
-            throw new Error('Transaction failed')
-          }
-
-          const newWxfiBalanceRaw = await WXFIContract.balanceOf(activeAccount.address)
-          toast.success('XFI wrapped to WXFI successfully')
-          if (BigNumber.from(newWxfiBalanceRaw).lt(makeOfferValue!)) {
-            throw new Error('Insufficient balance even after deposit')
-          }
-        } catch (error) {
-          throw new Error('Failed to wrapper XFI to WXFI')
+        const updatedWxfiBalance = await WXFIContract.balanceOf(activeAccount.address)
+        if (BigNumber.from(updatedWxfiBalance).lt(makeOfferValue!)) {
+          throw new Error('Insufficient WXFI balance after conversion')
         }
       }
 
-      if (BigNumber.from(wxfiAllowance).lt(makeOfferValue!)) {
+      // Step 2: Increase allowance if needed
+      const currentAllowance = await WXFIContract.allowance(
+        activeAccount?.address,
+        CROSSFI_MARKETPLACE_CONTRACT,
+      )
+      if (BigNumber.from(currentAllowance).lt(makeOfferValue!)) {
         await toast.loading('Approving WXFI to spend')
-        try {
-          const approvalTxData = await WXFIContract.populateTransaction.approve(
-            CROSSFI_MARKETPLACE_CONTRACT,
-            makeOfferValue,
-          )
-          // @ts-ignore
-          const tx = await activeAccount.sendTransaction(approvalTxData)
-          const receipt = await waitForTransaction(tx.transactionHash)
+        await increaseAllowanceMutation.mutateAsync({ amount: makeOffer.totalPrice! })
 
-          if (receipt.status === 'reverted') {
-            throw new Error('Transaction failed')
-          }
-
-          toast.success('Approval successful')
-        } catch (error) {
-          throw new Error('Approval failed')
+        const updatedAllowance = await WXFIContract.allowance(
+          activeAccount?.address,
+          CROSSFI_MARKETPLACE_CONTRACT,
+        )
+        if (BigNumber.from(updatedAllowance).lt(makeOfferValue!)) {
+          throw new Error('Insufficient allowance after approval')
         }
       }
 

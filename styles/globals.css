@@ -40,7 +40,6 @@ body {
   -moz-appearance: textfield; /* For Firefox */
 }
 
-
 .loader-container {
   display: flex;
   justify-content: center;

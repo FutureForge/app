@@ -1,11 +1,11 @@
-export { useAddCollectionMutation } from "./collection";
+export { useAddCollectionMutation } from './collection'
 export {
   useCreateListingMutation,
   useBuyFromDirectListingMutation,
   useCancelDirectListingMutation,
   useUpdateListingMutation,
-} from "./listing";
-export { useApprovedForAllMutation } from "./lib";
+} from './listing'
+export { useApprovedForAllMutation } from './lib'
 export {
   useMakeListingOfferMutation,
   useAcceptOfferMutation,
@@ -13,17 +13,22 @@ export {
   useBidInAuctionMutation,
   useCollectAuctionPayoutMutation,
   useCollectAuctionTokensMutation,
-} from "./offers";
-export { useCreateAuctionMutation, useCancelAuctionMutation } from "./auction";
+} from './offers'
+export { useCreateAuctionMutation, useCancelAuctionMutation } from './auction'
 export {
   useApprovedForAllStakingMutation,
   useClaimStakingRewardMutation,
   useStakingMutation,
   useWithdrawStakingMutation,
-} from "./staking";
+} from './staking'
 export { useCreateNFTMutation } from './create-nft'
+export {
+  useIncreaseAllowanceMutation,
+  useConvertXFIToWXFIMutation,
+  useWithdrawWXFIMutation,
+} from './wxfi'
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 // syntax
 export function useMutationExample() {
   // call needed functions
@@ -39,5 +44,5 @@ export function useMutationExample() {
       // your error callback here
     },
     // other options like retry, etc.
-  });
+  })
 }

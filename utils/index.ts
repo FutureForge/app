@@ -60,7 +60,7 @@ export function formatBlockchainTimestamp(timestamp: string) {
   // Fix the error by specifying the correct types for the options object
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
-    month: 'numeric',
+    month: 'short',
     day: 'numeric',
     // hour: 'numeric',
     // minute: 'numeric',

@@ -4,22 +4,14 @@ export {
   getCollectAuctionPayout,
   getCollectAuctionTokens,
   getCreateAuction,
-} from "./auction";
-export {
-  getNewAuction,
-  getNewBid,
-  getNewListing,
-  getNewOffer,
-  getNewSaleListing,
-  getRecentlySoldAuction,
-} from "./events";
+} from './auction'
 export {
   decimalOffChain,
   fromBlock,
   getContractCustom,
   getCurrentBlockNumber,
   nativeCurrency,
-} from "./lib";
+} from './lib'
 export {
   getAcceptOffer,
   getBuyFromDirectListing,
@@ -28,7 +20,7 @@ export {
   getCreateDirectListing,
   getMakeOffer,
   getUpdateDirectListing,
-} from "./listing";
+} from './listing'
 export {
   getAllAuctions,
   getAllListing,
@@ -38,7 +30,7 @@ export {
   getTotalAuctions,
   getTotalListings,
   getTotalOffers,
-} from "./global";
+} from './global'
 export {
   getCheckApprovedForAllStaking,
   getClaimStakingReward,
@@ -46,4 +38,4 @@ export {
   getStake,
   getStakeInfo,
   getWithdrawStake,
-} from "./staking";
+} from './staking'

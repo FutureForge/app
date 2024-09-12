@@ -3,7 +3,7 @@ import {
   useGetGlobalListingOrAuctionQuery,
   useGetMarketplaceCollectionsQuery,
 } from '@/modules/query'
-import { NFTType, NFTTypeV2, StatusType } from '@/utils/lib/types'
+import { NFTType, StatusType } from '@/utils/lib/types'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
@@ -24,10 +24,11 @@ export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
 
-  const { data: collections, isLoading: loading, isError: error} = useGetMarketplaceCollectionsQuery()
-  console.log('====================================')
-  console.log(collections, 'Look here')
-  console.log('====================================')
+  const {
+    data: collections,
+    isLoading: loading,
+    isError: error,
+  } = useGetMarketplaceCollectionsQuery()
 
   const getFilteredData = () => {
     if (!global) return []
@@ -37,10 +38,7 @@ export function Header() {
       .reverse()
       .slice(0, 20) as NewListing[]
 
-    const recentlySold = global.allListing
-      .filter((item: NewListing) => item.status === StatusType.COMPLETED)
-      .reverse()
-      .slice(0, 20) as NewListing[]
+    const recentlySold = global.recentlySold.reverse().slice(0, 20) as (NewListing | NewAuction)[]
 
     const recentlyAuctioned = global.allAuction
       .filter((item: NewAuction) => item.status === StatusType.CREATED)
@@ -56,7 +54,7 @@ export function Header() {
         return recentlyAuctioned
       case 'All':
       default:
-        return [...recentlyListed, ...recentlySold, ...recentlyAuctioned]
+        return [...recentlyListed, ...recentlyAuctioned]
     }
   }
 
@@ -100,11 +98,11 @@ export function Header() {
     const nft = item.nft
     const tokenId = item.tokenId
     const assetContract = item.assetContract
-    const type = nft?.type as NFTTypeV2
     const pricePerToken = isListing ? item.pricePerToken : undefined
     const currency = isListing ? item.currency : item.winningBid.currency
     const buyOutAmount = !isListing ? item.buyoutBidAmount : undefined
     const creator = isListing ? item.listingCreator : item.auctionCreator
+    const soldType = 'soldType' in item ? item?.soldType : undefined
 
     return (
       <NFTCard
@@ -115,18 +113,19 @@ export function Header() {
         buyoutBidAmount={buyOutAmount}
         tokenId={tokenId}
         contractAddress={assetContract}
-        type={type}
+        type={'CFC-721'}
         creator={creator}
+        soldType={soldType}
+        viewType={soldType !== undefined ? 'sold' : undefined}
       />
     )
   }
 
   return (
     <div>
-      <div>
-        <div>
-          <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
-        </div>
+      <div className='border border-red-500'>
+        <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
+
         {isLoading || isError ? (
           <Loader className="!h-[40vh]" />
         ) : (
@@ -152,7 +151,7 @@ export function Header() {
                   name={item.collection.name}
                   description={item.collection.description}
                   image={item.collection.image}
-                  contractAddress={item.collection.contractAddress}
+                  collectionContractAddress={item.collection.collectionContractAddress}
                 />
               </>
             ))}
@@ -165,7 +164,7 @@ export function Header() {
 
 type Collection = {
   _id: string
-  contractAddress?: string
+  collectionContractAddress?: string
   name: string
   description?: string
   nftType?: NFTType
@@ -179,10 +178,12 @@ type CollectionData = {
   floorPrice: string
 }
 
-function CollectionCard({ image, contractAddress }: Collection) {
+function CollectionCard({ image, collectionContractAddress }: Collection) {
+  const href = `/collections/${collectionContractAddress}`
+
   return (
     <Link
-      href={`/collection/${contractAddress}`}
+      href={href}
       className="relative cursor-pointer w-fit max-w-[320px] h-[320px] border border-red-500 rounded-[20px] group overflow-hidden"
     >
       <MediaRenderer
@@ -191,7 +192,7 @@ function CollectionCard({ image, contractAddress }: Collection) {
         className="w-full h-full rounded-2xl group-hover:scale-105 transition duration-300 ease-in-out"
       />
       <div className="absolute bottom-0 left-0 w-full flex justify-end flex-col h-[180px] p-4 bg-gradient-to-t from-black/95 via-black/85 to-transparent">
-        <p>{contractAddress}</p>
+        <p>{collectionContractAddress}</p>
       </div>
     </Link>
   )

@@ -2,6 +2,7 @@ import { Button, Label, TextField } from '@/modules/app'
 import { Dialog } from '@/modules/app/component/dialog'
 import { decimalOffChain } from '@/modules/blockchain'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -160,7 +161,22 @@ export function NFTDialog({
   const renderMakeOfferContent = () => (
     <>
       <div className="flex flex-col gap-3">
-        <h4>Note: Offers are made in WXFI. Dont have WXFI? Dont worry, we will take care of that.</h4>
+        <div className="bg-gray-800 border border-gray-700 rounded-md p-4 mb-4">
+          <h4 className="text-sm font-medium mb-2">Note:</h4>
+          <ul className="list-disc list-inside text-sm space-y-2">
+            <li>Offers are made in WXFI.</li>
+            <li>
+              Don&apos;t have WXFI? Don&apos;t worry, we&apos;ll handle the conversion for you.
+            </li>
+            <li>
+              You can also{' '}
+              <Link href="/swap" className="cursor-pointer hover:underline text-blue-500">
+                swap for WXFI
+              </Link>{' '}
+              manually.
+            </li>
+          </ul>
+        </div>
         <Label htmlFor="amount">Offer Amount</Label>
         <TextField
           value={value}

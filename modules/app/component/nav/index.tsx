@@ -31,6 +31,10 @@ const Nav_Links = [
     name: 'NFT Staking',
     link: '/staking',
   },
+  {
+    name: 'Swap',
+    link: '/swap',
+  },
   // {
   //   name: 'Collections',
   //   link: '/collections',

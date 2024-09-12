@@ -1,14 +1,18 @@
 import axios from 'axios'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getNFTs as getERC721NFTs, getNFT as getERC721NFT } from 'thirdweb/extensions/erc721'
 import { decimals } from 'thirdweb/extensions/erc20'
-import { getNFTs as getERC1155NFTs, getNFT as getERC1155NFT } from 'thirdweb/extensions/erc1155'
-import { getAllAuctions, getAllListing, getAllOffers, getTotalOffers } from '@/modules/blockchain'
+import { getAllAuctions, getAllListing, getAllOffers } from '@/modules/blockchain'
 import { ICollection } from '@/utils/models'
-import { NFTType, NFTTypeV2, StatusType } from '@/utils/lib/types'
-import { NFT } from 'thirdweb'
+import {
+  CollectionNFTResponse,
+  NFTActivity,
+  NFTActivityResponse,
+  NFTTypeV2,
+  SingleNFTResponse,
+  StatusType,
+} from '@/utils/lib/types'
 import { ethers } from 'ethers'
-import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
+import { decimalOffChain, getContractCustom } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 import { CROSSFI_API } from '@/utils/configs'
 import { ensureSerializable } from '@/utils'
@@ -54,14 +58,11 @@ export function useGetMarketplaceCollectionsQuery() {
 
       const collectionPromises = collections.map(async (collection: ICollection) => {
         try {
-          const contract = await getContractCustom({
-            contractAddress: collection.collectionContractAddress,
-          })
+          const response = await axios.get<CollectionNFTResponse>(
+            `${CROSSFI_API}/token-inventory?contractAddress=${collection.collectionContractAddress}&page=1&limit=20000&sort=-blockNumber`,
+          )
 
-          const nfts: NFT[] = ([] = await getERC721NFTs({
-            contract,
-            includeOwners: includeNFTOwner,
-          }))
+          const nfts = response.data.docs
 
           const allListing = await getAllListing()
 
@@ -142,17 +143,27 @@ export function useGetSingleNFTQuery({
     queryKey: ['nft', contractAddress, nftType, tokenId],
     queryFn: async () => {
       try {
-        const contract = await getContractCustom({ contractAddress })
-        let nftList: NFT | null = null
+        // get nft activity
+        let nftActivity: NFTActivity[] = []
+        try {
+          const response = await axios.get<NFTActivityResponse>(
+            `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenId=${tokenId}&tokenType=${nftType}&page=1&limit=10&sort=-blockNumber`,
+          )
+          nftActivity = response.data.docs
+        } catch (error) {
+          nftActivity = []
+        }
+
+        let nftList: SingleNFTResponse | null = null
 
         if (nftType === 'CFC-721') {
-          const nft = await getERC721NFT({
-            contract,
-            tokenId: BigInt(tokenId),
-            includeOwner: includeNFTOwner,
-          })
+          const response = await axios.get<SingleNFTResponse>(
+            `${CROSSFI_API}/token-inventory/${contractAddress}/${tokenId}`,
+          )
+          const nft = response.data
+
           if (contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
-            const { uri } = nft.metadata
+            const uri = nft.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
             nftList = {
@@ -212,6 +223,7 @@ export function useGetSingleNFTQuery({
             nftAuctionList,
             isAuctionExpired,
             winningBid: winningBidBody,
+            nftActivity,
           }
         } else if (nftListingList) {
           const allOffers = await getAllOffers()
@@ -231,6 +243,7 @@ export function useGetSingleNFTQuery({
                 ...offer,
                 tokenId: offer.tokenId.toString(),
               })) || [],
+            nftActivity,
           }
         } else {
           const allOffers = await getAllOffers()
@@ -248,6 +261,7 @@ export function useGetSingleNFTQuery({
                 ...offer,
                 tokenId: offer.tokenId.toString(),
               })) || [],
+            nftActivity,
           }
         }
 
@@ -269,14 +283,10 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
     queryFn: async () => {
       const [allListing, allOffers] = await Promise.all([getAllListing(), getAllOffers()])
 
-      const contract = await getContractCustom({
-        contractAddress,
-      })
-
-      const nfts: NFT[] = await getERC721NFTs({
-        contract,
-        includeOwners: includeNFTOwner,
-      })
+      const response = await axios.get<CollectionNFTResponse>(
+        `${CROSSFI_API}/token-inventory?contractAddress=${contractAddress}&page=1&limit=20000&sort=-blockNumber`,
+      )
+      const nfts = response.data.docs
 
       const collectionListing = allListing.filter(
         (listing) =>
@@ -302,7 +312,7 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       })
 
       const updatedNFTs = nfts.map((nft) => {
-        const listing = listingMap.get(nft.id.toString())
+        const listing = listingMap.get(nft.tokenId.toString())
         return {
           ...nft,
           listing: listing || null,

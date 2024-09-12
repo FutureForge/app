@@ -17,7 +17,11 @@ export function FilteredContent({
   sliderSettings,
   renderItem,
 }: FilteredContentProps) {
-     const isMobile = useMediaQuery('only screen and (max-width: 600px)')
+  const isMobile = useMediaQuery('only screen and (max-width: 600px)')
+
+  console.log('====================================');
+  console.log(filteredData, 'How far');
+  console.log('====================================');
   return (
     <ClientOnly>
       <div className="px-4 max-xsm:mt-5">

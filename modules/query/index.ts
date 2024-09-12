@@ -12,10 +12,10 @@ export {
   useUserListingQuery,
   useUserAuctionQuery,
 } from './user'
-export { useMarketplaceEventQuery } from './events'
 export { useCheckApprovedForAllQuery } from './lib'
 export { useCheckApprovedForAllStakingQuery, useGetUserStakingInfoQuery } from './staking'
 export { useGetGlobalListingOrAuctionQuery } from './global'
+export { useWXFIAllowanceQuery, useXFIandWXFIBalanceQuery } from './wxfi'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 

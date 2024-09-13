@@ -4,6 +4,7 @@ import axios from 'axios'
 import { getContractCustom } from '@/modules/blockchain'
 import { useUserChainInfo } from '@/modules/query'
 import { isERC721 } from 'thirdweb/extensions/erc721'
+import { useRouter } from 'next/router'
 
 export async function isNFTContract(contractAddress: string) {
   const contract = await getContractCustom({ contractAddress })
@@ -14,6 +15,7 @@ export async function isNFTContract(contractAddress: string) {
 export function useAddCollectionMutation() {
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
+  const router = useRouter()
 
   return useMutation({
     mutationFn: async (newCollection: {
@@ -43,6 +45,11 @@ export function useAddCollectionMutation() {
       await activeAccount?.signMessage({ message: signMessage })
 
       const response = await axios.post('/api/collection', newCollection)
+
+      if (response.status === 200) {
+        router.push(`/collections/${newCollection.collectionContractAddress}`)
+      }
+
       return response.data
     },
     onSuccess: (data) => {

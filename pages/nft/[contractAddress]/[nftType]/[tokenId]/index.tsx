@@ -1,17 +1,19 @@
 'use client'
 
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
 import { NFTActivity, NFTTypeV2, OfferType, SingleNFTResponse } from '@/utils/lib/types'
 import {
   useCheckApprovedForAllQuery,
+  useFetchCollectionsQuery,
   useGetSingleNFTQuery,
   useUserChainInfo,
 } from '@/modules/query'
 import { client } from '@/utils/configs'
 import { MediaRenderer } from 'thirdweb/react'
-import { Button, Loader } from '@/modules/app'
+import { Button, Loader, Icon } from '@/modules/app'
 import { formatBlockchainTimestamp, getFormatAddress } from '@/utils'
 import {
   useApprovedForAllMutation,
@@ -31,8 +33,29 @@ import { useEffect, useState } from 'react'
 import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
 import { useToast } from '@/modules/app/hooks/useToast'
-import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { ICollection } from '@/utils/models'
+import { ArrowLeft } from 'lucide-react'
+
+const CollectionInfo = ({ collection }: { collection: ICollection }) => {
+  if (!collection) return null
+
+  return (
+    <div className="bg-special-bg p-4 rounded-lg mb-6 flex items-center justify-between">
+      <div>
+        <p className="text-sm text-gray-400">Collection</p>
+        <h4 className="text-lg font-semibold">{collection.name}</h4>
+      </div>
+      <Link
+        href={`/collections/${collection.collectionContractAddress}`}
+        className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition-colors"
+      >
+        <span>View Collection</span>
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+    </div>
+  )
+}
 
 const NFTDetailPage = () => {
   const toast = useToast()
@@ -84,6 +107,8 @@ const NFTDetailPage = () => {
     collectionContractAddress: contractAddress as string,
   })
 
+  const { data: collections = [], isLoading: isLoadingCollections } = useFetchCollectionsQuery()
+
   const {
     data: nftData,
     isLoading,
@@ -93,6 +118,11 @@ const NFTDetailPage = () => {
     nftType: nftType as NFTTypeV2,
     tokenId: tokenId as string,
   })
+
+  const collection = collections.find(
+    (col: ICollection) =>
+      col.collectionContractAddress.toLowerCase() === (contractAddress as string).toLowerCase(),
+  )
 
   const { id, isAuctionExpired, nftAuctionList, winningBid, message, nftListingList, offers } =
     nftData || {}
@@ -384,7 +414,7 @@ const NFTDetailPage = () => {
 
   console.log('mutation status')
 
-  if (isLoading || isError) return <Loader className='!h-[80vh]'/>
+  if (isLoading || isError || isLoadingCollections) return <Loader className="!h-[80vh]" />
 
   const imageUrl = nft?.metadata?.image || nft?.tokenURI
 
@@ -409,6 +439,7 @@ const NFTDetailPage = () => {
       </Head>
       <div className="container h-full mx-auto items-start gap-8 md:px-14 px-4 max-md:flex-col justify-center flex mt-5 max-w-[1550px]">
         <div className="md:w-1/2 w-full">
+          <CollectionInfo collection={collection} />
           <div className="h-[500px] relative mb-8">
             {/* Decorative frame */}
             <div className="absolute inset-0 border-8 border-gold-gradient rounded-2xl z-10 pointer-events-none"></div>

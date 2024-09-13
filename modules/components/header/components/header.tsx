@@ -1,4 +1,4 @@
-"use Client"
+'use Client'
 import React, { useState } from 'react'
 import {
   useGetGlobalListingOrAuctionQuery,
@@ -21,160 +21,131 @@ import Slider from 'react-slick'
 import { useWindowSize } from '@uidotdev/usehooks'
 import { CollectionCard, CollectionData } from './collection-card'
 
-type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
+type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned' | 'Collections'
 
-const filters: FilterType[] = ['All', 'Recently Listed', 'Recently Sold', 'Recently Auctioned']
+const filters: FilterType[] = [
+  'All',
+  'Recently Listed',
+  'Recently Sold',
+  'Recently Auctioned',
+  'Collections',
+]
 
 export function Header() {
   const [filter, setFilter] = useState<FilterType>('All')
   const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
-    const { width } = useWindowSize()
-    const isMobile = width && width <= 440
-    const isDesktop = width && width >= 1024
-
-
   const {
     data: collections,
-    isLoading: loading,
-    isError: error,
+    isLoading: collectionsLoading,
+    isError: collectionsError,
   } = useGetMarketplaceCollectionsQuery()
 
-  // Determine whether to use slider based on number of collections
-  const useSlider = (collections?.length ?? 0) > (isMobile ? 1 : isDesktop ? 4 : 1)
-  const getFilteredData = () => {
-    if (!global) return []
+  if (isLoading || isError || collectionsLoading || collectionsError)
+    return <Loader className="!h-[80vh]" />
 
-    const recentlyListed = global.allListing as NewListing[]
+  const renderNFTItems = (items: (NewListing | NewAuction)[]) => {
+    return items.map((item, index) => {
+      const isListing = 'listingId' in item
+      const nft = item?.nft
+      const tokenId = item?.tokenId
+      const assetContract = item?.assetContract
+      const pricePerToken = isListing ? item?.pricePerToken : undefined
+      const currency = isListing ? item?.currency : item?.winningBid?.currency
+      const buyOutAmount = !isListing ? item?.buyoutBidAmount : undefined
+      const creator = isListing ? item?.listingCreator : item?.auctionCreator
+      const soldType = 'soldType' in item ? item?.soldType : undefined
 
-    const recentlySold = global.recentlySold as (NewListing | NewAuction)[]
-
-    const recentlyAuctioned = global.allAuction as NewAuction[]
-
-    switch (filter) {
-      case 'Recently Listed':
-        return recentlyListed
-      case 'Recently Sold':
-        return recentlySold
-      case 'Recently Auctioned':
-        return recentlyAuctioned
-      case 'All':
-      default:
-        return [...recentlyListed, ...recentlyAuctioned]
-    }
+      return (
+        <NFTCard
+          key={index}
+          nft={nft}
+          pricePerToken={pricePerToken}
+          currency={currency}
+          buyoutBidAmount={buyOutAmount}
+          tokenId={tokenId}
+          contractAddress={assetContract}
+          type={'CFC-721'}
+          creator={creator}
+          soldType={soldType}
+          viewType={soldType !== undefined ? 'sold' : undefined}
+        />
+      )
+    })
   }
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 4,
-    arrows: false,
-    centerPadding: '60px',
-    autoplay: true,
-    autoplaySpeed: 3000,
-    responsive: [
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-          initialSlide: 2,
-          dots: true,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          dots: true,
-        },
-      },
-    ],
-  }
-  const filteredData = getFilteredData()
 
-  const renderItem = (item: NewListing | NewAuction, index: number) => {
-    const isListing = 'listingId' in item
-    const nft = item?.nft
-    const tokenId = item?.tokenId
-    const assetContract = item?.assetContract
-    const pricePerToken = isListing ? item?.pricePerToken : undefined
-    const currency = isListing ? item?.currency : item?.winningBid?.currency
-    const buyOutAmount = !isListing ? item?.buyoutBidAmount : undefined
-    const creator = isListing ? item?.listingCreator : item?.auctionCreator
-    const soldType = 'soldType' in item ? item?.soldType : undefined
-
-    return (
-      <NFTCard
-        key={index}
-        nft={nft}
-        pricePerToken={pricePerToken}
-        currency={currency}
-        buyoutBidAmount={buyOutAmount}
-        tokenId={tokenId}
-        contractAddress={assetContract}
-        type={'CFC-721'}
-        creator={creator}
-        soldType={soldType}
-        viewType={soldType !== undefined ? 'sold' : undefined}
-      />
-    )
-  }
+  const renderSection = ({
+    title,
+    items,
+  }: {
+    title?: string
+    items: (NewListing | NewAuction)[]
+  }) => (
+    <div>
+      {title && <h2 className="text-2xl font-semibold mb-8 px-4">{title}</h2>}
+      <div className="flex overflow-x-auto gap-6 pb-4">{renderNFTItems(items)}</div>
+    </div>
+  )
 
   return (
     <div className="flex flex-col gap-20">
-      <div>
+      {/* Filter Buttons */}
+      <div className="px-4">
         <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
-
-        <div className="mt-8 w-full">
-          {isLoading || isError ? (
-            <Loader className="!h-[40vh]" />
-          ) : (
-            <FilteredContent
-              sliderSettings={sliderSettings}
-              filteredData={filteredData}
-              renderItem={renderItem}
-            />
-          )}
-        </div>
       </div>
 
-      <div className="mt-14">
-        <div className='px-4'>
-          <h2 className="text-2xl font-semibold mb-8">Featured Collections</h2>
-        </div>
-
-        {loading || error ? (
-          <Loader className="!h-[40vh]" />
-        ) : (
-          <ClientOnly>
-            {useSlider ? (
-              <Slider {...sliderSettings}>
-                {collections?.map((item: CollectionData) => (
-                  <CollectionCard
-                    key={item.collection?._id}
-                    collection={item.collection}
-                    floorPrice={item.floorPrice}
-                  />
-                ))}
-              </Slider>
+      {filter === 'All' && (
+        <>
+          {/* Featured Collections */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-8 px-4">Featured Collections</h2>
+            {collectionsLoading || collectionsError ? (
+              <Loader className="!h-[40vh]" />
             ) : (
-              <div className="flex flex-wrap gap-7 mt-3">
+              <div className="flex overflow-x-auto gap-6 pb-4">
                 {collections?.map((item: CollectionData) => (
                   <CollectionCard
                     key={item.collection?._id}
                     collection={item.collection}
                     floorPrice={item.floorPrice}
+                    totalVolume={item.totalVolume}
                   />
                 ))}
               </div>
             )}
-          </ClientOnly>
-        )}
-      </div>
+          </div>
+
+          {/* Recently Listed */}
+          {renderSection({ title: 'Recently Listed', items: global?.allListing || [] })}
+
+          {/* Recently Sold */}
+          {renderSection({ title: 'Recently Sold', items: global?.recentlySold || [] })}
+
+          {/* Recently Auctioned */}
+          {renderSection({ title: 'Recently Auctioned', items: global?.allAuction || [] })}
+        </>
+      )}
+
+      {filter === 'Recently Listed' && renderSection({ items: global?.allListing || [] })}
+      {filter === 'Recently Sold' && renderSection({ items: global?.recentlySold || [] })}
+      {filter === 'Recently Auctioned' && renderSection({ items: global?.allAuction || [] })}
+      {filter === 'Collections' && (
+        <div>
+          {collectionsLoading || collectionsError ? (
+            <Loader className="!h-[40vh]" />
+          ) : (
+            <div className="flex overflow-x-auto gap-6 pb-4">
+              {collections?.map((item: CollectionData) => (
+                <CollectionCard
+                  key={item.collection?._id}
+                  collection={item.collection}
+                  floorPrice={item.floorPrice}
+                  totalVolume={item.totalVolume}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
-
-

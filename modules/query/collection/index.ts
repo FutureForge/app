@@ -190,7 +190,7 @@ export function useGetSingleNFTQuery({
         let nftActivity: NFTActivity[] = []
         try {
           const response = await axios.get<NFTActivityResponse>(
-            `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenId=${tokenId}&tokenType=${nftType}&page=1&limit=10&sort=-blockNumber`,
+            `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenId=${tokenId}&tokenType=${nftType}&page=1&limit=100&sort=-blockNumber`,
           )
           nftActivity = response.data.docs
         } catch (error) {
@@ -343,17 +343,52 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
   return useQuery({
     queryKey: ['collection', 'auction', contractAddress],
     queryFn: async () => {
-      const [allListing, allOffers] = await Promise.all([getAllListing(), getAllOffers()])
+      const [allListing, allOffers, allAuctions] = await Promise.all([
+        getAllListing(),
+        getAllOffers(),
+        getAllAuctions(),
+      ])
+
+      const currentCollection = await collections.find(
+        (collection: ICollection) =>
+          collection.collectionContractAddress.toLowerCase() === contractAddress.toLowerCase(),
+      )
+
+      const tokenResponse = await axios.get(`${CROSSFI_API}/tokens/${contractAddress}`)
+      const tokenDetails = tokenResponse.data
 
       const response = await axios.get<CollectionNFTResponse>(
         `${CROSSFI_API}/token-inventory?contractAddress=${contractAddress}&page=1&limit=20000&sort=-blockNumber`,
       )
       const nfts = response.data.docs
 
+      const tokenTransfersResponse = await axios.get<NFTActivityResponse>(
+        `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenType=CFC-721&page=1&limit=20000&sort=-blockNumber`,
+      )
+      const tokenTransfers = tokenTransfersResponse.data.docs
+
+      const collectionCompletedListing = allListing.filter(
+        (listing) =>
+          listing.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          listing.status === StatusType.COMPLETED,
+      )
+
       const collectionListing = allListing.filter(
         (listing) =>
           listing.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
           listing.status === StatusType.CREATED,
+      )
+
+      const collectionAuction = allAuctions.filter(
+        (auction) =>
+          auction.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          auction.status === StatusType.CREATED,
+      )
+
+      const collectionCompletedAuction = allAuctions.filter(
+        (auction) =>
+          auction.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          auction.status === StatusType.COMPLETED,
       )
 
       const totalVolumeCollection = allListing.filter(
@@ -376,10 +411,16 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         listingMap.set(listing.tokenId.toString(), listing)
       })
 
+      const auctionMap = new Map<string, any>()
+      collectionAuction.forEach((auction) => {
+        auctionMap.set(auction.tokenId.toString(), auction)
+      })
+
       const updatedNFTs = await Promise.all(
         nfts.map(async (nft) => {
           let nftList: SingleNFTResponse | NFT | null = null
           const listing = listingMap.get(nft.tokenId.toString())
+          const auction = auctionMap.get(nft.tokenId.toString())
           const metadata = nft?.metadata
 
           if (
@@ -416,6 +457,65 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           return {
             ...nftList,
             listing: listing || null,
+            auction: auction || null,
+          }
+        }),
+      )
+
+      const updatedCollectionSalesNFT = await Promise.all(
+        collectionCompletedListing.map(async (sale) => {
+          // @ts-ignore
+          const nft = updatedNFTs.find((nft) => nft.tokenId === sale.tokenId.toString())
+          return {
+            ...sale,
+            nft,
+            soldType: 'listing',
+          }
+        }),
+      )
+
+      const updatedCollectionAuctionNFT = await Promise.all(
+        collectionCompletedAuction.map(async (sale) => {
+          const winningBid = await getWinningBid({
+            auctionId: sale.auctionId,
+          })
+
+          // @ts-ignore
+          const nft = updatedNFTs.find((nft) => nft.tokenId === sale.tokenId.toString())
+
+          const winningBidBody = {
+            bidder: winningBid[0],
+            currency: winningBid[1],
+            bidAmount: winningBid[2],
+          }
+
+          return {
+            ...sale,
+            nft,
+            soldType: 'auction',
+            winningBid: winningBidBody,
+          }
+        }),
+      )
+
+      const updatedCollectionOffers = await Promise.all(
+        collectionOffers.map(async (offer) => {
+          // @ts-ignore
+          const nft = updatedNFTs.find((nft) => nft.tokenId === offer.tokenId.toString())
+          return {
+            ...offer,
+            nft,
+          }
+        }),
+      )
+
+      const updatedTokenTransfers = await Promise.all(
+        tokenTransfers.map(async (transfer) => {
+          // @ts-ignore
+          const nft = updatedNFTs.find((nft) => nft.tokenId === transfer.tokenId.toString())
+          return {
+            ...transfer,
+            nft,
           }
         }),
       )
@@ -450,24 +550,30 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
 
       return ensureSerializable({
         nfts: updatedNFTs,
-        collectionListing,
-        collectionOffers,
+        collection: currentCollection,
+        collectionOffers: updatedCollectionOffers,
         totalVolume,
         floorPrice,
         listedNFTs,
         percentageOfListed,
+        tokenDetails,
+        tokenTransfers: updatedTokenTransfers,
+        sales: [...updatedCollectionSalesNFT, ...updatedCollectionAuctionNFT],
       })
     },
     initialData: {
       nfts: [],
-      collectionListing: [],
+      collection: {},
       collectionOffers: [],
       totalVolume: 0,
       floorPrice: '0',
       listedNFTs: 0,
       percentageOfListed: 0,
+      tokenDetails: {},
+      tokenTransfers: [],
+      sales: [],
     },
     enabled: !!collections && !!contractAddress,
-    refetchInterval: 6000,
+    refetchInterval: 5000,
   })
 }

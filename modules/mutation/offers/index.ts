@@ -13,7 +13,7 @@ import { MakeOfferListingType } from '@/utils/lib/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { sendAndConfirmTransaction } from 'thirdweb'
 import WXFIAbi from '@/utils/abi/wxfi.json'
-import { BigNumber } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { useToast } from '@/modules/app/hooks/useToast'
 import { useIncreaseAllowanceMutation, useConvertXFIToWXFIMutation } from '..'
 
@@ -54,7 +54,11 @@ export function useMakeListingOfferMutation() {
       )
       if (BigNumber.from(currentAllowance).lt(makeOfferValue!)) {
         await toast.loading('Approving WXFI to spend')
-        await increaseAllowanceMutation.mutateAsync({ amount: makeOffer.totalPrice! })
+        await increaseAllowanceMutation.mutateAsync({
+          amount: makeOfferValue
+            ? makeOfferValue.toString()
+            : ethers.constants.MaxUint256.toString(),
+        })
 
         const updatedAllowance = await WXFIContract.allowance(
           activeAccount?.address,
@@ -89,7 +93,7 @@ export function useMakeListingOfferMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['offer', 'event', 'nft'],
+        queryKey: ['offer', 'nft', activeAccount?.address],
       })
     },
     onError: () => {},
@@ -130,16 +134,16 @@ export function useAcceptOfferMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['cancelOffer', 'event'],
+        queryKey: ['acceptOffer', 'nft', activeAccount?.address],
       })
     },
     onError: () => {},
     meta: {
       successMessage: {
-        description: 'Offer Cancelled',
+        description: 'Offer Accepted',
       },
       errorMessage: {
-        description: 'Cancel Offer Failed',
+        description: 'Failed to accept offer',
       },
     },
   })

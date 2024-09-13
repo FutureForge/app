@@ -151,3 +151,16 @@ export type CollectionNFTResponse = {
   limit: number
   page: number
 }
+
+export type OfferType = {
+  assetContract: string
+  currency: string
+  expirationTimestamp: string
+  offerId: string
+  offeror: string
+  quantity: string
+  status: number
+  tokenId: string
+  tokenType: number
+  totalPrice: string
+}

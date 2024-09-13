@@ -13,7 +13,7 @@ export const includeNFTOwner = true
 export const fromBlock = 4880746
 export const nativeCurrency = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
-const providerUrl = 'https://crossfi-testnet-jsonrpc.itrocket.net'
+const providerUrl = 'https://rpc.testnet.ms'
 
 export const provider = new ethers.providers.JsonRpcProvider(providerUrl)
 
@@ -52,10 +52,7 @@ export async function getCurrentBlockNumber() {
   return await eth_blockNumber(rpcRequest)
 }
 
-export function decimalOffChain(
-  number: bigint | string | number,
-  decimalPlaces: string = 'ethers',
-) {
+export function decimalOffChain(number: bigint | string | number) {
   if (!number) return
   const value = ethers.utils.formatEther(number)
 

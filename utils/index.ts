@@ -62,8 +62,8 @@ export function formatBlockchainTimestamp(timestamp: string) {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-    // hour: 'numeric',
-    // minute: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
     // second: 'numeric',
     // timeZone: 'UTC',
   }

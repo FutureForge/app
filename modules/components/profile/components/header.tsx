@@ -1,8 +1,22 @@
+'use client'
 import { useUserChainInfo } from '@/modules/query'
 import { getFormatAddress } from '@/utils'
-import { useMediaQuery } from '@uidotdev/usehooks'
+import { useWindowSize } from '@uidotdev/usehooks'
 import Image from 'next/image'
 import { createHash } from 'crypto'
+import { ClientOnly } from '@/modules/app'
+import { ICollection } from '@/utils/models'
+
+type HeaderProps = {
+  isCollection?: boolean
+  floorPrice?: string | undefined
+  totalVolume?: number
+  listed?: number
+  uniqueHolders?: number
+  totalSupply?: number
+  transferCount?: number
+  collection?: ICollection
+}
 
 // Function to generate a color based on hash
 function generateColor(hash: string, index: number): string {
@@ -18,47 +32,132 @@ function generatePixelatedImage(address: string, size: number): string {
     pixels.push(generateColor(hash, i % 32))
   }
   return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-    ${pixels.map((color, i) => `<rect x="${i % size}" y="${Math.floor(i / size)}" width="1" height="1" fill="${color}" />`).join('')}
+    ${pixels
+      .map(
+        (color, i) =>
+          `<rect x="${i % size}" y="${Math.floor(
+            i / size,
+          )}" width="1" height="1" fill="${color}" />`,
+      )
+      .join('')}
   </svg>`
 }
 
-export function Header() {
+export function Header({
+  isCollection = false,
+  floorPrice,
+  totalVolume,
+  listed,
+  uniqueHolders,
+  totalSupply,
+  transferCount,
+  collection,
+}: HeaderProps) {
   const { activeAccount } = useUserChainInfo()
   const address = activeAccount?.address || ''
-  const isMobile = useMediaQuery('(max-width: 440px)')
+  const { width } = useWindowSize()
+  const isMobile = width && width <= 440
 
-  const backgroundImage = generatePixelatedImage(address, 100)
-  const profileImage = generatePixelatedImage(address, 10)
+  const userBackgroundImage = generatePixelatedImage(address, 100)
+  const userProfileImage = generatePixelatedImage(address, 10)
+
+  // Ensure floorPrice and listed are properly rounded
+  const roundedFloorPrice = floorPrice ? parseFloat(floorPrice).toFixed(2) : '0.00'
+  const roundedPercentage = listed ? Number(listed).toFixed(2) : '0.00'
 
   return (
-    <div className="w-full">
-      <div className="relative h-48 md:h-64 overflow-hidden">
-        <div className="absolute inset-0">
-          <Image 
-            src={backgroundImage} 
-            alt="background" 
-            layout="fill" 
-            objectFit="cover" 
-            quality={100} 
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50" />
+    <ClientOnly>
+      <div className="w-full">
+        <div className="relative">
+          <div className="h-48 md:h-64 w-full overflow-hidden">
+            {isCollection ? (
+              <Image
+                src={'/default-collection-banner.jpg'}
+                alt="collection background"
+                width={2500}
+                height={1000}
+                quality={100}
+                objectFit="cover"
+              />
+            ) : (
+              <Image
+                src={userBackgroundImage}
+                alt="background"
+                width={2500}
+                height={1000}
+                quality={100}
+              />
+            )}
+            <Image
+              src="/gradients.png"
+              alt="gradient"
+              width={2000}
+              height={1000}
+              className="absolute bottom-0"
+            />
+          </div>
+
+          <div className="absolute lg:-bottom-20 -bottom-0 w-full items-start lg:left-6 flex gap-4 text-3xl font-semibold z-10">
+            <Image
+              src={isCollection ? collection?.image! : userProfileImage}
+              alt="profile"
+              width={isMobile ? 100 : 170}
+              height={isMobile ? 100 : 170}
+              quality={100}
+              className="rounded-2xl max-md:hidden"
+            />
+            <div className="flex justify-between w-full max-md:flex-col gap-4">
+              <span>
+                <h3 className="text-2xl">{isCollection ? collection?.name! : getFormatAddress(address)}</h3>
+                {isCollection && (
+                  <p className="text-base font-normal mt-2 max-w-2xl">{collection?.description}</p>
+                )}
+              </span>
+
+              {isCollection ? (
+                <div className="flex items-center gap-5 mr-20 flex-wrap">
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {roundedFloorPrice} XFI
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Floor Price</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {totalVolume || 0} XFI
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Volume</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {totalSupply || 0}
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Total Supply</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {uniqueHolders || 0}
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Unique Holders</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {transferCount || 0}
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Total Transfers</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {roundedPercentage}%
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Listed</p>
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          </div>
         </div>
       </div>
-      <div className="relative z-10 px-6 -mt-16 md:-mt-20">
-        <div className="flex items-end space-x-5">
-          <Image
-            src={profileImage}
-            alt="profile"
-            width={isMobile ? 100 : 140}
-            height={isMobile ? 100 : 140}
-            quality={100}
-            className="rounded-2xl border-4 border-white shadow-lg"
-          />
-          <h3 className="text-2xl md:text-3xl font-semibold text-white mb-4">
-            {getFormatAddress(address)}
-          </h3>
-        </div>
-      </div>
-    </div>
+    </ClientOnly>
   )
 }

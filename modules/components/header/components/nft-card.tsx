@@ -60,7 +60,7 @@ export function NFTCard(props: NFTCardProps) {
         <MediaRenderer
           client={client}
           src={imageUrl}
-          className="rounded-2xl w-full h-[70%]  group-hover:scale-105 transition duration-300 ease-in-out"
+          className="rounded-2xl group-hover:scale-105 transition duration-300 ease-in-out"
         />
       </div>
       <div className="absolute bottom-0 left-0 w-full flex justify-end flex-col h-[180px] p-4 bg-gradient-to-t from-black/95 via-black/85 to-transparent">

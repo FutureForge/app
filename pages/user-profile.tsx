@@ -244,7 +244,7 @@ export default function UserProfile() {
         <title>Mint Mingle - {address ? getFormatAddress(address!) : 'No User'}</title>
       </Head>
       <div className="md:px-14 px-4 flex flex-col max-xsm:items-center gap-8 relative w-full h-full">
-        {/* <Header /> */}
+        <Header />
         <div className="lg:ml-52 z-50 max-md:mt-10 max-w-[90%]">
           <FilterButtons
             className="z-50"

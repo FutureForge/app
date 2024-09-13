@@ -65,10 +65,6 @@ export function Header({
   const roundedFloorPrice = floorPrice ? parseFloat(floorPrice).toFixed(2) : '0.00'
   const roundedPercentage = listed ? Number(listed).toFixed(2) : '0.00'
 
-  // Ensure floorPrice and listed are properly rounded
-  const roundedFloorPrice = floorPrice ? parseFloat(floorPrice).toFixed(2) : '0.00'
-  const roundedPercentage = listed ? Number(listed).toFixed(2) : '0.00'
-
   return (
     <ClientOnly>
       <div className="w-full">

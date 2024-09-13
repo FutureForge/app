@@ -106,12 +106,20 @@ export function useGetMarketplaceCollectionsQuery() {
           )
 
           const allListing = await getAllListing()
+          const allAuctions = await getAllAuctions()
 
           const collectionListing = allListing.filter(
             (listing) =>
               listing.assetContract.toLowerCase() ===
                 collection.collectionContractAddress.toLowerCase() &&
               listing.status === StatusType.CREATED,
+          )
+
+          const collectionAuctions = allAuctions.filter(
+            (auction) =>
+              auction.assetContract.toLowerCase() ===
+                collection.collectionContractAddress.toLowerCase() &&
+              auction.status === StatusType.CREATED,
           )
 
           const totalVolumeCollection = allListing.filter(
@@ -126,26 +134,41 @@ export function useGetMarketplaceCollectionsQuery() {
             return acc + price
           }, 0)
 
-          const formattedPrices = await Promise.all(
-            collectionListing.map(async (listing) => {
-              if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-                return ethers.utils.formatUnits(listing.pricePerToken, 'ether')
-              } else {
-                const tokenContract = await getContractCustom({
-                  contractAddress: listing.currency,
-                })
-                const tokenDecimals = await decimals({
-                  contract: tokenContract,
-                })
-                return ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals)
-              }
-            }),
-          )
+          // Calculate floor price
+          let floorPrice = Infinity;
+          for (const listing of collectionListing) {
+            let listingPrice: number;
 
-          const floorPrice =
-            formattedPrices.length > 0
-              ? Math.min(...formattedPrices.map((price) => parseFloat(price)))
-              : 0
+            if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
+              listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, 'ether'));
+            } else {
+              const tokenContract = await getContractCustom({
+                contractAddress: listing.currency,
+              });
+              const tokenDecimals = await decimals({ contract: tokenContract });
+              listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals));
+            }
+
+            floorPrice = Math.min(floorPrice, listingPrice);
+          }
+
+          for (const auction of collectionAuctions) {
+            let auctionPrice: number;
+
+            if (auction.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
+              auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, 'ether'));
+            } else {
+              const tokenContract = await getContractCustom({
+                contractAddress: auction.currency,
+              });
+              const tokenDecimals = await decimals({ contract: tokenContract });
+              auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, tokenDecimals));
+            }
+
+            floorPrice = Math.min(floorPrice, auctionPrice);
+          }
+
+          floorPrice = floorPrice === Infinity ? 0 : floorPrice;
 
           return {
             collection,
@@ -520,33 +543,45 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         }),
       )
 
-      // Calculate formatted prices and floor price
-      let totalFormattedPrice = ethers.BigNumber.from(0)
+      // Calculate floor price
+      let floorPrice = Infinity;
       for (const listing of collectionListing) {
-        let formattedPrice: string
+        let listingPrice: number;
 
         if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-          formattedPrice = ethers.utils.formatUnits(listing.pricePerToken, 'ether')
+          listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, 'ether'));
         } else {
           const tokenContract = await getContractCustom({
             contractAddress: listing.currency,
-          })
-          const tokenDecimals = await decimals({ contract: tokenContract })
-
-          formattedPrice = ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals)
+          });
+          const tokenDecimals = await decimals({ contract: tokenContract });
+          listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals));
         }
 
-        totalFormattedPrice = totalFormattedPrice.add(ethers.utils.parseUnits(formattedPrice, 18))
+        floorPrice = Math.min(floorPrice, listingPrice);
       }
 
-      const collectionLength = updatedNFTs.length
-      const listedNFTs = updatedNFTs.filter((nft) => nft.listing !== null).length
-      const percentageOfListed = (listedNFTs / collectionLength) * 100
+      for (const auction of collectionAuction) {
+        let auctionPrice: number;
 
-      const floorPrice =
-        collectionLength > 0
-          ? ethers.utils.formatUnits(totalFormattedPrice.div(collectionLength), 'ether')
-          : '0'
+        if (auction.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
+          auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, 'ether'));
+        } else {
+          const tokenContract = await getContractCustom({
+            contractAddress: auction.currency,
+          });
+          const tokenDecimals = await decimals({ contract: tokenContract });
+          auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, tokenDecimals));
+        }
+
+        floorPrice = Math.min(floorPrice, auctionPrice);
+      }
+
+      floorPrice = floorPrice === Infinity ? 0 : floorPrice;
+
+      const collectionLength = updatedNFTs.length;
+      const listedNFTs = updatedNFTs.filter((nft) => nft.listing !== null || nft.auction !== null).length;
+      const percentageOfListed = (listedNFTs / collectionLength) * 100;
 
       return ensureSerializable({
         nfts: updatedNFTs,

@@ -68,6 +68,9 @@ const NFTDetailPage = () => {
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
+
+  console.log({ endTimestamp })
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // mutation
@@ -856,6 +859,9 @@ const NFTDetailPage = () => {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                         Amount
                       </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Expires On
+                      </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                         Actions
                       </th>
@@ -869,6 +875,9 @@ const NFTDetailPage = () => {
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           {decimalOffChain(offer?.totalPrice)} WXFI
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {formatBlockchainTimestamp(offer?.expirationTimestamp)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-right">
                           {isOwner ? (

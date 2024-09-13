@@ -18,18 +18,25 @@ export function useAddCollectionMutation() {
   const router = useRouter()
 
   return useMutation({
-    mutationFn: async (newCollection: {
+    mutationFn: async ({
+      collectionContractAddress,
+      description,
+      name,
+      image,
+      backgroundImage,
+    }: {
       collectionContractAddress: string
-      name: string
       description: string
+      name: string
       image: string
+      backgroundImage: string
     }) => {
       if (!activeAccount?.address) {
         throw new Error('Wallet not connected')
       }
 
       const contract = await getContractCustom({
-        contractAddress: newCollection.collectionContractAddress,
+        contractAddress: collectionContractAddress,
       })
 
       const contractOwner = await owner({
@@ -40,14 +47,20 @@ export function useAddCollectionMutation() {
         throw new Error('Not the contract owner')
       }
 
-      const signMessage = `I am the owner of the contract ${newCollection.collectionContractAddress} and want to add a new collection. Sign this message to confirm`
+      const signMessage = `I am the owner of the contract ${collectionContractAddress} and want to add a new collection. Sign this message to confirm`
 
       await activeAccount?.signMessage({ message: signMessage })
 
-      const response = await axios.post('/api/collection', newCollection)
+      const response = await axios.post('/api/collection', {
+        collectionContractAddress,
+        description,
+        name,
+        image,
+        backgroundImage,
+      })
 
       if (response.status === 200) {
-        router.push(`/collections/${newCollection.collectionContractAddress}`)
+        router.push(`/collections/${collectionContractAddress}`)
       }
 
       return response.data

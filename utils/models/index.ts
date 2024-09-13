@@ -2,12 +2,13 @@ import mongoose, { Document, Schema } from 'mongoose'
 import { ObjectId } from 'mongodb'
 
 export interface ICollection {
-  _id?: ObjectId;
-  collectionContractAddress: string;
-  name: string;
-  description: string;
-  image: string;
-  createdAt: Date;
+  _id?: ObjectId
+  collectionContractAddress: string
+  name: string
+  description: string
+  image: string
+  createdAt: Date
+  backgroundImage: string
 }
 
 const CollectionSchema = new Schema<ICollection>({
@@ -26,6 +27,10 @@ const CollectionSchema = new Schema<ICollection>({
     maxLength: 500,
   },
   image: {
+    type: String,
+    required: false,
+  },
+  backgroundImage: {
     type: String,
     required: false,
   },

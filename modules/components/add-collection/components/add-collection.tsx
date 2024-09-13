@@ -27,17 +27,25 @@ export function AddCollection() {
 
   const [error, setError] = useState<string | null | CloudinaryUploadWidgetError>(null)
   const [imageUrl, setImageUrl] = useState<string | CloudinaryUploadWidgetInfo | undefined>()
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<
+    string | CloudinaryUploadWidgetInfo | undefined
+  >()
   const secureUrl = imageUrl ? (imageUrl as CloudinaryUploadWidgetInfo).secure_url : undefined
 
   const handleAddToMarketplace = async () => {
     if (!imageUrl) return alert('Please upload an image')
+    if (!backgroundImageUrl) return alert('Please upload an image')
+
     const { secure_url } = imageUrl as CloudinaryUploadWidgetInfo
+    const { secure_url: backgroundSecureUrl } = backgroundImageUrl as CloudinaryUploadWidgetInfo
+
     addCollectionMutation.mutate(
       {
         collectionContractAddress: collectionContractAddress,
         description: description,
         name: nftName,
         image: secure_url,
+        backgroundImage: backgroundSecureUrl,
       },
       {
         onSuccess: () => {
@@ -45,12 +53,14 @@ export function AddCollection() {
           setCollectionContractAddress('')
           setDescription('')
           setImageUrl(undefined)
+          setBackgroundImageUrl(undefined)
         },
         onError: () => {
           setNFTName('')
           setCollectionContractAddress('')
           setDescription('')
           setImageUrl(undefined)
+          setBackgroundImageUrl(undefined)
         },
       },
     )
@@ -98,61 +108,112 @@ export function AddCollection() {
           title="Add Collection"
           desc="Please make sure you are the owner of the contract address"
         />
-        {/* <FileInput /> */}
-        <CldUploadWidget
-          options={{ sources: ['local'] }}
-          onSuccess={(result, { widget }) => {
-            setImageUrl(result?.info)
-            widget.close()
-          }}
-          onQueuesEnd={(result, { widget }) => {
-            widget.close()
-          }}
-          onError={(error, { widget }) => {
-            setError(error)
-            widget.close()
-          }}
-          uploadPreset="mint-mingles-collection"
-        >
-          {({ open }) => {
-            function handleOnClick() {
-              setImageUrl(undefined)
-              open()
-            }
-            // return <button onClick={handleOnClick}>Upload an Image</button>
-            return (
-              <>
-                <div
-                  onClick={handleOnClick}
-                  className="flex w-full h-full items-center relative text-center bg-sec-bg justify-center cursor-pointer rounded-2xl"
-                >
-                  {secureUrl ? (
-                    <Image
-                      src={secureUrl}
-                      alt="Uploaded file"
-                      layout="fill"
-                      className="absolute inset-0 rounded-xl border border-sec-bg"
-                      style={{ maxWidth: '100%', maxHeight: '100%' }}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-6 py-8">
-                      <Icon iconType={'download'} className="w-20 max-md:w-10" />
-                      <div className="flex flex-col gap-4">
-                        <p className="font-medium text-muted-foreground">Drag and drop media</p>
-                        <p>Browse Files</p>
-                        <span>
-                          <p className="text-sm text-muted-foreground">Max size: 50MB</p>
-                          <p className="text-sm text-muted-foreground">JPG, PNG, GIF, SVG, MP4</p>
-                        </span>
+
+        <div className="flex flex-col gap-4">
+          <h3 className="text-lg font-semibold">Collection Image</h3>
+          <CldUploadWidget
+            options={{ sources: ['local'] }}
+            onSuccess={(result, { widget }) => {
+              setImageUrl(result?.info)
+              widget.close()
+            }}
+            onQueuesEnd={(result, { widget }) => {
+              widget.close()
+            }}
+            onError={(error, { widget }) => {
+              setError(error)
+              widget.close()
+            }}
+            uploadPreset="mint-mingles-collection"
+          >
+            {({ open }) => {
+              function handleOnClick() {
+                setImageUrl(undefined)
+                open()
+              }
+              return (
+                <>
+                  <div
+                    onClick={handleOnClick}
+                    className="flex w-full h-64 items-center relative text-center bg-sec-bg justify-center cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+                  >
+                    {secureUrl ? (
+                      <Image
+                        src={secureUrl}
+                        alt="Uploaded file"
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-xl"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-4">
+                        <Icon iconType={'download'} className="w-12 h-12 text-gray-400" />
+                        <div className="flex flex-col gap-2">
+                          <p className="font-medium text-gray-600">Click to upload image</p>
+                          <p className="text-sm text-gray-400">JPG, PNG, GIF, SVG (max 5MB)</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-                {error && <p style={{ color: 'red' }}>{error.toString()}</p>}
-              </>
-            )
-          }}
-        </CldUploadWidget>
+                    )}
+                  </div>
+                  {error && <p className="text-red-500 mt-2">{error.toString()}</p>}
+                </>
+              )
+            }}
+          </CldUploadWidget>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h3 className="text-lg font-semibold">Background Image</h3>
+          <CldUploadWidget
+            options={{ sources: ['local'] }}
+            onSuccess={(result, { widget }) => {
+              setBackgroundImageUrl(result?.info)
+              widget.close()
+            }}
+            onQueuesEnd={(result, { widget }) => {
+              widget.close()
+            }}
+            onError={(error, { widget }) => {
+              setError(error)
+              widget.close()
+            }}
+            uploadPreset="mint-mingles-collection"
+          >
+            {({ open }) => {
+              function handleOnClick() {
+                setBackgroundImageUrl(undefined)
+                open()
+              }
+              return (
+                <>
+                  <div
+                    onClick={handleOnClick}
+                    className="flex w-full h-64 items-center relative text-center bg-sec-bg justify-center cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+                  >
+                    {backgroundImageUrl ? (
+                      <Image
+                        src={(backgroundImageUrl as CloudinaryUploadWidgetInfo).secure_url}
+                        alt="Uploaded background"
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-xl"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-4">
+                        <Icon iconType={'download'} className="w-12 h-12 text-gray-400" />
+                        <div className="flex flex-col gap-2">
+                          <p className="font-medium text-gray-600">Click to upload background</p>
+                          <p className="text-sm text-gray-400">JPG, PNG, GIF, SVG (max 5MB)</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {error && <p className="text-red-500 mt-2">{error.toString()}</p>}
+                </>
+              )
+            }}
+          </CldUploadWidget>
+        </div>
       </div>
       <div className="w-1/2 h-full flex flex-col max-lg:w-full max-lg:py-8">
         <div className="lg:overflow-y-auto flex-grow px-1 scrollbar-none">

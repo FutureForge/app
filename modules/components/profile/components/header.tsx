@@ -72,7 +72,7 @@ export function Header({
           <div className="h-48 md:h-64 w-full overflow-hidden">
             {isCollection ? (
               <Image
-                src={'/default-collection-banner.jpg'}
+                src={collection?.backgroundImage || '/background.jpeg'}
                 alt="collection background"
                 width={2500}
                 height={1000}
@@ -99,7 +99,13 @@ export function Header({
 
           <div className="absolute lg:-bottom-20 -bottom-0 w-full items-start lg:left-6 flex gap-4 text-3xl font-semibold z-10">
             <Image
-              src={isCollection ? collection?.image! : userProfileImage}
+              src={
+                isCollection
+                  ? collection?.image!
+                    ? collection?.image!
+                    : '/logo.svg'
+                  : userProfileImage
+              }
               alt="profile"
               width={isMobile ? 100 : 170}
               height={isMobile ? 100 : 170}
@@ -108,7 +114,9 @@ export function Header({
             />
             <div className="flex justify-between w-full max-md:flex-col gap-4">
               <span>
-                <h3 className="text-2xl">{isCollection ? collection?.name! : getFormatAddress(address)}</h3>
+                <h3 className="text-2xl">
+                  {isCollection ? collection?.name! : getFormatAddress(address)}
+                </h3>
                 {isCollection && (
                   <p className="text-base font-normal mt-2 max-w-2xl">{collection?.description}</p>
                 )}

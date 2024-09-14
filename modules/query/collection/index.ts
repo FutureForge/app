@@ -123,17 +123,31 @@ export function useGetMarketplaceCollectionsQuery() {
               auction.status === StatusType.CREATED,
           )
 
-          const totalVolumeCollection = allListing.filter(
+          const totalListingVolumeCollection = allListing.filter(
             (listing) =>
               listing.assetContract.toLowerCase() ===
                 collection.collectionContractAddress.toLowerCase() &&
               listing.status === StatusType.COMPLETED,
           )
 
-          const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
+          const totalVolumeListing = totalListingVolumeCollection.reduce((acc, listing) => {
             const price = parseFloat(decimalOffChain(listing.pricePerToken) || '0')
             return acc + price
           }, 0)
+
+          const totalAuctionVolumeCollection = allAuctions.filter(
+            (auction) =>
+              auction.assetContract.toLowerCase() ===
+                collection.collectionContractAddress.toLowerCase() &&
+              auction.status === StatusType.COMPLETED,
+          )
+
+          const totalVolumeAuction = totalAuctionVolumeCollection.reduce((acc, auction) => {
+            const price = parseFloat(decimalOffChain(auction.buyoutBidAmount) || '0')
+            return acc + price
+          }, 0)
+
+          const totalVolume = totalVolumeAuction + totalVolumeListing
 
           // Calculate floor price
           let floorPrice = Infinity
@@ -445,16 +459,29 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           auction.status === StatusType.COMPLETED,
       )
 
-      const totalVolumeCollection = allListing.filter(
+      const totalListingVolumeCollection = allListing.filter(
         (listing) =>
           listing.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
           listing.status === StatusType.COMPLETED,
       )
 
-      const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
+      const totalVolumeListing = totalListingVolumeCollection.reduce((acc, listing) => {
         const price = parseFloat(decimalOffChain(listing.pricePerToken) || '0')
         return acc + price
       }, 0)
+
+      const totalAuctionVolumeCollection = allAuctions.filter(
+        (auction) =>
+          auction.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          auction.status === StatusType.COMPLETED,
+      )
+
+      const totalVolumeAuction = totalAuctionVolumeCollection.reduce((acc, auction) => {
+        const price = parseFloat(decimalOffChain(auction.buyoutBidAmount) || '0')
+        return acc + price
+      }, 0)
+
+      const totalVolume = totalVolumeAuction + totalVolumeListing
 
       const collectionOffers = allOffers.filter(
         (offer) =>

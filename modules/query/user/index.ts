@@ -143,10 +143,10 @@ export function useUserOffersMadeQuery() {
           )
           .map((offer) => {
             const offersLength = allOffers.filter(
-              (offer) =>
-                offer.status === StatusType.CREATED &&
-                offer.assetContract.toLowerCase() === offer.assetContract.toLowerCase() &&
-                offer.tokenId === offer.tokenId,
+              (o) =>
+                o.status === StatusType.CREATED &&
+                o.assetContract.toLowerCase() === offer.assetContract.toLowerCase() &&
+                o.tokenId === offer.tokenId,
             ).length
 
             return { ...offer, type: "Offer's Made", offersCount: offersLength }

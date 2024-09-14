@@ -197,17 +197,17 @@ const NFTDetailPage = () => {
   const nft = nftData?.nft
   const nftActivity = nftData?.nftActivity as NFTActivity[]
 
-  // console.log({
-  //   isAuctionExpired,
-  //   nftAuctionList,
-  //   winningBid,
-  //   nft,
-  //   id,
-  //   message,
-  //   nftListingList,
-  //   offers,
-  //   nftActivity,
-  // })
+  console.log({
+    isAuctionExpired,
+    nftAuctionList,
+    winningBid,
+    nft,
+    id,
+    message,
+    nftListingList,
+    offers,
+    nftActivity,
+  })
 
   const owner =
     id === 'listing'
@@ -912,70 +912,69 @@ const NFTDetailPage = () => {
           </div>
 
           {/* Offers Table */}
-          {id === 'listing' ||
-            (id === 'none' && (
-              <div className="bg-special-bg p-6 rounded-2xl">
-                <h3 className="text-xl font-semibold mb-4">Offers</h3>
-                {offers && offers.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-full divide-y divide-gray-700">
-                      <thead>
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Offeror
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Amount
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Expires On
-                          </th>
-                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Actions
-                          </th>
+          {id !== 'auction' && (
+            <div className="bg-special-bg p-6 rounded-2xl">
+              <h3 className="text-xl font-semibold mb-4">Offers</h3>
+              {offers && offers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-full divide-y divide-gray-700">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Offeror
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Amount
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Expires On
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {offers.map((offer: OfferType) => (
+                        <tr key={offer.tokenId} className="hover:bg-gray-800 transition-colors">
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {getFormatAddress(offer?.offeror)}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {decimalOffChain(offer?.totalPrice)} WXFI
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {formatBlockchainTimestamp(offer?.expirationTimestamp)}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-right">
+                            {isOwner ? (
+                              <Button
+                                onClick={() => handleAcceptOffer(offer.offerId)}
+                                variant="secondary"
+                                className="text-xs font-medium px-2 py-1"
+                              >
+                                Accept
+                              </Button>
+                            ) : offer.offeror === address ? (
+                              <Button
+                                onClick={() => handleCancelOffer(offer.offerId)}
+                                variant="secondary"
+                                className="text-xs font-medium px-2 py-1"
+                              >
+                                Cancel
+                              </Button>
+                            ) : null}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-700">
-                        {offers.map((offer: OfferType) => (
-                          <tr key={offer.tokenId} className="hover:bg-gray-800 transition-colors">
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              {getFormatAddress(offer?.offeror)}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              {decimalOffChain(offer?.totalPrice)} WXFI
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              {formatBlockchainTimestamp(offer?.expirationTimestamp)}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-right">
-                              {isOwner ? (
-                                <Button
-                                  onClick={() => handleAcceptOffer(offer.offerId)}
-                                  variant="secondary"
-                                  className="text-xs font-medium px-2 py-1"
-                                >
-                                  Accept
-                                </Button>
-                              ) : offer.offeror === address ? (
-                                <Button
-                                  onClick={() => handleCancelOffer(offer.offerId)}
-                                  variant="secondary"
-                                  className="text-xs font-medium px-2 py-1"
-                                >
-                                  Cancel
-                                </Button>
-                              ) : null}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-gray-400">No offers available</p>
-                )}
-              </div>
-            ))}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-400">No offers available</p>
+              )}
+            </div>
+          )}
 
           {id === 'auction' && (
             <div className="bg-special-bg p-6 rounded-2xl">

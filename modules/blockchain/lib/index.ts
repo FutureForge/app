@@ -13,7 +13,7 @@ export const includeNFTOwner = true
 export const fromBlock = 4880746
 export const nativeCurrency = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
-const providerUrl = 'https://rpc.testnet.ms'
+const providerUrl = 'https://crossfi-testnet-jsonrpc.itrocket.net'
 
 export const provider = new ethers.providers.JsonRpcProvider(providerUrl)
 

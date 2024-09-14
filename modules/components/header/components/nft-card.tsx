@@ -54,9 +54,9 @@ export function NFTCard(props: NFTCardProps) {
   return (
     <Link
       href={`/nft/${contractAddress}/${type}/${tokenId}`}
-      className="relative cursor-pointer w-fit max-w-[320px] h-full rounded-[20px] group overflow-hidden"
+      className="relative cursor-pointer w-fit max-w-[320px] h-full max-h-[300px] rounded-[20px] group overflow-hidden"
     >
-      <div className="w-full h-[70%] overflow-hidden rounded-2xl">
+      <div className="w-full max-h-[300px] min-h-[300px] overflow-hidden rounded-2xl">
         <MediaRenderer
           client={client}
           src={imageUrl}

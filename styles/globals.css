@@ -20,7 +20,7 @@ body {
   background: #000000;
   color: white;
 }
-*{
+* {
   /* outline: 1px solid red; */
 }
 @layer utilities {
@@ -53,18 +53,31 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.2); 
+    transform: scale(1.2);
   }
 }
 
 .slick-slide {
-  padding: 0 10px; 
+  padding: 0 10px;
 }
 
 .slick-list {
-  margin: 0 -10px; 
+  margin: 0 -10px;
+}
+
+.slick-prev::before,
+.slick-next::before {
+  display: none;
+}
+
+.arrows{
+height:20px;
+width:20px;
+margin: 1px;
+
 }

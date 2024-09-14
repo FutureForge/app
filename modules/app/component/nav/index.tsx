@@ -150,11 +150,11 @@ export function Nav() {
   return (
     <nav
       className={cn(
-        'flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 px-4 justify-between items-center font-inter',
+        'flex sticky top-0 inset-x-0 z-50 py-3 h-20 w-full md:px-14 px-4 gap-4 justify-between items-center font-inter',
         isScrolled ? 'bg-[#0F0F0F] border-b border-sec-bg' : 'bg-transparent',
       )}
     >
-      <div className="flex items-center justify-between w-1/3 gap-10">
+      <div className="flex items-center justify-between w-1/2 gap-10">
         <Link href={'/'} className="text-white font-medium flex-1 flex gap-1 items-center">
           <Icon iconType={'logo'} />
           <span className="hidden sm:block">MintMingle</span>
@@ -244,7 +244,7 @@ export function Nav() {
         <Icon
           iconType={'profile'}
           onClick={handleClick}
-          className="w-6 text-muted-foreground max-sm:hidden cursor-pointer hover:text-foreground duration-300 ease-in-out transition"
+          className="w-6 text-muted-foreground min-w-6 max-sm:hidden cursor-pointer hover:text-foreground duration-300 ease-in-out transition"
         />
 
         <ConnectButton

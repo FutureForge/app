@@ -32,7 +32,7 @@ export function CollectionCard({ collection, floorPrice, totalVolume }: Collecti
   return (
     <Link
       href={href}
-      className="relative cursor-pointer w-fit max-w-[320px] h-full rounded-[20px] group overflow-hidden"
+      className="relative cursor-pointer w-full max-w-[280px] h-full !max-h-[300px] !min-h-[300px] rounded-[20px] group overflow-hidden"
     >
       <div className="w-full h-full overflow-hidden rounded-2xl">
         <MediaRenderer

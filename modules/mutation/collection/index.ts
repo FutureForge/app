@@ -61,7 +61,7 @@ export function useAddCollectionMutation() {
 
       console.log({ response })
 
-      router.push(`/collections/${collectionContractAddress}`)
+      await router.push(`/collections/${collectionContractAddress}`)
 
       return response.data
     },

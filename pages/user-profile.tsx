@@ -63,7 +63,12 @@ export default function UserProfile() {
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
 
-  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError, error } = useUserNFTsQuery()
+  const {
+    data: userNFTS,
+    isLoading: userNFTLoading,
+    isError: userNFTError,
+    error,
+  } = useUserNFTsQuery()
   const {
     data: userOffersMade,
     isLoading: userOffersMadeLoading,
@@ -138,6 +143,8 @@ export default function UserProfile() {
     const contractAddress = selectedNFT?.contractAddress
     const tokenId = selectedNFT?.nft?.tokenId
 
+    if (!tokenId) toast.error('cant find out the token id')
+
     createListingMutation.mutate(
       {
         directListing: {
@@ -172,6 +179,8 @@ export default function UserProfile() {
 
     const contractAddress = selectedNFT?.contractAddress
     const tokenId = selectedNFT?.nft?.tokenId
+
+    if (!tokenId) toast.error('cant find out the token id')
 
     createAuctionMutation.mutate(
       {
@@ -235,7 +244,7 @@ export default function UserProfile() {
   const isUserActive = !!activeAccount
 
   if (isLoading || isError) {
-    return <Loader className='!h-[80vh]'/>
+    return <Loader className="!h-[80vh]" />
   }
 
   return (

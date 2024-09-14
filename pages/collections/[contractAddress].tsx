@@ -36,8 +36,6 @@ export default function CollectionPage() {
   const [selectedPick, setSelectedPick] = useState<PicksType>('All')
   const [searchTerm, setSearchTerm] = useState('')
 
-  console.log({ filter })
-
   const {
     data: singleCollection,
     isLoading,
@@ -391,7 +389,6 @@ function OffersTable({ offers }: { offers: any[] }) {
 }
 
 function SalesGrid({ sales }: { sales: any[] }) {
-  console.log({ sales })
   if (sales.length === 0) {
     return <EmptyState message="No sales recorded for this collection." />
   }

@@ -18,7 +18,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
             toast.loading('Transaction In Process...', { duration: 30000 })
           },
           onSuccess: (_data, _variables, _context, mutation) => {
-            console.log('query provider success', _data, _variables, _context, mutation)
+            // console.log('query provider success', _data, _variables, _context, mutation)
 
             const successMessage = mutation?.meta?.successMessage as {
               title?: string
@@ -33,14 +33,14 @@ export function QueryProvider({ children }: QueryProviderProps) {
             )
           },
           onError: (error, _variables, _context, mutation) => {
-            console.log('query provider error: ', error)
+            // console.log('query provider error: ', error)
 
             const errorMessage = mutation?.meta?.errorMessage as {
               title?: string
               description: string
             }
 
-            console.log({ errorMessage, error })
+            // console.log({ errorMessage, error })
 
             toast.error(
               errorMessage ? `${errorMessage.description} ${error.message}` : error.message,

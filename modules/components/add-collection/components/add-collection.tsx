@@ -98,7 +98,7 @@ export function AddCollection() {
     const checkIfNFT721Contract = async () => {
       if (collectionContractAddress) {
         const result = await isNFTContract(collectionContractAddress)
-        console.log('result', result)
+        // console.log('result', result)
         setNFTContract(result)
       }
     }

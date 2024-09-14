@@ -120,8 +120,6 @@ const NFTDetailPage = () => {
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
 
-  console.log({ endTimestamp })
-
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // mutation
@@ -199,17 +197,17 @@ const NFTDetailPage = () => {
   const nft = nftData?.nft
   const nftActivity = nftData?.nftActivity as NFTActivity[]
 
-  console.log({
-    isAuctionExpired,
-    nftAuctionList,
-    winningBid,
-    nft,
-    id,
-    message,
-    nftListingList,
-    offers,
-    nftActivity,
-  })
+  // console.log({
+  //   isAuctionExpired,
+  //   nftAuctionList,
+  //   winningBid,
+  //   nft,
+  //   id,
+  //   message,
+  //   nftListingList,
+  //   offers,
+  //   nftActivity,
+  // })
 
   const owner =
     id === 'listing'
@@ -481,7 +479,7 @@ const NFTDetailPage = () => {
     acceptOfferMutation.mutate({ offerId })
   }
 
-  console.log('mutation status')
+  // console.log('mutation status')
 
   if (isLoading || isError || isLoadingCollections) return <Loader className="!h-[80vh]" />
 

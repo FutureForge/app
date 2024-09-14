@@ -76,7 +76,6 @@ export default function Staking() {
           ) : (
             <div className="grid grid-cols-4 gap-7 2xl:grid-cols-6 max-lg:grid-cols-3 max-sm:grid-cols-1 max-xsm:grid-cols-2">
               {stakingData?.map((item, index) => {
-                console.log({ item })
                 return (
                   <Card
                     key={index}

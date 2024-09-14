@@ -1,17 +1,19 @@
 'use client'
 
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
-import { NFTActivity, NFTTypeV2, OfferType, SingleNFTResponse } from '@/utils/lib/types'
+import { NFTActivity, NFTTypeV2, OfferType, PlatformFeeType } from '@/utils/lib/types'
 import {
   useCheckApprovedForAllQuery,
+  useFetchCollectionsQuery,
   useGetSingleNFTQuery,
   useUserChainInfo,
 } from '@/modules/query'
 import { client } from '@/utils/configs'
 import { MediaRenderer } from 'thirdweb/react'
-import { Button, Loader } from '@/modules/app'
+import { Button, Loader, Icon } from '@/modules/app'
 import { formatBlockchainTimestamp, getFormatAddress } from '@/utils'
 import {
   useApprovedForAllMutation,
@@ -31,8 +33,80 @@ import { useEffect, useState } from 'react'
 import { Dialog } from '@/modules/app/component/dialog'
 import { NFTDialog } from '@/modules/components/nft-details'
 import { useToast } from '@/modules/app/hooks/useToast'
-import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { ICollection } from '@/utils/models'
+import { ArrowLeft } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+
+const CollectionInfo = ({ collection }: { collection: ICollection }) => {
+  if (!collection) return null
+
+  return (
+    <div className="bg-special-bg p-4 rounded-lg mb-6 flex items-center justify-between">
+      <div>
+        <p className="text-sm text-gray-400">Collection</p>
+        <h4 className="text-lg font-semibold">{collection.name}</h4>
+      </div>
+      <Link
+        href={`/collections/${collection.collectionContractAddress}`}
+        className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition-colors"
+      >
+        <span>View Collection</span>
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+    </div>
+  )
+}
+
+const MarketplaceInfo = ({ collectionFee, marketplaceFee }: PlatformFeeType) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="bg-special-bg p-4 rounded-lg mt-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between items-center w-full text-left"
+      >
+        <span className="text-sm font-medium">Marketplace Details</span>
+        {isOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+      </button>
+      {isOpen && (
+        <div className="mt-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-400">Collection Fee</span>
+            <span>{collectionFee?.percent || 0}%</span>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-400">Collection Fee Collector</span>
+            <Link
+              href={`https://test.xfiscan.com/address/${collectionFee?.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" font-semibold hover:underline cursor-pointer text-blue-500"
+            >
+              {getFormatAddress(marketplaceFee?.address)}
+            </Link>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-400">Marketplace Fee</span>
+            <span>{marketplaceFee?.percent || 0}%</span>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-400">Marketplace Fee Collector</span>
+            <Link
+              href={`https://test.xfiscan.com/address/${marketplaceFee?.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" font-semibold hover:underline cursor-pointer text-blue-500"
+            >
+              {getFormatAddress(marketplaceFee?.address)}
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const NFTDetailPage = () => {
   const toast = useToast()
@@ -45,6 +119,9 @@ const NFTDetailPage = () => {
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
+
+  console.log({ endTimestamp })
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // mutation
@@ -84,6 +161,8 @@ const NFTDetailPage = () => {
     collectionContractAddress: contractAddress as string,
   })
 
+  const { data: collections = [], isLoading: isLoadingCollections } = useFetchCollectionsQuery()
+
   const {
     data: nftData,
     isLoading,
@@ -94,8 +173,28 @@ const NFTDetailPage = () => {
     tokenId: tokenId as string,
   })
 
-  const { id, isAuctionExpired, nftAuctionList, winningBid, message, nftListingList, offers } =
-    nftData || {}
+  useEffect(() => {
+    if (!tokenId || !contractAddress) {
+      router.push('/')
+    }
+  }, [contractAddress, nftType, router, tokenId])
+
+  const collection = collections.find(
+    (col: ICollection) =>
+      col.collectionContractAddress.toLowerCase() === (contractAddress as string).toLowerCase(),
+  )
+
+  const {
+    id,
+    isAuctionExpired,
+    nftAuctionList,
+    winningBid,
+    message,
+    nftListingList,
+    offers,
+    collectionFee,
+    marketplaceFee,
+  } = nftData || {}
 
   const nft = nftData?.nft
   const nftActivity = nftData?.nftActivity as NFTActivity[]
@@ -384,7 +483,7 @@ const NFTDetailPage = () => {
 
   console.log('mutation status')
 
-  if (isLoading || isError) return <Loader className='!h-[80vh]'/>
+  if (isLoading || isError || isLoadingCollections) return <Loader className="!h-[80vh]" />
 
   const imageUrl = nft?.metadata?.image || nft?.tokenURI
 
@@ -409,6 +508,7 @@ const NFTDetailPage = () => {
       </Head>
       <div className="container h-full mx-auto items-start gap-8 md:px-14 px-4 max-md:flex-col justify-center flex mt-5 max-w-[1550px]">
         <div className="md:w-1/2 w-full">
+          <CollectionInfo collection={collection} />
           <div className="h-[500px] relative mb-8">
             {/* Decorative frame */}
             <div className="absolute inset-0 border-8 border-gold-gradient rounded-2xl z-10 pointer-events-none"></div>
@@ -622,6 +722,8 @@ const NFTDetailPage = () => {
             </div>
           </div>
 
+          <MarketplaceInfo collectionFee={collectionFee} marketplaceFee={marketplaceFee} />
+
           <div className="bg-special-bg w-full p-6 flex items-center justify-center flex-col gap-6 rounded-2xl">
             {/* BUYER BUTTON */}
             {!isOwner && (
@@ -812,61 +914,104 @@ const NFTDetailPage = () => {
           </div>
 
           {/* Offers Table */}
-          <div className="bg-special-bg p-6 rounded-2xl">
-            <h3 className="text-xl font-semibold mb-4">Offers</h3>
-            {offers && offers.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-full divide-y divide-gray-700">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Offeror
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {offers.map((offer: OfferType) => (
-                      <tr key={offer.tokenId} className="hover:bg-gray-800 transition-colors">
+          {id === 'listing' ||
+            (id === 'none' && (
+              <div className="bg-special-bg p-6 rounded-2xl">
+                <h3 className="text-xl font-semibold mb-4">Offers</h3>
+                {offers && offers.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-full divide-y divide-gray-700">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Offeror
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Expires On
+                          </th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700">
+                        {offers.map((offer: OfferType) => (
+                          <tr key={offer.tokenId} className="hover:bg-gray-800 transition-colors">
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              {getFormatAddress(offer?.offeror)}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              {decimalOffChain(offer?.totalPrice)} WXFI
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              {formatBlockchainTimestamp(offer?.expirationTimestamp)}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-right">
+                              {isOwner ? (
+                                <Button
+                                  onClick={() => handleAcceptOffer(offer.offerId)}
+                                  variant="secondary"
+                                  className="text-xs font-medium px-2 py-1"
+                                >
+                                  Accept
+                                </Button>
+                              ) : offer.offeror === address ? (
+                                <Button
+                                  onClick={() => handleCancelOffer(offer.offerId)}
+                                  variant="secondary"
+                                  className="text-xs font-medium px-2 py-1"
+                                >
+                                  Cancel
+                                </Button>
+                              ) : null}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-400">No offers available</p>
+                )}
+              </div>
+            ))}
+
+          {id === 'auction' && (
+            <div className="bg-special-bg p-6 rounded-2xl">
+              <h3 className="text-xl font-semibold mb-4">Wining Bid</h3>
+              {winningBid ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-full divide-y divide-gray-700">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Bidder
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Amount
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      <tr className="hover:bg-gray-800 transition-colors">
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {getFormatAddress(offer?.offeror)}
+                          {getFormatAddress(winningBid?.bidder)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {decimalOffChain(offer?.totalPrice)} WXFI
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right">
-                          {isOwner ? (
-                            <Button
-                              onClick={() => handleAcceptOffer(offer.offerId)}
-                              variant="secondary"
-                              className="text-xs font-medium px-2 py-1"
-                            >
-                              Accept
-                            </Button>
-                          ) : offer.offeror === address ? (
-                            <Button
-                              onClick={() => handleCancelOffer(offer.offerId)}
-                              variant="secondary"
-                              className="text-xs font-medium px-2 py-1"
-                            >
-                              Cancel
-                            </Button>
-                          ) : null}
+                          {decimalOffChain(winningBid?.bidAmount)} XFI
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-gray-400">No offers available</p>
-            )}
-          </div>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-400">No offers available</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>

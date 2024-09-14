@@ -21,7 +21,7 @@ export function FilterButtons<T extends string, P extends string>({
   data,
   collection = false,
   onPickChange,
-  selectedPick
+  selectedPick,
 }: FilterButtonsProps<T, P>) {
   const handlePickClick = (pick: P) => {
     if (onPickChange) {
@@ -31,7 +31,12 @@ export function FilterButtons<T extends string, P extends string>({
 
   return (
     <div className="flex justify-between lg:items-center max-md:flex-col gap-4">
-      <div className={cn('flex items-center gap-3 max-md:w-full overflow-x-auto whitespace-nowrap', className)}>
+      <div
+        className={cn(
+          'flex items-center gap-3 max-md:w-full overflow-x-auto whitespace-nowrap',
+          className,
+        )}
+      >
         {filters.map((f) => (
           <button
             disabled={disabled}
@@ -51,11 +56,10 @@ export function FilterButtons<T extends string, P extends string>({
           {data.map((item, index) => (
             <button
               key={index}
-              className={`px-4 py-2 rounded-xl ${
-                selectedPick === item
-                  ? 'bg-white text-primary'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              } transition ease-in-out duration-200`}
+              className={cn(
+                'px-4 py-2 rounded-xl text-muted-foreground transition ease-in-out duration-200 hover:text-foreground',
+                { 'text-foreground': selectedPick === item },
+              )}
               onClick={() => handlePickClick(item)}
             >
               {item}

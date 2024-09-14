@@ -4,6 +4,7 @@ import { useWithdrawStakingMutation } from '@/modules/mutation'
 import { useGetUserStakingInfoQuery } from '@/modules/query'
 import Head from 'next/head'
 import { NFT } from 'thirdweb'
+import { NFTHolding } from '.'
 
 export default function Withdraw() {
   const { data: withdraw, isLoading, isError } = useGetUserStakingInfoQuery()
@@ -30,13 +31,13 @@ export default function Withdraw() {
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-7 2xl:grid-cols-6 max-lg:grid-cols-3 max-sm:grid-cols-1 max-xsm:grid-cols-2">
-              {withdraw?.nftsTokenStaked?.map((item: NFT) => (
+              {withdraw?.nftsTokenStaked?.map((item: NFTHolding) => (
                 <Card
-                  key={item.metadata.name}
-                  title={item.metadata.name}
-                  src={item.metadata.image}
+                  key={item?.nft?.metadata?.name}
+                  title={item?.nft?.metadata?.name}
+                  src={item?.nft?.metadata?.image}
                   onClick={handleWithdrawStakedNFT}
-                  tokenId={item.id.toString()}
+                  tokenId={item.nft?.id?.toString() || item.nft?.tokenId?.toString() || ''}
                   disabled={withdrawStakeMutation.isPending}
                   cta={
                     <span className="flex gap-2 items-center">

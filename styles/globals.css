@@ -20,7 +20,7 @@ body {
   background: #000000;
   color: white;
 }
-*{
+* {
   /* outline: 1px solid red; */
 }
 @layer utilities {
@@ -53,18 +53,45 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.2); 
+    transform: scale(1.2);
   }
 }
 
 .slick-slide {
-  padding: 0 10px; 
+  padding: 0 10px;
 }
 
 .slick-list {
-  margin: 0 -10px; 
+  margin: 0 -10px;
+}
+
+.slick-prev::before,
+.slick-next::before {
+  display: none;
+}
+
+.gfg {
+  border-collapse: separate;
+  border-spacing: 0 15px;
+}
+
+.gfg tbody > tr > td:nth-child(1) {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+.gfg tbody > tr > td:last-child {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+.gfg tbody > tr {
+  transition: background-color 0.3s ease;
+}
+.gfg tbody > tr:hover {
+  background-color: #3c3c434a !important;
 }

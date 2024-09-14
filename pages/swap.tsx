@@ -32,9 +32,29 @@ export default function SwapPage() {
     if (!amount) return toast.error('Please enter an amount')
 
     if (swapType === SwapType.Wrap) {
-      convertXFITOWXFIMutation.mutate({ amount })
+      convertXFITOWXFIMutation.mutate(
+        { amount },
+        {
+          onSuccess: () => {
+            setAmount('')
+          },
+          onError: () => {
+            setAmount('')
+          },
+        },
+      )
     } else {
-      withdrawWXFIMutation.mutate({ amount })
+      withdrawWXFIMutation.mutate(
+        { amount },
+        {
+          onSuccess: () => {
+            setAmount('')
+          },
+          onError: () => {
+            setAmount('')
+          },
+        },
+      )
     }
   }
 

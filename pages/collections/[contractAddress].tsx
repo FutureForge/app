@@ -4,16 +4,17 @@ import { FilterButtons } from '@/modules/components/header/components/filter'
 import { Header } from '@/modules/components/profile'
 import { useGetSingleCollectionQuery } from '@/modules/query'
 import { client } from '@/utils/configs'
-import { NFTTypeV2, SingleNFTResponse } from '@/utils/lib/types'
+import { NFTTypeV2, PlatformFeeType, SingleNFTResponse } from '@/utils/lib/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { MediaRenderer } from 'thirdweb/react'
 import { motion } from 'framer-motion'
 import { NewAuction, NewListing } from '@/modules/components/header/types/types'
 import { decimalOffChain } from '@/modules/blockchain'
 import { getFormatAddress } from '@/utils'
+import Head from 'next/head'
 
 type FilterType = 'Items' | 'Offers' | 'Sales' | 'Activity'
 const filters: FilterType[] = ['Items', 'Offers', 'Sales', 'Activity']
@@ -45,7 +46,14 @@ export default function CollectionPage() {
     contractAddress: contractAddress as string,
   })
 
-  console.log({ singleCollection })
+  const marketplaceFee = singleCollection?.marketplaceFee
+  const collectionFee = singleCollection?.collectionFee
+
+  useEffect(() => {
+    if (!contractAddress) {
+      router.push('/')
+    }
+  }, [contractAddress, router])
 
   const sortedNFTs = singleCollection?.nfts.sort(
     (a: SingleCollectionType, b: SingleCollectionType) => {
@@ -97,6 +105,17 @@ export default function CollectionPage() {
   const renderContent = () => {
     return (
       <>
+        <Head>
+          <title>
+            Mint Mingle Marketplace - {singleCollection?.collection?.name || 'Collection Details'}
+          </title>
+          <meta
+            name="description"
+            content={`Collection: ${
+              singleCollection?.collection?.name || 'Collection'
+            } on Mint Mingle Marketplace`}
+          />
+        </Head>
         <div className="lg:ml-52 z-50 max-w-[90%] max-md:max-w-full max-md:w-full overflow-x-scroll scrollbar-none mb-6">
           <FilterButtons
             collection
@@ -109,16 +128,19 @@ export default function CollectionPage() {
           />
         </div>
         {filter === 'Items' && (
-          <div className="relative w-full max-w-md mb-6">
-            <TextField
-              type="text"
-              placeholder="Search by token name"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setSelectedPick('All')
-              }}
-            />
+          <div className="w-full flex justify-end">
+            <div className="relative w-full max-w-md bg-primary rounded-xl border border-primary">
+              <TextField
+                type="text"
+                placeholder="Search by token name"
+                className="bg-transparent"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setSelectedPick('All')
+                }}
+              />
+            </div>
           </div>
         )}
         {filter === 'Items' && (
@@ -145,7 +167,9 @@ export default function CollectionPage() {
         )}
         {filter === 'Offers' && <OffersTable offers={singleCollection?.collectionOffers || []} />}
         {filter === 'Sales' && <SalesGrid sales={singleCollection?.sales || []} />}
-        {filter === 'Activity' && <ActivityList activities={singleCollection?.tokenTransfers || []} />}
+        {filter === 'Activity' && (
+          <ActivityList activities={singleCollection?.tokenTransfers || []} />
+        )}
       </>
     )
   }
@@ -161,6 +185,7 @@ export default function CollectionPage() {
         uniqueHolders={singleCollection?.tokenDetails?.holderCount}
         transferCount={singleCollection?.tokenDetails?.transferCount}
         collection={singleCollection?.collection}
+        collectionFee={collectionFee?.percent}
       />
 
       {renderContent()}
@@ -222,40 +247,43 @@ function Card(props: NFTCardProps) {
     >
       <div className="w-full relative rounded-2xl flex flex-col group bg-primary overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
         {getListingTag()}
-        <div className="w-full h-[250px] overflow-hidden rounded-t-2xl">
+        <div className="w-full max-h-[300px] relative min-h-[300px] overflow-hidden rounded-2xl">
           <MediaRenderer
             client={client}
             src={imageUrl}
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-300 ease-in-out"
+            className="rounded-2xl w-full h-full group-hover:scale-105 transition duration-300 ease-in-out"
           />
+          <div className=" h-full w-full bg-black/15 absolute inset-0" />
         </div>
 
-        <div className="p-4 rounded-b-2xl flex flex-col justify-between bg-gray-800 h-[120px]">
+        <div className="p-4 rounded-b-2xl flex flex-col justify-between h-[120px]">
           <div className="flex flex-col gap-3">
             <p className={cn('font-semibold text-lg truncate')}>{name}</p>
 
             <div className="flex w-full justify-between items-end">
-              <span className="flex flex-col">
-                {listingType === 'listing' && (
-                  <>
-                    <p className="text-sm text-gray-400">Listing Price</p>
-                    <p className="font-semibold text-white">
-                      {decimalOffChain(listing?.pricePerToken || 0)} XFI
-                    </p>
-                  </>
-                )}
-                {listingType === 'auction' && (
-                  <>
-                    <p className="text-sm text-gray-400">Minimum Bid</p>
-                    <p className="font-semibold text-white">
-                      {decimalOffChain(auction?.minimumBidAmount || 0)} XFI
-                    </p>
-                  </>
-                )}
-                {!listingType && <div className="h-[38px]" />}
-              </span>
+              {listingType && (
+                <span className="flex flex-col">
+                  {listingType === 'listing' && (
+                    <>
+                      <p className="text-sm text-gray-400">Listing Price</p>
+                      <p className="font-semibold text-white">
+                        {decimalOffChain(listing?.pricePerToken || 0)} XFI
+                      </p>
+                    </>
+                  )}
+                  {listingType === 'auction' && (
+                    <>
+                      <p className="text-sm text-gray-400">Minimum Bid</p>
+                      <p className="font-semibold text-white">
+                        {decimalOffChain(auction?.minimumBidAmount || 0)} XFI
+                      </p>
+                    </>
+                  )}
+                  {!listingType && <div className="h-[38px]" />}
+                </span>
+              )}
 
-              <span className="flex flex-col items-end">
+              <span className="flex flex-col">
                 <p className="text-sm text-gray-400">Owner</p>
                 <p className="text-white">{getFormatAddress(owner!)}</p>
               </span>
@@ -322,29 +350,29 @@ function OffersTable({ offers }: { offers: any[] }) {
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full gfg text-center divide-y divide-gray-200">
         <thead>
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Token ID
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               NFT Name
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Offers Count
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Min Offer
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Max Offer
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white text-red-600 divide-y divide-gray-200">
+        <tbody className="bg-sec-bg text-foreground rounded-2xl cursor-pointer">
           {nftOffers.map((nftOffer) => (
-            <tr key={nftOffer.tokenId}>
+            <tr key={nftOffer.tokenId} className="hover:!bg-sec-bg/90">
               <td className="px-6 py-4 whitespace-nowrap">{nftOffer.tokenId}</td>
               <td className="px-6 py-4 whitespace-nowrap">{nftOffer.name}</td>
               <td className="px-6 py-4 whitespace-nowrap">{nftOffer.offersCount}</td>
@@ -371,13 +399,16 @@ function SalesGrid({ sales }: { sales: any[] }) {
   return (
     <div className="w-full grid py-10 grid-cols-4 gap-6 2xl:grid-cols-6 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 max-xsm:grid-cols-1">
       {sales.map((sale) => (
-        <div key={sale.tokenId} className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="p-4">
+        <div key={sale.tokenId} className="bg-primary shadow rounded-2xl overflow-hidden">
+          <div className="w-full max-h-full relative overflow-hidden rounded-2xl">
             <MediaRenderer
               client={client}
               src={sale.nft.metadata.image}
-              className="w-full h-48 object-cover mb-4 rounded"
+              className="rounded-2xl w-full h-full group-hover:scale-105 transition duration-300 ease-in-out"
             />
+            <div className=" h-full w-full bg-black/15 absolute inset-0" />
+          </div>
+          <div className="p-4">
             <h3 className="text-lg font-semibold mb-2">{sale.nftName}</h3>
             <p className="text-gray-600 mb-2">
               Sold for: {decimalOffChain(sale.pricePerToken || sale?.winningBid?.bidAmount)} XFI
@@ -404,21 +435,31 @@ function ActivityList({ activities }: { activities: any[] }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1  w-full gap-6">
       {activities.map((activity, index) => (
-        <div key={index} className="bg-white shadow rounded-lg p-4 flex items-center space-x-4">
+        <div
+          key={index}
+          className="bg-special-bg border border-sec-bg shadow rounded-lg p-4 flex items-center space-x-4 max-h-[150px]"
+        >
           <div className="flex-shrink-0">
             <MediaRenderer
               client={client}
               src={activity.nft.metadata.image}
-              className="w-16 h-16 object-cover rounded"
+              className="w-16 h-full object-cover rounded-lg"
             />
           </div>
           <div className="flex-grow">
             <h3 className="text-lg font-semibold">{activity.nftName}</h3>
-            <p className="text-gray-600">
-              Transferred from {getFormatAddress(activity.addressFrom)} to{' '}
-              {getFormatAddress(activity.addressTo)}
+            <p className="text-muted-foreground">
+              Transferred from{' '}
+              <span className="font-semibold text-foreground">
+                {getFormatAddress(activity.addressFrom)}
+              </span>{' '}
+              to{' '}
+              <span className="font-semibold text-foreground">
+                {' '}
+                {getFormatAddress(activity.addressTo)}
+              </span>
             </p>
           </div>
           <div className="text-sm text-gray-500">

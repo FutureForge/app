@@ -14,11 +14,12 @@ import {
 import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
-import { CROSSFI_API } from '@/utils/configs'
+import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT } from '@/utils/configs'
 import { ensureSerializable } from '@/utils'
 import { useUserChainInfo } from '../user'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { NFT } from 'thirdweb'
+import { getPlatformFeeInfo } from '@/modules/blockchain/global'
 
 export function useFetchCollectionsQuery() {
   return useQuery({
@@ -57,6 +58,9 @@ export function useGetMarketplaceCollectionsQuery() {
     queryKey: ['collections', 'marketplace', collections],
     queryFn: async () => {
       if (!collections || collections.length === 0) return []
+
+      const allListing = await getAllListing()
+      const allAuctions = await getAllAuctions()
 
       const collectionPromises = collections.map(async (collection: ICollection) => {
         try {
@@ -105,9 +109,6 @@ export function useGetMarketplaceCollectionsQuery() {
             }),
           )
 
-          const allListing = await getAllListing()
-          const allAuctions = await getAllAuctions()
-
           const collectionListing = allListing.filter(
             (listing) =>
               listing.assetContract.toLowerCase() ===
@@ -135,40 +136,44 @@ export function useGetMarketplaceCollectionsQuery() {
           }, 0)
 
           // Calculate floor price
-          let floorPrice = Infinity;
+          let floorPrice = Infinity
           for (const listing of collectionListing) {
-            let listingPrice: number;
+            let listingPrice: number
 
             if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-              listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, 'ether'));
+              listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, 'ether'))
             } else {
               const tokenContract = await getContractCustom({
                 contractAddress: listing.currency,
-              });
-              const tokenDecimals = await decimals({ contract: tokenContract });
-              listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals));
+              })
+              const tokenDecimals = await decimals({ contract: tokenContract })
+              listingPrice = parseFloat(
+                ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals),
+              )
             }
 
-            floorPrice = Math.min(floorPrice, listingPrice);
+            floorPrice = Math.min(floorPrice, listingPrice)
           }
 
           for (const auction of collectionAuctions) {
-            let auctionPrice: number;
+            let auctionPrice: number
 
             if (auction.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-              auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, 'ether'));
+              auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, 'ether'))
             } else {
               const tokenContract = await getContractCustom({
                 contractAddress: auction.currency,
-              });
-              const tokenDecimals = await decimals({ contract: tokenContract });
-              auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, tokenDecimals));
+              })
+              const tokenDecimals = await decimals({ contract: tokenContract })
+              auctionPrice = parseFloat(
+                ethers.utils.formatUnits(auction.minimumBidAmount, tokenDecimals),
+              )
             }
 
-            floorPrice = Math.min(floorPrice, auctionPrice);
+            floorPrice = Math.min(floorPrice, auctionPrice)
           }
 
-          floorPrice = floorPrice === Infinity ? 0 : floorPrice;
+          floorPrice = floorPrice === Infinity ? 0 : floorPrice
 
           return {
             collection,
@@ -186,6 +191,7 @@ export function useGetMarketplaceCollectionsQuery() {
         .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
         .map((result) => result.value)
         .filter((value) => value !== null)
+        .reverse()
 
       return ensureSerializable(collectionsData)
     },
@@ -211,6 +217,12 @@ export function useGetSingleNFTQuery({
       try {
         // get nft activity
         let nftActivity: NFTActivity[] = []
+
+        const collectionFee = await getPlatformFeeInfo({ contractAddress })
+        const marketplaceFee = await getPlatformFeeInfo({
+          contractAddress: CROSSFI_MARKETPLACE_CONTRACT,
+        })
+
         try {
           const response = await axios.get<NFTActivityResponse>(
             `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenId=${tokenId}&tokenType=${nftType}&page=1&limit=100&sort=-blockNumber`,
@@ -307,6 +319,8 @@ export function useGetSingleNFTQuery({
             isAuctionExpired,
             winningBid: winningBidBody,
             nftActivity,
+            collectionFee,
+            marketplaceFee,
           }
         } else if (nftListingList) {
           const allOffers = await getAllOffers()
@@ -327,6 +341,8 @@ export function useGetSingleNFTQuery({
                 tokenId: offer.tokenId.toString(),
               })) || [],
             nftActivity,
+            collectionFee,
+            marketplaceFee,
           }
         } else {
           const allOffers = await getAllOffers()
@@ -347,6 +363,8 @@ export function useGetSingleNFTQuery({
                 tokenId: offer.tokenId.toString(),
               })) || [],
             nftActivity,
+            collectionFee,
+            marketplaceFee,
           }
         }
 
@@ -376,6 +394,11 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         (collection: ICollection) =>
           collection.collectionContractAddress.toLowerCase() === contractAddress.toLowerCase(),
       )
+
+      const collectionFee = await getPlatformFeeInfo({ contractAddress })
+      const marketplaceFee = await getPlatformFeeInfo({
+        contractAddress: CROSSFI_MARKETPLACE_CONTRACT,
+      })
 
       const tokenResponse = await axios.get(`${CROSSFI_API}/tokens/${contractAddress}`)
       const tokenDetails = tokenResponse.data
@@ -415,7 +438,9 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       )
 
       const totalVolumeCollection = allListing.filter(
-        (listing) => listing.status === StatusType.COMPLETED,
+        (listing) =>
+          listing.assetContract.toLowerCase() === contractAddress.toLowerCase() &&
+          listing.status === StatusType.COMPLETED,
       )
 
       const totalVolume = totalVolumeCollection.reduce((acc, listing) => {
@@ -544,44 +569,48 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       )
 
       // Calculate floor price
-      let floorPrice = Infinity;
+      let floorPrice = Infinity
       for (const listing of collectionListing) {
-        let listingPrice: number;
+        let listingPrice: number
 
         if (listing.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-          listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, 'ether'));
+          listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, 'ether'))
         } else {
           const tokenContract = await getContractCustom({
             contractAddress: listing.currency,
-          });
-          const tokenDecimals = await decimals({ contract: tokenContract });
-          listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals));
+          })
+          const tokenDecimals = await decimals({ contract: tokenContract })
+          listingPrice = parseFloat(ethers.utils.formatUnits(listing.pricePerToken, tokenDecimals))
         }
 
-        floorPrice = Math.min(floorPrice, listingPrice);
+        floorPrice = Math.min(floorPrice, listingPrice)
       }
 
       for (const auction of collectionAuction) {
-        let auctionPrice: number;
+        let auctionPrice: number
 
         if (auction.currency === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
-          auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, 'ether'));
+          auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, 'ether'))
         } else {
           const tokenContract = await getContractCustom({
             contractAddress: auction.currency,
-          });
-          const tokenDecimals = await decimals({ contract: tokenContract });
-          auctionPrice = parseFloat(ethers.utils.formatUnits(auction.minimumBidAmount, tokenDecimals));
+          })
+          const tokenDecimals = await decimals({ contract: tokenContract })
+          auctionPrice = parseFloat(
+            ethers.utils.formatUnits(auction.minimumBidAmount, tokenDecimals),
+          )
         }
 
-        floorPrice = Math.min(floorPrice, auctionPrice);
+        floorPrice = Math.min(floorPrice, auctionPrice)
       }
 
-      floorPrice = floorPrice === Infinity ? 0 : floorPrice;
+      floorPrice = floorPrice === Infinity ? 0 : floorPrice
 
-      const collectionLength = updatedNFTs.length;
-      const listedNFTs = updatedNFTs.filter((nft) => nft.listing !== null || nft.auction !== null).length;
-      const percentageOfListed = (listedNFTs / collectionLength) * 100;
+      const collectionLength = updatedNFTs.length
+      const listedNFTs = updatedNFTs.filter(
+        (nft) => nft.listing !== null || nft.auction !== null,
+      ).length
+      const percentageOfListed = (listedNFTs / collectionLength) * 100
 
       return ensureSerializable({
         nfts: updatedNFTs,
@@ -594,6 +623,8 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         tokenDetails,
         tokenTransfers: updatedTokenTransfers,
         sales: [...updatedCollectionSalesNFT, ...updatedCollectionAuctionNFT],
+        collectionFee,
+        marketplaceFee,
       })
     },
     initialData: {
@@ -607,6 +638,8 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       tokenDetails: {},
       tokenTransfers: [],
       sales: [],
+      collectionFee: {},
+      marketplaceFee: {},
     },
     enabled: !!collections && !!contractAddress,
     refetchInterval: 5000,

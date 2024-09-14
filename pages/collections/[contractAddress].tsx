@@ -40,9 +40,12 @@ export default function CollectionPage() {
     data: singleCollection,
     isLoading,
     isError,
+    error,
   } = useGetSingleCollectionQuery({
     contractAddress: contractAddress as string,
   })
+
+  console.log({error})
 
   const marketplaceFee = singleCollection?.marketplaceFee
   const collectionFee = singleCollection?.collectionFee
@@ -114,6 +117,7 @@ export default function CollectionPage() {
             } on Mint Mingle Marketplace`}
           />
         </Head>
+        <br />
         <div className="lg:ml-52 z-50 max-w-[90%] max-md:max-w-full max-md:w-full overflow-x-scroll scrollbar-none mb-6">
           <FilterButtons
             collection

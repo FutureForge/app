@@ -35,7 +35,11 @@ export function useUserNFTsQuery() {
         `${CROSSFI_API}/token-holders?address=${userAddress}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`,
       )
 
-      const userNFTs = response.data.docs
+      const userNFTs = response.data.docs.filter(
+        (nft) =>
+          nft.contractAddress.toLowerCase() !==
+          '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
+      )
 
       const allListings = await getAllListing()
 
@@ -136,13 +140,17 @@ export function useUserOffersMadeQuery() {
           .filter(
             (offer) =>
               offer.offeror.toLowerCase() === userAddress?.toLowerCase() &&
-              offer.status === StatusType.CREATED,
+              offer.status === StatusType.CREATED &&
+              offer.assetContract.toLowerCase() !==
+                '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
           )
           .map((offer) => {
             const offersLength = allOffers.filter(
               (o) =>
                 o.status === StatusType.CREATED &&
                 o.assetContract.toLowerCase() === offer.assetContract.toLowerCase() &&
+                o.assetContract.toLowerCase() !==
+                  '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase() &&
                 o.tokenId === offer.tokenId,
             ).length
 
@@ -217,13 +225,17 @@ export function useUserListingQuery() {
             .filter(
               (listing) =>
                 listing.listingCreator.toLowerCase() === userAddress?.toLowerCase() &&
-                listing.status === StatusType.CREATED,
+                listing.status === StatusType.CREATED &&
+                listing.assetContract.toLowerCase() !==
+                  '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
             )
             .map((listing) => {
               const offersLength = allOffers.filter(
                 (offer) =>
                   offer.status === StatusType.CREATED &&
                   offer.assetContract.toLowerCase() === listing.assetContract.toLowerCase() &&
+                  offer.assetContract.toLowerCase() !==
+                    '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase() &&
                   offer.tokenId === listing.tokenId,
               ).length
 
@@ -297,7 +309,9 @@ export function useUserAuctionQuery() {
           .filter(
             (auction) =>
               auction.auctionCreator.toLowerCase() === userAddress?.toLowerCase() &&
-              auction.status === StatusType.CREATED,
+              auction.status === StatusType.CREATED &&
+              auction.assetContract.toLowerCase() !==
+                '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
           )
           .map((auction) => ({ ...auction, type: 'Auction' }))
 

@@ -31,9 +31,9 @@ import { SingleNFTResponse } from '@/utils/lib/types'
 import { createWallet } from 'thirdweb/wallets'
 import { getFormatAddress } from '@/utils'
 
-type FilterType = 'NFTs' | 'Listed' | "Offer's Made" | 'Auction'
+type FilterType = 'NFTs' | 'Listed' | 'Auction' | "Offer's Made"
 
-const filters: FilterType[] = ['NFTs', 'Listed', "Offer's Made", 'Auction']
+const filters: FilterType[] = ['NFTs', 'Listed', 'Auction', "Offer's Made"]
 
 type NFTSelectedItem = {
   address: string

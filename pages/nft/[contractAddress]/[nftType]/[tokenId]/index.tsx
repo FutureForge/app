@@ -165,11 +165,14 @@ const NFTDetailPage = () => {
     data: nftData,
     isLoading,
     isError,
+    error,
   } = useGetSingleNFTQuery({
     contractAddress: contractAddress as string,
     nftType: nftType as NFTTypeV2,
     tokenId: tokenId as string,
   })
+
+  console.log({error})
 
   useEffect(() => {
     if (!tokenId || !contractAddress) {

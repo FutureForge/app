@@ -21,27 +21,52 @@ export function useGetGlobalListingOrAuctionQuery() {
       const [allOffers] = await Promise.all([getAllOffers()])
 
       const createdAuction = allAuctions
-        .filter((auction) => auction.status === StatusType.CREATED)
+        .filter(
+          (auction) =>
+            auction.status === StatusType.CREATED &&
+            auction.assetContract.toLowerCase() !==
+              '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
+        )
         .reverse()
         .slice(0, 20)
 
       const updatedListing = allListing
-        .filter((listing) => listing.status === StatusType.CREATED)
+        .filter(
+          (listing) =>
+            listing.status === StatusType.CREATED &&
+            listing.assetContract.toLowerCase() !==
+              '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
+        )
         .reverse()
         .slice(0, 20)
 
       const recentlySoldAuction = allAuctions
-        .filter((auction) => auction.status === StatusType.COMPLETED)
+        .filter(
+          (auction) =>
+            auction.status === StatusType.COMPLETED &&
+            auction.assetContract.toLowerCase() !==
+              '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
+        )
         .reverse()
         .slice(0, 20)
 
       const recentlySoldListing = allListing
-        .filter((listing) => listing.status === StatusType.COMPLETED)
+        .filter(
+          (listing) =>
+            listing.status === StatusType.COMPLETED &&
+            listing.assetContract.toLowerCase() !==
+              '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
+        )
         .reverse()
         .slice(0, 20)
 
       const recentlySoldOffers = allOffers
-        .filter((offer) => offer.status === StatusType.COMPLETED)
+        .filter(
+          (offer) =>
+            offer.status === StatusType.COMPLETED &&
+            offer.assetContract.toLowerCase() !==
+              '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE'.toLowerCase(),
+        )
         .reverse()
         .slice(0, 20)
 

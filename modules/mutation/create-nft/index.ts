@@ -45,10 +45,7 @@ export function useCreateNFTMutation() {
           name: createNFTData.name,
           description: createNFTData.description,
           image: uri,
-          attributes: [
-            { trait_type: 'Rarity', value: 'Common' },
-            { trait_type: 'Artist', value: 'Mingles' },
-          ],
+          attributes: createNFTData.attributes,
         })
         const transaction = await minterContract.populateTransaction.mint(tokenURI, {
           value: ethers.utils.parseEther('1'),

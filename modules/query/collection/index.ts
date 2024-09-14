@@ -680,3 +680,14 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
     refetchInterval: 5000,
   })
 }
+
+
+/**
+ * name, title
+ * homepage intro
+ * mint nft
+ * show collection
+ * go to profile
+ * list and auction nft
+ * 
+ */

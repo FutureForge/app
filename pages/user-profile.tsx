@@ -235,7 +235,7 @@ export default function UserProfile() {
   const isUserActive = !!activeAccount
 
   if (isLoading || isError) {
-    return <Loader />
+    return <Loader className='!h-[80vh]'/>
   }
 
   return (

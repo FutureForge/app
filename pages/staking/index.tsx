@@ -49,7 +49,7 @@ export default function Staking() {
   }
 
   if (isLoading || isError) {
-    return <Loader />
+    return <Loader className='!h-[80vh]'/>
   }
 
   return (

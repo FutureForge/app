@@ -68,6 +68,6 @@ export function useXFIandWXFIBalanceQuery() {
       })
     },
     enabled: !!activeAccount?.address && !xfiBalanceLoading && !wxfiBalanceLoading,
-    refetchInterval: 5000,
+    refetchInterval: 100,
   })
 }

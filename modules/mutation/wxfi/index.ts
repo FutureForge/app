@@ -1,6 +1,11 @@
 import { useToast } from '@/modules/app/hooks/useToast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { decimalOffChain, decimalOnChain, getContractEthers, waitForTransaction } from '@/modules/blockchain/lib'
+import {
+  decimalOffChain,
+  decimalOnChain,
+  getContractEthers,
+  waitForTransaction,
+} from '@/modules/blockchain/lib'
 import { CROSSFI_MARKETPLACE_CONTRACT, CROSSFI_WRAPPED_TOKEN_CONTRACT } from '@/utils/configs'
 import WXFIAbi from '@/utils/abi/wxfi.json'
 import { useUserChainInfo } from '@/modules/query'
@@ -80,7 +85,7 @@ export function useConvertXFIToWXFIMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['convert-xfi-to-wxfi', 'balance', activeAccount?.address],
+        queryKey: ['withdraw-wxfi', 'balance', 'convert-xfi-to-wxfi', activeAccount?.address],
       })
     },
     onError: () => {},
@@ -123,7 +128,7 @@ export function useWithdrawWXFIMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['withdraw-wxfi', 'balance', activeAccount?.address],
+        queryKey: ['withdraw-wxfi', 'balance', 'convert-xfi-to-wxfi', activeAccount?.address],
       })
     },
     onError: () => {},

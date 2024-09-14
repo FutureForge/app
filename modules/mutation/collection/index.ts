@@ -4,6 +4,7 @@ import axios from 'axios'
 import { getContractCustom } from '@/modules/blockchain'
 import { useUserChainInfo } from '@/modules/query'
 import { isERC721 } from 'thirdweb/extensions/erc721'
+import { useRouter } from 'next/router'
 
 export async function isNFTContract(contractAddress: string) {
   const contract = await getContractCustom({ contractAddress })
@@ -14,20 +15,28 @@ export async function isNFTContract(contractAddress: string) {
 export function useAddCollectionMutation() {
   const queryClient = useQueryClient()
   const { activeAccount } = useUserChainInfo()
+  const router = useRouter()
 
   return useMutation({
-    mutationFn: async (newCollection: {
+    mutationFn: async ({
+      collectionContractAddress,
+      description,
+      name,
+      image,
+      backgroundImage,
+    }: {
       collectionContractAddress: string
-      name: string
       description: string
+      name: string
       image: string
+      backgroundImage: string
     }) => {
       if (!activeAccount?.address) {
         throw new Error('Wallet not connected')
       }
 
       const contract = await getContractCustom({
-        contractAddress: newCollection.collectionContractAddress,
+        contractAddress: collectionContractAddress,
       })
 
       const contractOwner = await owner({
@@ -38,11 +47,22 @@ export function useAddCollectionMutation() {
         throw new Error('Not the contract owner')
       }
 
-      const signMessage = `I am the owner of the contract ${newCollection.collectionContractAddress} and want to add a new collection. Sign this message to confirm`
+      const signMessage = `I am the owner of the contract ${collectionContractAddress} and want to add a new collection. Sign this message to confirm`
 
       await activeAccount?.signMessage({ message: signMessage })
 
-      const response = await axios.post('/api/collection', newCollection)
+      const response = await axios.post('/api/collection', {
+        collectionContractAddress,
+        description,
+        name,
+        image,
+        backgroundImage,
+      })
+
+      console.log({ response })
+
+      await router.push(`/collections/${collectionContractAddress}`)
+
       return response.data
     },
     onSuccess: (data) => {

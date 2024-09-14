@@ -4,22 +4,16 @@ import {
   useGetGlobalListingOrAuctionQuery,
   useGetMarketplaceCollectionsQuery,
 } from '@/modules/query'
-import { NFTType, StatusType } from '@/utils/lib/types'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import { NFTCard } from './nft-card'
 import { FilterButtons } from './filter'
 import { NewAuction, NewListing } from '../types/types'
-import { ClientOnly, Icon, Loader } from '@/modules/app'
-import { FilteredContent } from './filtered-data'
-import { NFT } from 'thirdweb'
-import Link from 'next/link'
-import { MediaRenderer } from 'thirdweb/react'
-import { client } from '@/utils/configs'
-import { useMediaQuery } from '@uidotdev/usehooks'
+import { Icon, Loader } from '@/modules/app'
 import Slider from 'react-slick'
 import { useWindowSize } from '@uidotdev/usehooks'
 import { CollectionCard, CollectionData } from './collection-card'
+import {ChevronRight} from 'lucide-react'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned' | 'Collections'
 
@@ -73,6 +67,7 @@ export function Header() {
       )
     })
   }
+
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -83,6 +78,8 @@ export function Header() {
     centerPadding: '60px',
     autoplay: false,
     autoplaySpeed: 3000,
+    nextArrow: <CustomArrow direction="next" />,
+    prevArrow: <CustomArrow direction="prev" />,
     responsive: [
       {
         breakpoint: 600,
@@ -115,54 +112,58 @@ export function Header() {
       filter === 'All' && ((isLaptop && items.length > 4) || (isMobile && items.length > 1))
 
     return (
-      <div className='w-full px-4'>
+      <div className="w-full px-4">
         {title && <h2 className="text-2xl font-semibold mb-8 px-4">{title}</h2>}
         {displayInSlider ? (
-          <div className="">
+          <div>
             <Slider {...sliderSettings}>{renderNFTItems(items)}</Slider>
           </div>
         ) : (
-          <div className="flex gap-6 flex-wrap items-center justify-center w-full pb-4">
-            {/* grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 */}
+          <div className="flex gap-6 lg:grid grid-cols-4 flex-wrap items-center w-full pb-4">
             {renderNFTItems(items)}
           </div>
         )}
       </div>
     )
   }
+const renderCollectionSection = (items: CollectionData[]) => {
+  // Determine when to display the slider based on screen size and number of items
+  const displayInSlider =
+    filter === 'All' && ((isLaptop && items.length > 4) || (isMobile && items.length > 1))
 
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-8 px-4">Featured Collections</h2>
+
+      {displayInSlider && (
+        <Slider {...sliderSettings}>
+          {items.map((item) => (
+            <CollectionCard
+              key={item.collection?._id}
+              collection={item.collection}
+              floorPrice={item.floorPrice}
+              totalVolume={item.totalVolume}
+            />
+          ))}
+        </Slider>
+      )}
+    </div>
+  )
+}
   return (
     <div className="flex flex-col gap-20">
       {/* Filter Buttons */}
-      <div className='max-md:w-[90%]'>
+      <div className="max-md:w-[90%]">
         <FilterButtons filter={filter} setFilter={setFilter} filters={filters} />
       </div>
-
       {isLoading || isError || collectionsLoading || collectionsError ? (
-        <Loader className="!h-[80vh]" />
+        <Loader className="!h-[40vh]" />
       ) : (
         <>
           {filter === 'All' && (
             <>
               {/* Featured Collections */}
-              <div>
-                <h2 className="text-2xl font-semibold mb-8 px-4">Featured Collections</h2>
-
-                {/* <div className="flex overflow-x-auto gap-6 pb-4 flex-wrap"> */}
-                <div className="min-h-[300px] w-full relative">
-                  <Slider {...sliderSettings}>
-                    {collections?.map((item: CollectionData) => (
-                      <CollectionCard
-                        key={item.collection?._id}
-                        collection={item.collection}
-                        floorPrice={item.floorPrice}
-                        totalVolume={item.totalVolume}
-                      />
-                    ))}
-                  </Slider>
-                </div>
-                {/* </div> */}
-              </div>
+              {renderCollectionSection(collections || [])}
 
               {/* Recently Listed */}
               {renderSection({ title: 'Recently Listed', items: global?.allListing || [] })}
@@ -179,7 +180,7 @@ export function Header() {
           {filter === 'Recently Sold' && renderSection({ items: global?.recentlySold || [] })}
           {filter === 'Recently Auctioned' && renderSection({ items: global?.allAuction || [] })}
           {filter === 'Collections' && (
-            <div className="flex gap-6 pb-4 flex-wrap gap-y-">
+            <div className="flex gap-6 pb-4 flex-wrap">
               {collections?.map((item: CollectionData) => (
                 <CollectionCard
                   key={item.collection?._id}
@@ -197,3 +198,26 @@ export function Header() {
 }
 
 
+
+const CustomArrow = ({ className, style, onClick, direction }: any) => {
+  return (
+    <div
+      className={`${className} custom-arrow custom-arrow-${direction}`}
+      style={{
+        ...style,
+        display: 'block',
+        borderRadius: '50%',
+        padding: '10px',
+        zIndex: 1,
+        ...(direction === 'prev' ? { left: '-55px' } : { right: '-25px' }),
+      }}
+      onClick={onClick}
+    >
+      {direction === 'next' ? (
+        <ChevronRight size={40} color="#999999" />
+      ) : (
+        <ChevronRight size={40} color="#999999" className="rotate-180" />
+      )}
+    </div>
+  )
+}

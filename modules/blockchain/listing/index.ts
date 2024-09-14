@@ -42,7 +42,12 @@ export async function getCreateDirectListing({
   //   params: [formattedParams],
   // })
 
-  if (!_params.assetContract || !_params.tokenId || !_params.pricePerToken) {
+  if (
+    !_params.assetContract ||
+    !_params.tokenId ||
+    !_params.pricePerToken ||
+    !_params.endTimestamp
+  ) {
     return
   }
 
@@ -51,6 +56,7 @@ export async function getCreateDirectListing({
     assetContractAddress: _params.assetContract,
     tokenId: BigInt(_params.tokenId),
     pricePerToken: _params.pricePerToken,
+    endTimestamp: _params.endTimestamp,
   })
 
   return transaction
@@ -67,8 +73,7 @@ export async function getUpdateDirectListing({
     throw new Error('End timestamp is required')
   }
   const startTimestamp = getCurrentBlockchainTimestamp()
-  const endTimestamp =
-    getEndBlockchainTimestamp() || BigInt(Math.floor(_params.endTimestamp?.getTime() / 1000))
+  const endTimestamp = getEndBlockchainTimestamp(_params.endTimestamp)
 
   const contract = getContractCustom({ contractAddress: CROSSFI_MARKETPLACE_CONTRACT })
 

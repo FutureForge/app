@@ -72,7 +72,7 @@ export function Header({
           <div className="h-48 md:h-64 w-full overflow-hidden">
             {isCollection ? (
               <Image
-                src={'/default-collection-banner.jpg'}
+                src={'/placeholder.png'}
                 alt="collection background"
                 width={2500}
                 height={1000}
@@ -108,49 +108,63 @@ export function Header({
             />
             <div className="flex justify-between w-full max-md:flex-col gap-4">
               <span>
-                <h3 className="text-2xl">{isCollection ? collection?.name! : getFormatAddress(address)}</h3>
+                <h3 className="text-2xl">
+                  {isCollection ? collection?.name! : getFormatAddress(address)}
+                </h3>
                 {isCollection && (
-                  <p className="text-base font-normal mt-2 max-w-2xl">{collection?.description}</p>
+                  <p className="text-base font-normal mt-2 max-w-[350px] text-muted-foreground">{collection?.description}</p>
                 )}
               </span>
 
               {isCollection ? (
-                <div className="flex items-center gap-5 mr-20 flex-wrap">
+                <div className="flex items-center gap-5 mr-0 flex-wrap">
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
                       {roundedFloorPrice} XFI
                     </h3>
-                    <p className="text-base font-normal max-md:text-xs">Floor Price</p>
+                    <p className="text-base font-normal max-md:text-xs text-muted-foreground">
+                      Floor Price
+                    </p>
                   </span>
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
                       {totalVolume || 0} XFI
                     </h3>
-                    <p className="text-base font-normal max-md:text-xs">Volume</p>
+                    <p className="text-base font-normal max-md:text-xs text-muted-foreground">
+                      Volume
+                    </p>
                   </span>
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
                       {totalSupply || 0}
                     </h3>
-                    <p className="text-base font-normal max-md:text-xs">Total Supply</p>
+                    <p className="text-base font-normal max-md:text-xs text-muted-foreground">
+                      Total Supply
+                    </p>
                   </span>
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
                       {uniqueHolders || 0}
                     </h3>
-                    <p className="text-base font-normal max-md:text-xs">Unique Holders</p>
+                    <p className="text-base font-normal max-md:text-xs text-muted-foreground">
+                      Unique Holders
+                    </p>
                   </span>
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
                       {transferCount || 0}
                     </h3>
-                    <p className="text-base font-normal max-md:text-xs">Total Transfers</p>
+                    <p className="text-base font-normal max-md:text-xs text-muted-foreground">
+                      Total Transfers
+                    </p>
                   </span>
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
                       {roundedPercentage}%
                     </h3>
-                    <p className="text-base font-normal max-md:text-xs">Listed</p>
+                    <p className="text-base font-normal max-md:text-xs text-muted-foreground">
+                      Listed
+                    </p>
                   </span>
                 </div>
               ) : null}

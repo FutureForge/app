@@ -13,7 +13,7 @@ import { Icon, Loader } from '@/modules/app'
 import Slider from 'react-slick'
 import { useWindowSize } from '@uidotdev/usehooks'
 import { CollectionCard, CollectionData } from './collection-card'
-import {ChevronRight} from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned' | 'Collections'
 
@@ -70,9 +70,9 @@ export function Header() {
 
   const sliderSettings = {
     dots: true,
-    infinite: true,
+    infinite: false,
     speed: 500,
-    slidesToShow: 4.2,
+    slidesToShow: 4,
     slidesToScroll: 1,
     arrows: true,
     centerPadding: '60px',
@@ -109,14 +109,22 @@ export function Header() {
     items: (NewListing | NewAuction)[]
   }) => {
     const displayInSlider =
-      filter === 'All' && ((isLaptop && items.length > 4) || (isMobile && items.length > 1))
+      filter === 'All' && 
+      ((isLaptop && items.length > 4) || (isMobile && items.length > 1)) &&
+      items.length >= sliderSettings.slidesToShow
+
+    const sectionSliderSettings = {
+      ...sliderSettings,
+      infinite: items.length > 4,
+      slidesToShow: Math.min(4, items.length),
+    }
 
     return (
       <div className="w-full px-4">
         {title && <h2 className="text-2xl font-semibold mb-8 px-4">{title}</h2>}
         {displayInSlider ? (
           <div>
-            <Slider {...sliderSettings}>{renderNFTItems(items)}</Slider>
+            <Slider {...sectionSliderSettings}>{renderNFTItems(items)}</Slider>
           </div>
         ) : (
           <div className="flex gap-6 lg:grid grid-cols-4 flex-wrap items-center w-full pb-4">
@@ -126,30 +134,30 @@ export function Header() {
       </div>
     )
   }
-const renderCollectionSection = (items: CollectionData[]) => {
-  // Determine when to display the slider based on screen size and number of items
-  const displayInSlider =
-    filter === 'All' && ((isLaptop && items.length > 4) || (isMobile && items.length > 1))
+  const renderCollectionSection = (items: CollectionData[]) => {
+    // Determine when to display the slider based on screen size and number of items
+    const displayInSlider =
+      filter === 'All' && ((isLaptop && items.length > 4) || (isMobile && items.length > 1))
 
-  return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-8 px-4">Featured Collections</h2>
+    return (
+      <div>
+        <h2 className="text-2xl font-semibold mb-8 px-4">Featured Collections</h2>
 
-      {displayInSlider && (
-        <Slider {...sliderSettings}>
-          {items.map((item) => (
-            <CollectionCard
-              key={item.collection?._id}
-              collection={item.collection}
-              floorPrice={item.floorPrice}
-              totalVolume={item.totalVolume}
-            />
-          ))}
-        </Slider>
-      )}
-    </div>
-  )
-}
+        {displayInSlider && (
+          <Slider {...sliderSettings}>
+            {items.map((item) => (
+              <CollectionCard
+                key={item.collection?._id}
+                collection={item.collection}
+                floorPrice={item.floorPrice}
+                totalVolume={item.totalVolume}
+              />
+            ))}
+          </Slider>
+        )}
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col gap-20">
       {/* Filter Buttons */}
@@ -196,8 +204,6 @@ const renderCollectionSection = (items: CollectionData[]) => {
     </div>
   )
 }
-
-
 
 const CustomArrow = ({ className, style, onClick, direction }: any) => {
   return (

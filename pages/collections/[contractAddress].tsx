@@ -8,7 +8,7 @@ import { NFTTypeV2, PlatformFeeType, SingleNFTResponse } from '@/utils/lib/types
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { MediaRenderer } from 'thirdweb/react'
 import { motion } from 'framer-motion'
 import { NewAuction, NewListing } from '@/modules/components/header/types/types'
@@ -29,41 +29,6 @@ type SingleCollectionType = SingleNFTResponse & {
   soldType?: 'listing' | 'auction'
 }
 
-const MarketplaceInfo = ({ collectionFee, marketplaceFee }: PlatformFeeType) => {
-  return (
-    <div className="mt-4 p-4 bg-special-bg rounded-lg">
-      <h4 className="text-sm font-semibold mb-2">Marketplace Details</h4>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <span className="text-gray-400">Collection Fee</span>
-        <span>{collectionFee?.percent || 0}%</span>
-
-        <span className="text-gray-400">Collection Fee Collector</span>
-        <Link
-          href={`https://test.xfiscan.com/address/${collectionFee?.address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-semibold hover:underline text-blue-500 truncate"
-        >
-          {getFormatAddress(collectionFee?.address)}
-        </Link>
-
-        <span className="text-gray-400">Marketplace Fee</span>
-        <span>{marketplaceFee?.percent || 0}%</span>
-
-        <span className="text-gray-400">Marketplace Fee Collector</span>
-        <Link
-          href={`https://test.xfiscan.com/address/${marketplaceFee?.address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-semibold hover:underline text-blue-500 truncate"
-        >
-          {getFormatAddress(marketplaceFee?.address)}
-        </Link>
-      </div>
-    </div>
-  )
-}
-
 export default function CollectionPage() {
   const router = useRouter()
   const { contractAddress } = router.query
@@ -81,9 +46,14 @@ export default function CollectionPage() {
     contractAddress: contractAddress as string,
   })
 
-  console.log({ singleCollection })
   const marketplaceFee = singleCollection?.marketplaceFee
   const collectionFee = singleCollection?.collectionFee
+
+  useEffect(() => {
+    if (!contractAddress) {
+      router.push('/')
+    }
+  }, [contractAddress, router])
 
   const sortedNFTs = singleCollection?.nfts.sort(
     (a: SingleCollectionType, b: SingleCollectionType) => {
@@ -481,9 +451,15 @@ function ActivityList({ activities }: { activities: any[] }) {
           <div className="flex-grow">
             <h3 className="text-lg font-semibold">{activity.nftName}</h3>
             <p className="text-muted-foreground">
-              Transferred from <span className='font-semibold text-foreground'>{getFormatAddress(activity.addressFrom)}</span> to{' '}
-              <span className='font-semibold text-foreground'> {getFormatAddress(activity.addressTo)}</span>
-             
+              Transferred from{' '}
+              <span className="font-semibold text-foreground">
+                {getFormatAddress(activity.addressFrom)}
+              </span>{' '}
+              to{' '}
+              <span className="font-semibold text-foreground">
+                {' '}
+                {getFormatAddress(activity.addressTo)}
+              </span>
             </p>
           </div>
           <div className="text-sm text-gray-500">

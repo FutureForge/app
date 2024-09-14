@@ -173,6 +173,12 @@ const NFTDetailPage = () => {
     tokenId: tokenId as string,
   })
 
+  useEffect(() => {
+    if (!tokenId || !contractAddress) {
+      router.push('/')
+    }
+  }, [contractAddress, nftType, router, tokenId])
+
   const collection = collections.find(
     (col: ICollection) =>
       col.collectionContractAddress.toLowerCase() === (contractAddress as string).toLowerCase(),

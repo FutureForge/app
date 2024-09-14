@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useMemo } from 'react'
 import { NFT } from 'thirdweb'
 
-type NFTHolding = {
+export type NFTHolding = {
   address: string
   balance: string
   blockNumber: number
@@ -19,7 +19,9 @@ type NFTHolding = {
   tokenName: string
   tokenSymbol: string
   tokenType: string
-  nft: NFT
+  nft: Partial<NFT> & {
+    tokenId: string | bigint
+  }
 }
 
 export default function Staking() {
@@ -49,7 +51,7 @@ export default function Staking() {
   }
 
   if (isLoading || isError) {
-    return <Loader className='!h-[80vh]'/>
+    return <Loader className="!h-[80vh]" />
   }
 
   return (
@@ -63,29 +65,35 @@ export default function Staking() {
             <div className="w-full h-[calc(100vh-349px)] flex items-center justify-center">
               <p className="font-medium">
                 You don&apos;t own any MINT MINGLE COLLECTION NFT. Try buying one{' '}
-                <Link href="/collection/mint-mingle-collection" className="hover:underline text-blue-500">
+                <Link
+                  href="/collection/mint-mingle-collection"
+                  className="hover:underline text-blue-500"
+                >
                   here
                 </Link>
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-7 2xl:grid-cols-6 max-lg:grid-cols-3 max-sm:grid-cols-1 max-xsm:grid-cols-2">
-              {stakingData?.map((item, index) => (
-                <Card
-                  key={index}
-                  title={item.nft.metadata.name}
-                  src={item.nft.metadata.image || '/logo.svg'}
-                  onClick={checkApprovedForAllStaking ? handleStakeNFT : handleApproveNFT}
-                  tokenId={item.nft.id.toString()}
-                  disabled={isTxPending}
-                  cta={
-                    <span className="flex gap-2 items-center">
-                      {checkApprovedForAllStaking ? 'Stake' : 'Approve'}
-                      <Icon iconType="coins" className="w-4 text-white" />
-                    </span>
-                  }
-                />
-              ))}
+              {stakingData?.map((item, index) => {
+                console.log({ item })
+                return (
+                  <Card
+                    key={index}
+                    title={item?.nft?.metadata?.name}
+                    src={item?.nft?.metadata?.image || '/logo.svg'}
+                    onClick={checkApprovedForAllStaking ? handleStakeNFT : handleApproveNFT}
+                    tokenId={item.nft?.id?.toString() || item.nft?.tokenId?.toString() || ''}
+                    disabled={isTxPending}
+                    cta={
+                      <span className="flex gap-2 items-center">
+                        {checkApprovedForAllStaking ? 'Stake' : 'Approve'}
+                        <Icon iconType="coins" className="w-4 text-white" />
+                      </span>
+                    }
+                  />
+                )
+              })}
             </div>
           )}
         </div>

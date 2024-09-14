@@ -191,6 +191,7 @@ export function useGetMarketplaceCollectionsQuery() {
         .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
         .map((result) => result.value)
         .filter((value) => value !== null)
+        .reverse()
 
       return ensureSerializable(collectionsData)
     },

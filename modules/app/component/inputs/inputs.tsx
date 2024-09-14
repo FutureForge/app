@@ -151,6 +151,8 @@ const FileInput = forwardRef<HTMLInputElement, FileInputProps & { key?: string }
       'image/jpg',
       'image/png',
       'image/gif',
+      'image/webp',
+      'image/avif',
       'image/svg+xml',
       'video/mp4',
     ]
@@ -187,7 +189,7 @@ const FileInput = forwardRef<HTMLInputElement, FileInputProps & { key?: string }
           ref={fileInputRef}
           type="file"
           onChange={handleFileChange}
-          accept=".jpeg,.jpg,.png,.gif,.svg,.mp4"
+          accept=".jpeg,.jpg,.png,.gif,.svg,.mp4,.webp,.avif"
           style={{ display: 'none' }}
           {...otherProps}
         />

@@ -61,12 +61,6 @@ export function CreateNFT() {
     )
   }
 
-  useEffect(() => {
-    if (createNFTMutation.isPending) {
-      toast.error('Creating NFT...')
-    }
-  }, [createNFTMutation.isPending])
-
   return (
     <div className="h-[calc(100vh-120px)] w-full flex max-lg:flex-col container mx-auto justify-between max-lg:gap-8 gap-20">
       <div className="flex flex-col gap-8 h-full w-1/2 max-lg:w-full">

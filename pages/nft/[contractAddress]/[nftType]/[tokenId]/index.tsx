@@ -743,20 +743,10 @@ const NFTDetailPage = () => {
                   <>
                     {isAuctionExpired ? (
                       <>
-                        {winningBid?.bidder ? (
-                          (nftAuctionList?.auctionCreator as string).toLowerCase() ===
-                          address?.toLowerCase() ? (
-                            <Button
-                              onClick={handleClaimAuctionPayout}
-                              variant="secondary"
-                              disabled={isTxPending}
-                              className="text-sm font-medium h-8"
-                            >
-                              Claim Auction NFT
-                            </Button>
-                          ) : (
-                            <p className="text-sm font-medium">Auction Has Been Completed. NFT Has Been Transferred</p>
-                          )
+                        {winningBid ? (
+                          <p className="text-sm font-medium">
+                            Auction Has Been Completed. NFT Has Been Transferred
+                          </p>
                         ) : (
                           <p className="text-sm font-medium">Auction Has Expired Without Bids</p>
                         )}

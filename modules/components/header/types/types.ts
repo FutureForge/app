@@ -1,5 +1,5 @@
-import { SingleNFTResponse } from "@/utils/lib/types"
-import { NFT } from "thirdweb"
+import { SingleNFTResponse } from '@/utils/lib/types'
+import { NFT } from 'thirdweb'
 
 // export type NFT = {
 //   id: string
@@ -19,7 +19,6 @@ import { NFT } from "thirdweb"
 //   type: string
 // }
 
-
 export type NewListing = {
   nft: SingleNFTResponse
   tokenId: string
@@ -34,8 +33,9 @@ export type NewListing = {
   endTimestamp: bigint
   listingCreator: string
   reserved: boolean
+  totalPrice?: string
+  id: 'listing' | 'auction'
 }
-
 
 export type NewAuction = {
   winningBid: {
@@ -43,6 +43,7 @@ export type NewAuction = {
     currency: string
     bidAmount: bigint
   }
+  id: 'listing' | 'auction'
   nft: SingleNFTResponse
   auctionId: bigint
   tokenId: string

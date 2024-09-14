@@ -38,16 +38,14 @@ export function Header() {
     isError: collectionsError,
   } = useGetMarketplaceCollectionsQuery()
 
-  const renderNFTItems = (items: (NewListing | NewAuction)[]) => {
-    return items.map((item, index) => {
-      const isListing = 'listingId' in item
+  const renderNFTItems = (items: any) => {
+    return items.map((item: any, index: number) => {
       const nft = item?.nft
       const tokenId = item?.tokenId
       const assetContract = item?.assetContract
-      const pricePerToken = isListing ? item?.pricePerToken : undefined
-      const currency = isListing ? item?.currency : item?.winningBid?.currency
-      const buyOutAmount = !isListing ? item?.buyoutBidAmount : undefined
-      const creator = isListing ? item?.listingCreator : item?.auctionCreator
+      const pricePerToken = item?.pricePerToken || item?.totalPrice
+      const buyOutAmount = item?.buyoutBidAmount
+      const creator = item?.listingCreator || item?.auctionCreator
       const soldType = 'soldType' in item ? item?.soldType : undefined
 
       return (
@@ -55,7 +53,6 @@ export function Header() {
           key={index}
           nft={nft}
           pricePerToken={pricePerToken}
-          currency={currency}
           buyoutBidAmount={buyOutAmount}
           tokenId={tokenId}
           contractAddress={assetContract}
@@ -109,7 +106,7 @@ export function Header() {
     items: (NewListing | NewAuction)[]
   }) => {
     const displayInSlider =
-      filter === 'All' && 
+      filter === 'All' &&
       ((isLaptop && items.length > 4) || (isMobile && items.length > 1)) &&
       items.length >= sliderSettings.slidesToShow
 

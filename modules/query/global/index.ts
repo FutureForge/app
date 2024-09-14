@@ -85,6 +85,7 @@ export function useGetGlobalListingOrAuctionQuery() {
             return ensureSerializable({
               ...offer,
               soldType: 'listing',
+              id: 'listing',
               nft: {
                 ...newUpdatedNFTs,
                 type: 'CFC-721',
@@ -94,6 +95,7 @@ export function useGetGlobalListingOrAuctionQuery() {
             return ensureSerializable({
               ...offer,
               soldType: 'listing',
+              id: 'listing',
               nft: {
                 ...updatedNFT,
                 type: 'CFC-721',
@@ -143,6 +145,7 @@ export function useGetGlobalListingOrAuctionQuery() {
             return ensureSerializable({
               ...listing,
               soldType: 'listing',
+              id: 'listing',
               nft: {
                 ...newUpdatedNFTs,
                 type: 'CFC-721',
@@ -152,6 +155,7 @@ export function useGetGlobalListingOrAuctionQuery() {
             return ensureSerializable({
               ...listing,
               soldType: 'listing',
+              id: 'listing',
               nft: {
                 ...updatedNFT,
                 type: 'CFC-721',
@@ -200,6 +204,7 @@ export function useGetGlobalListingOrAuctionQuery() {
 
             return ensureSerializable({
               ...listing,
+              id: 'listing',
               nft: {
                 ...newUpdatedNFTs,
                 type: 'CFC-721',
@@ -208,6 +213,7 @@ export function useGetGlobalListingOrAuctionQuery() {
           } else {
             return ensureSerializable({
               ...listing,
+              id: 'listing',
               nft: {
                 ...updatedNFT,
                 type: 'CFC-721',
@@ -267,6 +273,7 @@ export function useGetGlobalListingOrAuctionQuery() {
             return ensureSerializable({
               ...auction,
               soldType: 'auction',
+              id: 'auction',
               winningBid: winningBidBody,
               nft: {
                 ...newUpdatedNFTs,
@@ -277,6 +284,7 @@ export function useGetGlobalListingOrAuctionQuery() {
             return ensureSerializable({
               ...auction,
               soldType: 'auction',
+              id: 'auction',
               winningBid: winningBidBody,
               nft: {
                 ...updatedNFT,
@@ -339,6 +347,7 @@ export function useGetGlobalListingOrAuctionQuery() {
               winningBid: winningBidBody,
               nft: {
                 ...newUpdatedNFTs,
+                id: 'auction',
                 type: 'CFC-721',
               },
             })
@@ -348,6 +357,7 @@ export function useGetGlobalListingOrAuctionQuery() {
               winningBid: winningBidBody,
               nft: {
                 ...updatedNFT,
+                id: 'auction',
                 type: 'CFC-721',
               },
             })

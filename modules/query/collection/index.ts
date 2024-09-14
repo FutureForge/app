@@ -215,13 +215,25 @@ export function useGetSingleNFTQuery({
     queryKey: ['nft', contractAddress, nftType, tokenId, activeAccount?.address],
     queryFn: async () => {
       try {
-        // get nft activity
-        let nftActivity: NFTActivity[] = []
-
-        const collectionFee = await getPlatformFeeInfo({ contractAddress })
+        let collectionFee = {}
+        // let marketplaceFee = {}
+        if (
+          contractAddress.toLowerCase() ===
+          '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+        ) {
+          collectionFee = {
+            address: '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE',
+            percent: 0,
+          }
+        } else {
+          collectionFee = await getPlatformFeeInfo({ contractAddress })
+        }
         const marketplaceFee = await getPlatformFeeInfo({
           contractAddress: CROSSFI_MARKETPLACE_CONTRACT,
         })
+
+        // get nft activity
+        let nftActivity: NFTActivity[] = []
 
         try {
           const response = await axios.get<NFTActivityResponse>(
@@ -234,45 +246,41 @@ export function useGetSingleNFTQuery({
 
         let nftList: SingleNFTResponse | NFT | null = null
 
-        if (nftType === 'CFC-721') {
-          const response = await axios.get<SingleNFTResponse>(
-            `${CROSSFI_API}/token-inventory/${contractAddress}/${tokenId}`,
-          )
-          const nft = response.data
+        const response = await axios.get<SingleNFTResponse>(
+          `${CROSSFI_API}/token-inventory/${contractAddress}/${tokenId}`,
+        )
+        const nft = response.data
 
-          const metadata = nft?.metadata
-          if (
-            contractAddress.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
-            const uri = nft.tokenURI
-            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+        const metadata = nft?.metadata
+        if (
+          contractAddress.toLowerCase() ===
+          '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+        ) {
+          const uri = nft.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
-            nftList = {
-              ...nft,
-              tokenURI: parsedMetadata.image,
-              metadata: {
-                ...parsedMetadata,
-              },
-            }
-          } else if (metadata === undefined || null) {
-            const contract = getContractCustom({
-              contractAddress: nft.contractAddress,
-            })
-            const tokenId = nft.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            nftList = { ...nft, ...newUpdatedNFTs }
-          } else {
-            nftList = nft
+          nftList = {
+            ...nft,
+            tokenURI: parsedMetadata.image,
+            metadata: {
+              ...parsedMetadata,
+            },
           }
+        } else if (metadata === undefined || null) {
+          const contract = getContractCustom({
+            contractAddress: nft.contractAddress,
+          })
+          const tokenId = nft.tokenId
+
+          const newUpdatedNFTs = await getNFT({
+            contract: contract,
+            tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
+          })
+
+          nftList = { ...nft, ...newUpdatedNFTs }
         } else {
-          throw new Error('NFT type not supported')
+          nftList = nft
         }
 
         const allAuctions = await getAllAuctions()

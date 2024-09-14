@@ -14,7 +14,7 @@ import {
 import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
-import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT, CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
+import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT } from '@/utils/configs'
 import { ensureSerializable } from '@/utils'
 import { useUserChainInfo } from '../user'
 import { getNFT } from 'thirdweb/extensions/erc721'
@@ -75,7 +75,7 @@ export function useGetMarketplaceCollectionsQuery() {
               const metadata = nft?.metadata
               if (
                 collection.collectionContractAddress.toLowerCase() ===
-                CROSSFI_MINTER_ADDRESS.toLowerCase()
+                '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
               ) {
                 const uri = nft.tokenURI
                 const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
@@ -231,9 +231,12 @@ export function useGetSingleNFTQuery({
       try {
         let collectionFee = {}
         // let marketplaceFee = {}
-        if (contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+        if (
+          contractAddress.toLowerCase() ===
+          '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+        ) {
           collectionFee = {
-            address: CROSSFI_MINTER_ADDRESS,
+            address: '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE',
             percent: 0,
           }
         } else {
@@ -263,7 +266,10 @@ export function useGetSingleNFTQuery({
         const nft = response.data
 
         const metadata = nft?.metadata
-        if (contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+        if (
+          contractAddress.toLowerCase() ===
+          '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+        ) {
           const uri = nft.tokenURI
           const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -500,7 +506,10 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           const auction = auctionMap.get(nft.tokenId.toString())
           const metadata = nft?.metadata
 
-          if (contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+          if (
+            contractAddress.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nft.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -672,6 +681,7 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
   })
 }
 
+
 /**
  * name, title
  * homepage intro
@@ -679,5 +689,5 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
  * show collection
  * go to profile
  * list and auction nft
- *
+ * 
  */

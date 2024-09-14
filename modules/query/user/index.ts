@@ -1,5 +1,5 @@
 import { useActiveAccount, useActiveWallet } from 'thirdweb/react'
-import { CROSSFI_API, CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
+import { CROSSFI_API } from '@/utils/configs'
 import { UserNFTResponse, StatusType, SingleNFTResponse } from '@/utils/lib/types'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
@@ -62,7 +62,10 @@ export function useUserNFTsQuery() {
 
               let updatedNFT = nft
 
-              if (contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+              if (
+                contractAddress.toLowerCase() ===
+                '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+              ) {
                 const uri = nft.tokenURI
                 const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -157,7 +160,10 @@ export function useUserOffersMadeQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+            if (
+              ids.assetContract.toLowerCase() ===
+              '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+            ) {
               const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -239,7 +245,7 @@ export function useUserListingQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS) {
+            if (ids.assetContract.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de') {
               const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -326,7 +332,10 @@ export function useUserAuctionQuery() {
             const nft = response.data
             let updatedNFT = nft
 
-            if (ids.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+            if (
+              ids.assetContract.toLowerCase() ===
+              '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+            ) {
               const uri = nft.tokenURI
               const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 

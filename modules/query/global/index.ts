@@ -9,7 +9,7 @@ import { SingleNFTResponse, StatusType } from '@/utils/lib/types'
 import { useQuery } from '@tanstack/react-query'
 import { ensureSerializable } from '@/utils'
 import axios from 'axios'
-import { CROSSFI_API, CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
+import { CROSSFI_API } from '@/utils/configs'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { includeNFTOwner } from '@/modules/blockchain/lib'
 
@@ -54,7 +54,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (offer.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+          if (
+            offer.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -111,7 +114,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (listing.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+          if (
+            listing.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -168,7 +174,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (listing.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+          if (
+            listing.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -233,7 +242,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (auction.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+          if (
+            auction.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -302,7 +314,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (auction.assetContract.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
+          if (
+            auction.assetContract.toLowerCase() ===
+            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+          ) {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 

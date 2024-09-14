@@ -400,10 +400,13 @@ const NFTDetailPage = () => {
     )
   }
 
+  console.log('nftAuctionList?.auctionCreator', nftAuctionList?.auctionCreator)
+  console.log('address', address)
+
   const handleClaimAuctionPayout = () => {
     if (!address) return toast.error('Please connect to a wallet.')
     if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
-    if (nftAuctionList?.auctionCreator === address)
+    if ((nftAuctionList?.auctionCreator as string).toLowerCase() !== address.toLowerCase())
       return toast.error('Only the auction creator can claim payout the listing.')
 
     collectAuctionPayoutMutation.mutate(
@@ -740,24 +743,22 @@ const NFTDetailPage = () => {
                   <>
                     {isAuctionExpired ? (
                       <>
-                        {winningBid?.bidder === address ? (
-                          <>
-                            {' '}
+                        {winningBid?.bidder ? (
+                          (nftAuctionList?.auctionCreator as string).toLowerCase() ===
+                          address?.toLowerCase() ? (
                             <Button
-                              onClick={handleClaimAuctionNFT}
+                              onClick={handleClaimAuctionPayout}
                               variant="secondary"
                               disabled={isTxPending}
                               className="text-sm font-medium h-8"
                             >
                               Claim Auction NFT
                             </Button>
-                          </>
+                          ) : (
+                            <p className="text-sm font-medium">Auction Has Been Completed. NFT Has Been Transferred</p>
+                          )
                         ) : (
-                          <>
-                            {winningBid?.bidder
-                              ? 'Auction Has Been Completed'
-                              : 'Auction Has Expired'}
-                          </>
+                          <p className="text-sm font-medium">Auction Has Expired Without Bids</p>
                         )}
                       </>
                     ) : (

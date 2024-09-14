@@ -4,7 +4,7 @@ import { FilterButtons } from '@/modules/components/header/components/filter'
 import { Header } from '@/modules/components/profile'
 import { useGetSingleCollectionQuery } from '@/modules/query'
 import { client } from '@/utils/configs'
-import { NFTTypeV2, SingleNFTResponse } from '@/utils/lib/types'
+import { NFTTypeV2, PlatformFeeType, SingleNFTResponse } from '@/utils/lib/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { NewAuction, NewListing } from '@/modules/components/header/types/types'
 import { decimalOffChain } from '@/modules/blockchain'
 import { getFormatAddress } from '@/utils'
+import Head from 'next/head'
 
 type FilterType = 'Items' | 'Offers' | 'Sales' | 'Activity'
 const filters: FilterType[] = ['Items', 'Offers', 'Sales', 'Activity']
@@ -26,6 +27,41 @@ type SingleCollectionType = SingleNFTResponse & {
   listing?: NewListing
   owner?: string
   soldType?: 'listing' | 'auction'
+}
+
+const MarketplaceInfo = ({ collectionFee, marketplaceFee }: PlatformFeeType) => {
+  return (
+    <div className="mt-4 p-4 bg-special-bg rounded-lg">
+      <h4 className="text-sm font-semibold mb-2">Marketplace Details</h4>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <span className="text-gray-400">Collection Fee</span>
+        <span>{collectionFee?.percent || 0}%</span>
+
+        <span className="text-gray-400">Collection Fee Collector</span>
+        <Link
+          href={`https://test.xfiscan.com/address/${collectionFee?.address}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold hover:underline text-blue-500 truncate"
+        >
+          {getFormatAddress(collectionFee?.address)}
+        </Link>
+
+        <span className="text-gray-400">Marketplace Fee</span>
+        <span>{marketplaceFee?.percent || 0}%</span>
+
+        <span className="text-gray-400">Marketplace Fee Collector</span>
+        <Link
+          href={`https://test.xfiscan.com/address/${marketplaceFee?.address}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold hover:underline text-blue-500 truncate"
+        >
+          {getFormatAddress(marketplaceFee?.address)}
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 export default function CollectionPage() {
@@ -46,6 +82,8 @@ export default function CollectionPage() {
   })
 
   console.log({ singleCollection })
+  const marketplaceFee = singleCollection?.marketplaceFee
+  const collectionFee = singleCollection?.collectionFee
 
   const sortedNFTs = singleCollection?.nfts.sort(
     (a: SingleCollectionType, b: SingleCollectionType) => {
@@ -97,6 +135,17 @@ export default function CollectionPage() {
   const renderContent = () => {
     return (
       <>
+        <Head>
+          <title>
+            Mint Mingle Marketplace - {singleCollection?.collection?.name || 'Collection Details'}
+          </title>
+          <meta
+            name="description"
+            content={`Collection: ${
+              singleCollection?.collection?.name || 'Collection'
+            } on Mint Mingle Marketplace`}
+          />
+        </Head>
         <div className="lg:ml-52 z-50 max-w-[90%] max-md:max-w-full max-md:w-full overflow-x-scroll scrollbar-none mb-6">
           <FilterButtons
             collection
@@ -145,7 +194,9 @@ export default function CollectionPage() {
         )}
         {filter === 'Offers' && <OffersTable offers={singleCollection?.collectionOffers || []} />}
         {filter === 'Sales' && <SalesGrid sales={singleCollection?.sales || []} />}
-        {filter === 'Activity' && <ActivityList activities={singleCollection?.tokenTransfers || []} />}
+        {filter === 'Activity' && (
+          <ActivityList activities={singleCollection?.tokenTransfers || []} />
+        )}
       </>
     )
   }
@@ -161,6 +212,7 @@ export default function CollectionPage() {
         uniqueHolders={singleCollection?.tokenDetails?.holderCount}
         transferCount={singleCollection?.tokenDetails?.transferCount}
         collection={singleCollection?.collection}
+        collectionFee={collectionFee?.percent}
       />
 
       {renderContent()}

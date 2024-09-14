@@ -34,10 +34,14 @@ export function AddCollection() {
 
   const handleAddToMarketplace = async () => {
     if (!imageUrl) return alert('Please upload an image')
-    if (!backgroundImageUrl) return alert('Please upload an image')
+    // if (!backgroundImageUrl) return alert('Please upload an image')
 
     const { secure_url } = imageUrl as CloudinaryUploadWidgetInfo
-    const { secure_url: backgroundSecureUrl } = backgroundImageUrl as CloudinaryUploadWidgetInfo
+    let backgroundSecureUrl: string | undefined = undefined
+
+    if (backgroundImageUrl) {
+      backgroundSecureUrl = (backgroundImageUrl as CloudinaryUploadWidgetInfo).secure_url
+    }
 
     addCollectionMutation.mutate(
       {
@@ -45,7 +49,7 @@ export function AddCollection() {
         description: description,
         name: nftName,
         image: secure_url,
-        backgroundImage: backgroundSecureUrl,
+        backgroundImage: backgroundSecureUrl!,
       },
       {
         onSuccess: () => {

@@ -102,14 +102,18 @@ export function Header() {
               <Loader className="!h-[40vh]" />
             ) : (
               <div className="flex overflow-x-auto gap-6 pb-4">
-                {collections?.map((item: CollectionData) => (
-                  <CollectionCard
-                    key={item.collection?._id}
-                    collection={item.collection}
-                    floorPrice={item.floorPrice}
-                    totalVolume={item.totalVolume}
-                  />
-                ))}
+                {collections
+                  ? [...collections]
+                      .reverse()
+                      .map((item: CollectionData) => (
+                        <CollectionCard
+                          key={item.collection?._id}
+                          collection={item.collection}
+                          floorPrice={item.floorPrice}
+                          totalVolume={item.totalVolume}
+                        />
+                      ))
+                  : null}
               </div>
             )}
           </div>
@@ -149,5 +153,3 @@ export function Header() {
     </div>
   )
 }
-
-

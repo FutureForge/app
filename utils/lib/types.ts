@@ -1,4 +1,4 @@
-import { GetBalanceResult } from "thirdweb/extensions/erc20"
+import { GetBalanceResult } from 'thirdweb/extensions/erc20'
 
 export enum Status {
   UNSET,
@@ -163,4 +163,9 @@ export type OfferType = {
   tokenId: string
   tokenType: number
   totalPrice: string
+}
+
+export type PlatformFeeType = {
+  collectionFee: { percent: number; address: string }
+  marketplaceFee: { percent: number; address: string }
 }

@@ -59,9 +59,9 @@ export function useAddCollectionMutation() {
         backgroundImage,
       })
 
-      if (response.status === 200) {
-        router.push(`/collections/${collectionContractAddress}`)
-      }
+      console.log({ response })
+
+      router.push(`/collections/${collectionContractAddress}`)
 
       return response.data
     },

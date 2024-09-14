@@ -159,3 +159,20 @@ export async function getListing({ listingId }: { listingId: bigint }) {
 
   return offer
 }
+
+export async function getPlatformFeeInfo({ contractAddress }: { contractAddress: string }) {
+  const contract = getContractCustom({ contractAddress })
+
+  const platformFee = await readContract({
+    contract,
+    method: 'function getPlatformFeeInfo() view returns (address, uint16)',
+    params: [],
+  })
+
+  const platformFeeObject = {
+    address: platformFee[0] || '0x000000000000000000000000000000000000dEaD',
+    percent: platformFee[1] / 100 || 0,
+  }
+
+  return platformFeeObject
+}

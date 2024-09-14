@@ -16,6 +16,7 @@ type HeaderProps = {
   totalSupply?: number
   transferCount?: number
   collection?: ICollection
+  collectionFee?: string
 }
 
 // Function to generate a color based on hash
@@ -52,6 +53,7 @@ export function Header({
   totalSupply,
   transferCount,
   collection,
+  collectionFee,
 }: HeaderProps) {
   const { activeAccount } = useUserChainInfo()
   const address = activeAccount?.address || ''
@@ -153,6 +155,12 @@ export function Header({
                       {transferCount || 0}
                     </h3>
                     <p className="text-base font-normal max-md:text-xs">Total Transfers</p>
+                  </span>
+                  <span>
+                    <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">
+                      {collectionFee || 0} %
+                    </h3>
+                    <p className="text-base font-normal max-md:text-xs">Collection Fee</p>
                   </span>
                   <span>
                     <h3 className="font-bold text-2xl max-md:text-base whitespace-nowrap">

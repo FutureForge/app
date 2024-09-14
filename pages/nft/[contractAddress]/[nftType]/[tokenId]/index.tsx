@@ -4,7 +4,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { decimalOffChain } from '@/modules/blockchain'
-import { NFTActivity, NFTTypeV2, OfferType, SingleNFTResponse } from '@/utils/lib/types'
+import { NFTActivity, NFTTypeV2, OfferType, PlatformFeeType } from '@/utils/lib/types'
 import {
   useCheckApprovedForAllQuery,
   useFetchCollectionsQuery,
@@ -36,6 +36,7 @@ import { useToast } from '@/modules/app/hooks/useToast'
 import { formatDistanceToNow } from 'date-fns'
 import { ICollection } from '@/utils/models'
 import { ArrowLeft } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 const CollectionInfo = ({ collection }: { collection: ICollection }) => {
   if (!collection) return null
@@ -53,6 +54,56 @@ const CollectionInfo = ({ collection }: { collection: ICollection }) => {
         <span>View Collection</span>
         <ArrowLeft className="h-5 w-5" />
       </Link>
+    </div>
+  )
+}
+
+const MarketplaceInfo = ({ collectionFee, marketplaceFee }: PlatformFeeType) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="bg-special-bg p-4 rounded-lg mt-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between items-center w-full text-left"
+      >
+        <span className="text-sm font-medium">Marketplace Details</span>
+        {isOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+      </button>
+      {isOpen && (
+        <div className="mt-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-400">Collection Fee</span>
+            <span>{collectionFee?.percent || 0}%</span>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-400">Collection Fee Collector</span>
+            <Link
+              href={`https://test.xfiscan.com/address/${collectionFee?.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" font-semibold hover:underline cursor-pointer text-blue-500"
+            >
+              {getFormatAddress(marketplaceFee?.address)}
+            </Link>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-400">Marketplace Fee</span>
+            <span>{marketplaceFee?.percent || 0}%</span>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-400">Marketplace Fee Collector</span>
+            <Link
+              href={`https://test.xfiscan.com/address/${marketplaceFee?.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" font-semibold hover:underline cursor-pointer text-blue-500"
+            >
+              {getFormatAddress(marketplaceFee?.address)}
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -127,8 +178,17 @@ const NFTDetailPage = () => {
       col.collectionContractAddress.toLowerCase() === (contractAddress as string).toLowerCase(),
   )
 
-  const { id, isAuctionExpired, nftAuctionList, winningBid, message, nftListingList, offers } =
-    nftData || {}
+  const {
+    id,
+    isAuctionExpired,
+    nftAuctionList,
+    winningBid,
+    message,
+    nftListingList,
+    offers,
+    collectionFee,
+    marketplaceFee,
+  } = nftData || {}
 
   const nft = nftData?.nft
   const nftActivity = nftData?.nftActivity as NFTActivity[]
@@ -655,6 +715,8 @@ const NFTDetailPage = () => {
               )}
             </div>
           </div>
+
+          <MarketplaceInfo collectionFee={collectionFee} marketplaceFee={marketplaceFee} />
 
           <div className="bg-special-bg w-full p-6 flex items-center justify-center flex-col gap-6 rounded-2xl">
             {/* BUYER BUTTON */}

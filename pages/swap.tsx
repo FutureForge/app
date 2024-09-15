@@ -2,11 +2,8 @@ import { Button, TextField } from '@/modules/app'
 import { useToast } from '@/modules/app/hooks/useToast'
 import { useConvertXFIToWXFIMutation, useWithdrawWXFIMutation } from '@/modules/mutation'
 import { useUserChainInfo, useXFIandWXFIBalanceQuery } from '@/modules/query'
+import { to3DP } from '@/utils'
 import React, { useState } from 'react'
-
-function to3DP(value: number | string | undefined): string {
-  return Number(value).toFixed(3)
-}
 
 enum SwapType {
   Wrap,

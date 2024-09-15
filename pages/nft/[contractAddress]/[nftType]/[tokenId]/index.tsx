@@ -172,7 +172,7 @@ const NFTDetailPage = () => {
   })
 
   useEffect(() => {
-    if (!tokenId || !contractAddress) {
+    if (router.isReady && (!tokenId || !contractAddress)) {
       router.push('/')
     }
   }, [contractAddress, nftType, router, tokenId])

@@ -63,7 +63,12 @@ export default function UserProfile() {
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
 
-  const { data: userNFTS, isLoading: userNFTLoading, isError: userNFTError, error } = useUserNFTsQuery()
+  const {
+    data: userNFTS,
+    isLoading: userNFTLoading,
+    isError: userNFTError,
+    error,
+  } = useUserNFTsQuery()
   const {
     data: userOffersMade,
     isLoading: userOffersMadeLoading,
@@ -235,7 +240,7 @@ export default function UserProfile() {
   const isUserActive = !!activeAccount
 
   if (isLoading || isError) {
-    return <Loader className='!h-[80vh]'/>
+    return <Loader className="!h-[80vh]" />
   }
 
   return (

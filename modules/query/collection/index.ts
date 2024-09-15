@@ -15,7 +15,7 @@ import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT } from '@/utils/configs'
-import { ensureSerializable } from '@/utils'
+import { ensureSerializable, to3DP } from '@/utils'
 import { useUserChainInfo } from '../user'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { NFT } from 'thirdweb'
@@ -147,7 +147,7 @@ export function useGetMarketplaceCollectionsQuery() {
             return acc + price
           }, 0)
 
-          const totalVolume = totalVolumeAuction + totalVolumeListing
+          const totalVolume = to3DP(totalVolumeAuction + totalVolumeListing)
 
           // Calculate floor price
           let floorPrice = Infinity
@@ -481,7 +481,7 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         return acc + price
       }, 0)
 
-      const totalVolume = totalVolumeAuction + totalVolumeListing
+      const totalVolume = to3DP(totalVolumeAuction + totalVolumeListing)
 
       const collectionOffers = allOffers.filter(
         (offer) =>
@@ -681,7 +681,6 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
   })
 }
 
-
 /**
  * name, title
  * homepage intro
@@ -689,5 +688,5 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
  * show collection
  * go to profile
  * list and auction nft
- * 
+ *
  */

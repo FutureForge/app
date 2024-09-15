@@ -48,7 +48,7 @@ export default function CollectionPage() {
   const collectionFee = singleCollection?.collectionFee
 
   useEffect(() => {
-    if (!contractAddress) {
+    if (router.isReady && !contractAddress) {
       router.push('/')
     }
   }, [contractAddress, router])
@@ -115,6 +115,8 @@ export default function CollectionPage() {
           />
         </Head>
         <div className="lg:ml-52 z-50 max-w-[90%] max-md:max-w-full max-md:w-full overflow-x-scroll scrollbar-none mb-6">
+          <br />
+          <br />
           <FilterButtons
             collection
             filter={filter}

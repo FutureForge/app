@@ -73,3 +73,7 @@ export function formatBlockchainTimestamp(timestamp: string) {
 
   return formattedDate
 }
+
+export function to3DP(value: number | string | undefined): string {
+  return Number(value).toFixed(3)
+}

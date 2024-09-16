@@ -15,14 +15,14 @@ import { useWindowSize } from '@uidotdev/usehooks'
 import { CollectionCard, CollectionData } from './collection-card'
 import { ChevronRight } from 'lucide-react'
 
-type FilterType = 'All' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned' | 'Collections'
+type FilterType = 'All' | 'Collections' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
 
 const filters: FilterType[] = [
   'All',
+  'Collections',
   'Recently Listed',
   'Recently Sold',
   'Recently Auctioned',
-  'Collections',
 ]
 
 export function Header() {

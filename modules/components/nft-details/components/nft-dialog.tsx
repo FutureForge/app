@@ -23,6 +23,7 @@ type NFTDialogProps = {
   onBuyOutChange?: (value: string) => void
   buyOutValue?: string
   setTimestamp?: (value: Date) => void
+  onClose: () => void  // Add this new prop
 }
 
 export function NFTDialog({
@@ -41,6 +42,7 @@ export function NFTDialog({
   onBuyOutChange,
   buyOutValue,
   setTimestamp,
+  onClose,  // Add this to the destructured props
 }: NFTDialogProps) {
   const oneWeekFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   const [listingType, setListingType] = useState<'listing' | 'auction'>('listing')
@@ -194,26 +196,37 @@ export function NFTDialog({
   )
 
   return (
-    <div className="w-full flex gap-8 justify-between">
-      <div className="!rounded-lg relative w-[230px] h-[230px]">
-        <Image
-          src={src}
-          alt={title}
-          layout="fill"
-          className="aspect-square absolute inset-0 rounded-lg"
-        />
-      </div>
-      <div className="w-[80%] flex flex-col gap-[30px]">
-        <Dialog.Title>
-          <h5 className="font-medium text-center first-letter:uppercase ">
-            {id === 'none' ? 'Create' : id} - {title}
-          </h5>
-        </Dialog.Title>
-        {type === 'create'
-          ? renderCreateContent()
-          : type === 'make-offer'
-          ? renderMakeOfferContent()
-          : renderBidContent()}
+    <div className="w-full flex gap-8 justify-between relative">
+      <button
+        onClick={onClose}
+        className="absolute top-0 right-0 p-2 text-gray-400 hover:text-white"
+        aria-label="Close dialog"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div className="w-full flex gap-8 justify-between">
+        <div className="!rounded-lg relative w-[230px] h-[230px]">
+          <Image
+            src={src}
+            alt={title}
+            layout="fill"
+            className="aspect-square absolute inset-0 rounded-lg"
+          />
+        </div>
+        <div className="w-[80%] flex flex-col gap-[30px]">
+          <Dialog.Title>
+            <h5 className="font-medium text-center first-letter:uppercase ">
+              {id === 'none' ? 'Create' : id} - {title}
+            </h5>
+          </Dialog.Title>
+          {type === 'create'
+            ? renderCreateContent()
+            : type === 'make-offer'
+            ? renderMakeOfferContent()
+            : renderBidContent()}
+        </div>
       </div>
     </div>
   )

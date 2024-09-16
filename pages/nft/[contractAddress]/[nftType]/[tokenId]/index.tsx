@@ -400,9 +400,6 @@ const NFTDetailPage = () => {
     )
   }
 
-  console.log('nftAuctionList?.auctionCreator', nftAuctionList?.auctionCreator)
-  console.log('address', address)
-
   const handleClaimAuctionPayout = () => {
     if (!address) return toast.error('Please connect to a wallet.')
     if (chain?.id !== 4157) return toast.error('Please switch to CrossFi Testnet.')
@@ -772,6 +769,7 @@ const NFTDetailPage = () => {
                                 imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'
                               }
                               title={nft?.metadata?.name}
+                              onClose={() => setIsDialogOpen(false)}
                             />
                           </Dialog.Content>
                         </Dialog.Root>
@@ -806,6 +804,7 @@ const NFTDetailPage = () => {
                         ctaText="Make Offer"
                         src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
                         title={nft?.metadata?.name}
+                        onClose={() => setIsDialogOpen(false)}
                       />
                     </Dialog.Content>
                   </Dialog.Root>
@@ -858,6 +857,7 @@ const NFTDetailPage = () => {
                               imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'
                             }
                             title={nft?.metadata?.name}
+                            onClose={() => setIsDialogOpen(false)}
                           />
                         </Dialog.Content>
                       </Dialog.Root>

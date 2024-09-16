@@ -62,6 +62,7 @@ export default function UserProfile() {
   const [value, setValue] = useState('')
   const [buyOutAmount, setBuyOutAmount] = useState<string | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const {
     data: userNFTS,
@@ -205,6 +206,11 @@ export default function UserProfile() {
     )
   }
 
+  const handleSelectNFT = (item: NFTSelectedItem) => {
+    setSelectedNFT(item)
+    setIsDialogOpen(true)
+  }
+
   const getCtaAndOnClick = (item: any) => {
     let ctaText = ''
     let icon = false
@@ -214,7 +220,7 @@ export default function UserProfile() {
       case 'NFTs':
         icon = true
         ctaText = 'List / Auction'
-        handleClick = () => setSelectedNFT(item)
+        handleClick = () => handleSelectNFT(item)
         break
       case 'Listed':
         ctaText = 'Cancel Listing'
@@ -355,8 +361,11 @@ export default function UserProfile() {
         )}
         {selectedNFT && (
           <Dialog.Root
-            open={!!selectedNFT}
-            onOpenChange={(open: boolean) => !open && setSelectedNFT(null)}
+            open={isDialogOpen}
+            onOpenChange={(open: boolean) => {
+              setIsDialogOpen(open)
+              if (!open) setSelectedNFT(null)
+            }}
           >
             <Dialog.Content className="max-w-[690px] w-full p-6">
               <NFTDialog
@@ -371,11 +380,12 @@ export default function UserProfile() {
                 buyOutValue={buyOutAmount}
                 disabled={isTxPending}
                 value={value}
-                src={`${
-                  selectedNFT.nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
+                src={
+                  selectedNFT?.nft?.metadata?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') ||
                   '/logo.svg'
-                }`}
-                title={selectedNFT.nft?.metadata?.name || ''}
+                }
+                title={selectedNFT?.nft?.metadata?.name || ''}
+                onClose={() => setIsDialogOpen(false)}
               />
             </Dialog.Content>
           </Dialog.Root>
@@ -393,7 +403,7 @@ type Detail = {
 type CardProps = {
   src: string | undefined
   title: string | undefined
-  onClick?: () => void
+  onClick: () => void
   cta?: string
   icon?: boolean
   tokenId?: string

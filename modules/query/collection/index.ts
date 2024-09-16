@@ -20,12 +20,15 @@ import { useUserChainInfo } from '../user'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { NFT } from 'thirdweb'
 import { getPlatformFeeInfo } from '@/modules/blockchain/global'
+import { useAbortController } from '..'
 
 export function useFetchCollectionsQuery() {
+  const abortController = useAbortController()
+
   return useQuery({
     queryKey: ['collections'],
     queryFn: async () => {
-      const response = await axios.get('/api/collection')
+      const response = await axios.get('/api/collection', { signal: abortController!.signal })
       return response.data.data
     },
     initialData: [],
@@ -34,11 +37,14 @@ export function useFetchCollectionsQuery() {
 }
 
 export function useCheckIfItsACollectionQuery(collectionAddress: string) {
+  const abortController = useAbortController()
+
   return useQuery({
     queryKey: ['add-collection', collectionAddress],
     queryFn: async () => {
       const response = await axios.get(
         `${CROSSFI_API}/contracts?contractAddress=${collectionAddress}&page=1&limit=10&sort=-blockNumber`,
+        { signal: abortController!.signal },
       )
       const nftData = response.data.docs
 
@@ -53,6 +59,7 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
 
 export function useGetMarketplaceCollectionsQuery() {
   const { data: collections } = useFetchCollectionsQuery()
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['collections', 'marketplace', collections],
@@ -66,6 +73,7 @@ export function useGetMarketplaceCollectionsQuery() {
         try {
           const response = await axios.get<CollectionNFTResponse>(
             `${CROSSFI_API}/token-inventory?contractAddress=${collection.collectionContractAddress}&page=1&limit=20000&sort=-blockNumber`,
+            { signal: abortController!.signal },
           )
 
           const nfts = response.data.docs
@@ -224,6 +232,7 @@ export function useGetSingleNFTQuery({
   tokenId: string
 }) {
   const { activeAccount } = useUserChainInfo()
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['nft', contractAddress, nftType, tokenId, activeAccount?.address],
@@ -252,6 +261,7 @@ export function useGetSingleNFTQuery({
         try {
           const response = await axios.get<NFTActivityResponse>(
             `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenId=${tokenId}&tokenType=${nftType}&page=1&limit=100&sort=-blockNumber`,
+            { signal: abortController!.signal },
           )
           nftActivity = response.data.docs
         } catch (error) {
@@ -262,6 +272,7 @@ export function useGetSingleNFTQuery({
 
         const response = await axios.get<SingleNFTResponse>(
           `${CROSSFI_API}/token-inventory/${contractAddress}/${tokenId}`,
+          { signal: abortController!.signal },
         )
         const nft = response.data
 
@@ -402,6 +413,7 @@ export function useGetSingleNFTQuery({
 
 export function useGetSingleCollectionQuery({ contractAddress }: { contractAddress: string }) {
   const { data: collections } = useFetchCollectionsQuery()
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['collection', 'auction', contractAddress],
@@ -422,16 +434,20 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
         contractAddress: CROSSFI_MARKETPLACE_CONTRACT,
       })
 
-      const tokenResponse = await axios.get(`${CROSSFI_API}/tokens/${contractAddress}`)
+      const tokenResponse = await axios.get(`${CROSSFI_API}/tokens/${contractAddress}`, {
+        signal: abortController!.signal,
+      })
       const tokenDetails = tokenResponse.data
 
       const response = await axios.get<CollectionNFTResponse>(
         `${CROSSFI_API}/token-inventory?contractAddress=${contractAddress}&page=1&limit=20000&sort=-blockNumber`,
+        { signal: abortController!.signal },
       )
       const nfts = response.data.docs
 
       const tokenTransfersResponse = await axios.get<NFTActivityResponse>(
         `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenType=CFC-721&page=1&limit=20000&sort=-blockNumber`,
+        { signal: abortController!.signal },
       )
       const tokenTransfers = tokenTransfersResponse.data.docs
 

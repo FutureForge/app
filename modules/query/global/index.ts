@@ -12,8 +12,11 @@ import axios from 'axios'
 import { CROSSFI_API } from '@/utils/configs'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { includeNFTOwner } from '@/modules/blockchain/lib'
+import { useAbortController } from '..'
 
 export function useGetGlobalListingOrAuctionQuery() {
+  const abortController = useAbortController()
+
   return useQuery({
     queryKey: ['global-query'],
     queryFn: async () => {
@@ -49,6 +52,7 @@ export function useGetGlobalListingOrAuctionQuery() {
         recentlySoldOffers.map(async (offer) => {
           const response = await axios.get<SingleNFTResponse>(
             `${CROSSFI_API}/token-inventory/${offer.assetContract}/${offer.tokenId}`,
+            { signal: abortController!.signal },
           )
           const nftData = response.data
 
@@ -109,6 +113,7 @@ export function useGetGlobalListingOrAuctionQuery() {
         recentlySoldListing.map(async (listing) => {
           const response = await axios.get<SingleNFTResponse>(
             `${CROSSFI_API}/token-inventory/${listing.assetContract}/${listing.tokenId}`,
+            { signal: abortController!.signal },
           )
           const nftData = response.data
 
@@ -169,6 +174,7 @@ export function useGetGlobalListingOrAuctionQuery() {
         updatedListing.map(async (listing) => {
           const response = await axios.get<SingleNFTResponse>(
             `${CROSSFI_API}/token-inventory/${listing.assetContract}/${listing.tokenId}`,
+            { signal: abortController!.signal },
           )
           const nftData = response.data
 
@@ -237,6 +243,7 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           const response = await axios.get<SingleNFTResponse>(
             `${CROSSFI_API}/token-inventory/${auction.assetContract}/${auction.tokenId}`,
+            { signal: abortController!.signal },
           )
           const nftData = response.data
 
@@ -309,6 +316,7 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           const response = await axios.get<SingleNFTResponse>(
             `${CROSSFI_API}/token-inventory/${auction.assetContract}/${auction.tokenId}`,
+            { signal: abortController!.signal },
           )
           const nftData = response.data
 

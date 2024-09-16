@@ -16,6 +16,7 @@ export { useCheckApprovedForAllQuery } from './lib'
 export { useCheckApprovedForAllStakingQuery, useGetUserStakingInfoQuery } from './staking'
 export { useGetGlobalListingOrAuctionQuery } from './global'
 export { useWXFIAllowanceQuery, useXFIandWXFIBalanceQuery } from './wxfi'
+export { useAbortController } from './useAbortController'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 

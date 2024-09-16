@@ -16,6 +16,7 @@ import { ensureSerializable } from '@/utils'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
 import { includeNFTOwner } from '@/modules/blockchain/lib'
 import { getNFT } from 'thirdweb/extensions/erc721'
+import { useAbortController } from '..'
 
 export function useUserChainInfo() {
   const activeAccount = useActiveAccount()
@@ -27,12 +28,14 @@ export function useUserChainInfo() {
 export function useUserNFTsQuery() {
   const { activeAccount } = useUserChainInfo()
   const userAddress = activeAccount?.address
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['userNFTs', 'userProfile', 'profile'],
     queryFn: async () => {
       const response = await axios.get<UserNFTResponse>(
         `${CROSSFI_API}/token-holders?address=${userAddress}&tokenType=CFC-721&page=1&limit=1000&sort=-balance`,
+        { signal: abortController!.signal },
       )
 
       const userNFTs = response.data.docs
@@ -57,6 +60,7 @@ export function useUserNFTsQuery() {
             uniqueTokenIds.map(async (ids) => {
               const response = await axios.get<SingleNFTResponse>(
                 `${CROSSFI_API}/token-inventory/${contractAddress}/${ids}`,
+                { signal: abortController!.signal },
               )
               const nft = response.data
 
@@ -124,6 +128,7 @@ export function useUserNFTsQuery() {
 export function useUserOffersMadeQuery() {
   const { activeAccount } = useUserChainInfo()
   const userAddress = activeAccount?.address
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['userOffersMade', 'userProfile', 'profile', 'nfts'],
@@ -156,6 +161,7 @@ export function useUserOffersMadeQuery() {
           userOffers.map(async (ids) => {
             const response = await axios.get<SingleNFTResponse>(
               `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
+              { signal: abortController!.signal },
             )
             const nft = response.data
             let updatedNFT = nft
@@ -206,6 +212,7 @@ export function useUserOffersMadeQuery() {
 export function useUserListingQuery() {
   const { activeAccount } = useUserChainInfo()
   const userAddress = activeAccount?.address
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['userListing', 'userProfile', 'profile', 'nft'],
@@ -241,6 +248,7 @@ export function useUserListingQuery() {
           userListings.map(async (ids) => {
             const response = await axios.get<SingleNFTResponse>(
               `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
+              { signal: abortController!.signal },
             )
             const nft = response.data
             let updatedNFT = nft
@@ -288,6 +296,7 @@ export function useUserListingQuery() {
 export function useUserAuctionQuery() {
   const { activeAccount } = useUserChainInfo()
   const userAddress = activeAccount?.address
+  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['userAuction', 'userProfile', 'profile', 'auction', 'nfts'],
@@ -328,6 +337,7 @@ export function useUserAuctionQuery() {
 
             const response = await axios.get<SingleNFTResponse>(
               `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
+              { signal: abortController!.signal },
             )
             const nft = response.data
             let updatedNFT = nft

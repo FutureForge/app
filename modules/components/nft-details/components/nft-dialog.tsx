@@ -1,6 +1,7 @@
 import { Button, Label, TextField } from '@/modules/app'
 import { Dialog } from '@/modules/app/component/dialog'
 import { decimalOffChain } from '@/modules/blockchain'
+import { CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
@@ -23,7 +24,8 @@ type NFTDialogProps = {
   onBuyOutChange?: (value: string) => void
   buyOutValue?: string
   setTimestamp?: (value: Date) => void
-  onClose: () => void  // Add this new prop
+  onClose: () => void // Add this new prop
+  contractAddress: string
 }
 
 export function NFTDialog({
@@ -42,7 +44,8 @@ export function NFTDialog({
   onBuyOutChange,
   buyOutValue,
   setTimestamp,
-  onClose,  // Add this to the destructured props
+  onClose, // Add this to the destructured props
+  contractAddress,
 }: NFTDialogProps) {
   const oneWeekFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   const [listingType, setListingType] = useState<'listing' | 'auction'>('listing')
@@ -52,6 +55,8 @@ export function NFTDialog({
     setTimestamp?.(selectedDate)
   }, [selectedDate, setTimestamp])
 
+  const isAuctionRestricted = contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()
+
   const handleDateChange = (date: Date | null) => {
     const newDate = date || oneWeekFromNow
     setSelectedDate(newDate)
@@ -59,7 +64,7 @@ export function NFTDialog({
 
   const renderCreateContent = () => (
     <>
-      {id === 'none' && (
+      {id === 'none' && !isAuctionRestricted && (
         <div className="flex justify-center mb-4">
           <div className="flex bg-[#1B1F26B8] rounded-lg p-1">
             {['listing', 'auction'].map((type) => (
@@ -74,6 +79,15 @@ export function NFTDialog({
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {isAuctionRestricted && (
+        <div className="bg-gray-800 border border-gray-700 rounded-md p-4 mb-4">
+          <h4 className="text-sm font-medium mb-2">Note:</h4>
+          <ul className="list-disc list-inside text-sm space-y-2">
+            <li>Auction is not supported NFTs in this Collection.</li>
+          </ul>
         </div>
       )}
 
@@ -127,12 +141,18 @@ export function NFTDialog({
       </div>
 
       <Button
-        disabled={disabled}
+        disabled={disabled || (isAuctionRestricted && listingType === 'auction')}
         onClick={listingType === 'listing' ? onClick : secondaryOnClick}
         variant="secondary"
         className="h-8"
       >
-        {disabled ? 'Loading...' : listingType === 'listing' ? 'List NFT' : 'Auction NFT'}
+        {disabled
+          ? 'Loading...'
+          : isAuctionRestricted && listingType === 'auction'
+          ? 'Auction not available'
+          : listingType === 'listing'
+          ? 'List NFT'
+          : 'Auction NFT'}
       </Button>
     </>
   )
@@ -202,8 +222,19 @@ export function NFTDialog({
         className="absolute top-0 right-0 p-2 text-gray-400 hover:text-white"
         aria-label="Close dialog"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
       <div className="w-full flex gap-8 justify-between">

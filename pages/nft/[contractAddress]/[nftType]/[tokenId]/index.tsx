@@ -11,7 +11,7 @@ import {
   useGetSingleNFTQuery,
   useUserChainInfo,
 } from '@/modules/query'
-import { client } from '@/utils/configs'
+import { client, CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
 import { MediaRenderer } from 'thirdweb/react'
 import { Button, Loader, Icon } from '@/modules/app'
 import { formatBlockchainTimestamp, getFormatAddress } from '@/utils'
@@ -495,6 +495,10 @@ const NFTDetailPage = () => {
     return formatDistanceToNow(new Date(timestamp), { addSuffix: true })
   }
 
+  const isAuctionRestricted =
+    (contractAddress && (contractAddress as string).toLowerCase()) ===
+    CROSSFI_MINTER_ADDRESS.toLowerCase()
+
   return (
     <>
       <Head>
@@ -770,6 +774,7 @@ const NFTDetailPage = () => {
                               }
                               title={nft?.metadata?.name}
                               onClose={() => setIsDialogOpen(false)}
+                              contractAddress={contractAddress as string}
                             />
                           </Dialog.Content>
                         </Dialog.Root>
@@ -805,6 +810,7 @@ const NFTDetailPage = () => {
                         src={imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '/logo.svg'}
                         title={nft?.metadata?.name}
                         onClose={() => setIsDialogOpen(false)}
+                        contractAddress={contractAddress as string}
                       />
                     </Dialog.Content>
                   </Dialog.Root>
@@ -836,7 +842,7 @@ const NFTDetailPage = () => {
                             disabled={isTxPending}
                             className="text-sm font-medium h-8"
                           >
-                            List/Auction
+                            {isAuctionRestricted ? 'List NFT' : 'List/Auction NFT'}
                           </Button>
                         </Dialog.Trigger>
 
@@ -858,6 +864,7 @@ const NFTDetailPage = () => {
                             }
                             title={nft?.metadata?.name}
                             onClose={() => setIsDialogOpen(false)}
+                            contractAddress={contractAddress as string}
                           />
                         </Dialog.Content>
                       </Dialog.Root>

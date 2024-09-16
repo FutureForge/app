@@ -386,6 +386,7 @@ export default function UserProfile() {
                 }
                 title={selectedNFT?.nft?.metadata?.name || ''}
                 onClose={() => setIsDialogOpen(false)}
+                contractAddress={selectedNFT?.contractAddress as string}
               />
             </Dialog.Content>
           </Dialog.Root>

@@ -59,8 +59,6 @@ export function useAddCollectionMutation() {
         backgroundImage,
       })
 
-      console.log({ response })
-
       await router.push(`/collections/${collectionContractAddress}`)
 
       return response.data

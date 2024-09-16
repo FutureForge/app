@@ -429,7 +429,18 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           collection.collectionContractAddress.toLowerCase() === contractAddress.toLowerCase(),
       )
 
-      const collectionFee = await getPlatformFeeInfo({ contractAddress })
+      let collectionFee = {}
+      // let marketplaceFee = {}
+      if (
+        contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
+      ) {
+        collectionFee = {
+          address: '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE',
+          percent: 0,
+        }
+      } else {
+        collectionFee = await getPlatformFeeInfo({ contractAddress })
+      }
       const marketplaceFee = await getPlatformFeeInfo({
         contractAddress: CROSSFI_MARKETPLACE_CONTRACT,
       })

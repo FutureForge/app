@@ -160,13 +160,34 @@ export function NFTDialog({
   const renderBidContent = () => (
     <>
       <div className="flex flex-col gap-3">
+        <div className="bg-gray-800 border border-gray-700 rounded-md p-4 mb-4">
+          <h4 className="text-sm font-medium mb-2">Note:</h4>
+          <ul className="list-disc list-inside text-sm space-y-2">
+            <li>Bid amount must be greater than the minimum bid amount.</li>
+            <li>
+              If bid amount is greater than buyout price, the buyout price will be used instead.
+            </li>
+            <li>
+              If the buyout price is reached, the auction will end and the NFT will be sold to the
+              highest bidder.
+            </li>
+          </ul>
+        </div>
         <Label htmlFor="amount">Bid Amount</Label>
         <TextField
           value={value}
           onChange={(e) => {
             const inputValue = parseFloat(e.target.value)
             const minimumBidAmount = decimalOffChain(nftList?.minimumBidAmount)
-            onChange?.(inputValue >= Number(minimumBidAmount) ? e.target.value : '1')
+            const buyoutBidAmount = decimalOffChain(nftList?.buyoutBidAmount)
+
+            onChange?.(
+              inputValue >= Number(minimumBidAmount)
+                ? inputValue > Number(buyoutBidAmount)
+                  ? buyoutBidAmount!.toString()
+                  : e.target.value
+                : e.target.value,
+            )
           }}
           type="number"
           id="amount"

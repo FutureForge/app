@@ -746,7 +746,8 @@ const NFTDetailPage = () => {
                       <>
                         {winningBid ? (
                           <p className="text-sm font-medium">
-                            Auction Has Been Completed. NFT Has Been Transferred
+                            Auction Has Been Completed. NFT Has Been Transferred. Waiting for
+                            Auction Creator To Claim Payout
                           </p>
                         ) : (
                           <p className="text-sm font-medium">Auction Has Expired Without Bids</p>

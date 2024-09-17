@@ -41,7 +41,9 @@ type NFTSelectedItem = {
   blockNumber: number
   contractAddress: string
   decimals: number | null
-  nft: SingleNFTResponse
+  nft: SingleNFTResponse & {
+    id: string
+  }
   timestamp: string
   tokenIds: string[]
   tokenName: string
@@ -142,7 +144,7 @@ export default function UserProfile() {
     if (!selectedNFT) return toast.error('Please select an NFT')
 
     const contractAddress = selectedNFT?.contractAddress
-    const tokenId = selectedNFT?.nft?.tokenId
+    const tokenId = selectedNFT?.nft?.tokenId || selectedNFT?.nft?.id
 
     createListingMutation.mutate(
       {
@@ -177,7 +179,7 @@ export default function UserProfile() {
     if (!selectedNFT) return toast.error('Please select an NFT')
 
     const contractAddress = selectedNFT?.contractAddress
-    const tokenId = selectedNFT?.nft?.tokenId
+    const tokenId = selectedNFT?.nft?.tokenId || selectedNFT?.nft?.id
 
     createAuctionMutation.mutate(
       {

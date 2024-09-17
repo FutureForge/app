@@ -55,9 +55,7 @@ export function useMakeListingOfferMutation() {
       if (BigNumber.from(currentAllowance).lt(makeOfferValue!)) {
         await toast.loading('Approving WXFI to spend')
         await increaseAllowanceMutation.mutateAsync({
-          amount: makeOfferValue
-            ? makeOfferValue.toString()
-            : ethers.constants.MaxUint256.toString(),
+          amount: makeOfferValue!.toString(),
         })
 
         const updatedAllowance = await WXFIContract.allowance(

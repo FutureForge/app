@@ -15,13 +15,20 @@ import { useWindowSize } from '@uidotdev/usehooks'
 import { CollectionCard, CollectionData } from './collection-card'
 import { ChevronRight } from 'lucide-react'
 
-type FilterType = 'All' | 'Collections' | 'Recently Listed' | 'Recently Sold' | 'Recently Auctioned'
+type FilterType =
+  | 'All'
+  | 'Collections'
+  | 'Recently Listed'
+  | 'Recently Sold Listing'
+  | 'Recently Sold Auction'
+  | 'Recently Auctioned'
 
 const filters: FilterType[] = [
   'All',
   'Collections',
   'Recently Listed',
-  'Recently Sold',
+  'Recently Sold Listing',
+  'Recently Sold Auction',
   'Recently Auctioned',
 ]
 
@@ -182,7 +189,10 @@ export function Header() {
           )}
 
           {filter === 'Recently Listed' && renderSection({ items: global?.allListing || [] })}
-          {filter === 'Recently Sold' && renderSection({ items: global?.recentlySold || [] })}
+          {filter === 'Recently Sold Listing' &&
+            renderSection({ items: global?.recentlySoldListing || [] })}
+          {filter === 'Recently Sold Auction' &&
+            renderSection({ items: global?.recentlySoldAuction || [] })}
           {filter === 'Recently Auctioned' && renderSection({ items: global?.allAuction || [] })}
           {filter === 'Collections' && (
             <div className="flex gap-6 pb-4 flex-wrap">

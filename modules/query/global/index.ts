@@ -376,11 +376,8 @@ export function useGetGlobalListingOrAuctionQuery() {
       return ensureSerializable({
         allAuction: updatedAuction,
         allListing: newListingWithNFTs,
-        recentlySold: [
-          ...updatedRecentlySoldListing,
-          ...updatedRecentlySoldAuction,
-          ...updatedRecentlySoldOffers,
-        ],
+        recentlySoldListing: [...updatedRecentlySoldListing, ...updatedRecentlySoldOffers],
+        recentlySoldAuction: updatedRecentlySoldAuction,
       })
     },
     enabled: true,

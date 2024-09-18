@@ -15,6 +15,9 @@ import { useWindowSize } from '@uidotdev/usehooks'
 import { CollectionCard, CollectionData } from './collection-card'
 import { ChevronRight } from 'lucide-react'
 
+// 0xcab0b7addb93d41e0dfec1dc4c8de564aa0440cf
+// 0x55babEE194af5c59a5f17f9DeA47BE4a37DFB36d // egg collection
+
 type FilterType =
   | 'All'
   | 'Collections'

@@ -14,8 +14,8 @@ import {
 import { ethers } from 'ethers'
 import { decimalOffChain, getContractCustom, includeNFTOwner } from '@/modules/blockchain/lib'
 import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction'
-import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT } from '@/utils/configs'
-import { ensureSerializable, to3DP } from '@/utils'
+import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT, CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
+import { ensureSerializable, to3DP, tryParseJSON } from '@/utils'
 import { useUserChainInfo } from '../user'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { NFT } from 'thirdweb'
@@ -59,7 +59,6 @@ export function useCheckIfItsACollectionQuery(collectionAddress: string) {
 
 export function useGetMarketplaceCollectionsQuery() {
   const { data: collections } = useFetchCollectionsQuery()
-  const abortController = useAbortController()
 
   return useQuery({
     queryKey: ['collections', 'marketplace', collections],
@@ -71,52 +70,6 @@ export function useGetMarketplaceCollectionsQuery() {
 
       const collectionPromises = collections.map(async (collection: ICollection) => {
         try {
-          const response = await axios.get<CollectionNFTResponse>(
-            `${CROSSFI_API}/token-inventory?contractAddress=${collection.collectionContractAddress}&page=1&limit=20000&sort=-blockNumber`,
-            { signal: abortController!.signal },
-          )
-
-          const nfts = response.data.docs
-
-          const updatedNFTs = await Promise.all(
-            nfts.map(async (nft) => {
-              const metadata = nft?.metadata
-              if (
-                collection.collectionContractAddress.toLowerCase() ===
-                '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-              ) {
-                const uri = nft.tokenURI
-                const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
-
-                return {
-                  ...nft,
-                  tokenURI: parsedMetadata.image,
-                  metadata: {
-                    ...parsedMetadata,
-                  },
-                }
-              } else if (metadata === undefined || null) {
-                const contract = getContractCustom({
-                  contractAddress: nft.contractAddress,
-                })
-                const tokenId = nft.tokenId
-
-                const newUpdatedNFTs = await getNFT({
-                  contract: contract,
-                  tokenId: BigInt(tokenId),
-                  includeOwner: includeNFTOwner,
-                })
-
-                return {
-                  ...nft,
-                  ...newUpdatedNFTs,
-                }
-              } else {
-                return nft
-              }
-            }),
-          )
-
           const collectionListing = allListing.filter(
             (listing) =>
               listing.assetContract.toLowerCase() ===
@@ -199,7 +152,6 @@ export function useGetMarketplaceCollectionsQuery() {
 
           return {
             collection,
-            nfts: updatedNFTs,
             totalVolume,
             floorPrice: floorPrice.toString(),
           }
@@ -240,12 +192,9 @@ export function useGetSingleNFTQuery({
       try {
         let collectionFee = {}
         // let marketplaceFee = {}
-        if (
-          contractAddress.toLowerCase() ===
-          '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-        ) {
+        if (contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
           collectionFee = {
-            address: '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE',
+            address: CROSSFI_MINTER_ADDRESS,
             percent: 0,
           }
         } else {
@@ -277,13 +226,10 @@ export function useGetSingleNFTQuery({
         const nft = response.data
 
         const metadata = nft?.metadata
-        if (
-          contractAddress.toLowerCase() ===
-          '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-        ) {
-          const uri = nft.tokenURI
-          const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+        const uri = nft.tokenURI
+        const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
+        if (parsedMetadata && typeof parsedMetadata === 'object') {
           nftList = {
             ...nft,
             tokenURI: parsedMetadata.image,
@@ -431,11 +377,9 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
 
       let collectionFee = {}
       // let marketplaceFee = {}
-      if (
-        contractAddress.toLowerCase() === '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-      ) {
+      if (contractAddress.toLowerCase() === CROSSFI_MINTER_ADDRESS.toLowerCase()) {
         collectionFee = {
-          address: '0x6AF8860bA9eEd41C3a3C69249Da5ef8Ac36d20DE',
+          address: CROSSFI_MINTER_ADDRESS,
           percent: 0,
         }
       } else {
@@ -533,13 +477,10 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
           const auction = auctionMap.get(nft.tokenId.toString())
           const metadata = nft?.metadata
 
-          if (
-            contractAddress.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
-            const uri = nft.tokenURI
-            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+          const uri = nft.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
+          if (parsedMetadata && typeof parsedMetadata === 'object') {
             nftList = {
               ...nft,
               tokenURI: parsedMetadata.image,

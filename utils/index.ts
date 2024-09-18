@@ -77,3 +77,11 @@ export function formatBlockchainTimestamp(timestamp: string) {
 export function to3DP(value: number | string | undefined): string {
   return Number(value).toFixed(3)
 }
+
+export const tryParseJSON = (jsonString: string) => {
+  try {
+    return JSON.parse(jsonString)
+  } catch (e) {
+    return null
+  }
+}

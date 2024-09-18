@@ -7,7 +7,7 @@ import {
 import { getWinningBid } from '@/modules/blockchain/auction'
 import { SingleNFTResponse, StatusType } from '@/utils/lib/types'
 import { useQuery } from '@tanstack/react-query'
-import { ensureSerializable } from '@/utils'
+import { ensureSerializable, tryParseJSON } from '@/utils'
 import axios from 'axios'
 import { CROSSFI_API } from '@/utils/configs'
 import { getNFT } from 'thirdweb/extensions/erc721'
@@ -58,13 +58,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (
-            offer.assetContract.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
-            const uri = nftData.tokenURI
-            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+          const uri = nftData.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
+          if (parsedMetadata && typeof parsedMetadata === 'object') {
             updatedNFT = {
               ...nftData,
               tokenURI: parsedMetadata.image,
@@ -119,13 +116,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (
-            listing.assetContract.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
-            const uri = nftData.tokenURI
-            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+          const uri = nftData.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
+          if (parsedMetadata && typeof parsedMetadata === 'object') {
             updatedNFT = {
               ...nftData,
               tokenURI: parsedMetadata.image,
@@ -180,13 +174,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (
-            listing.assetContract.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
-            const uri = nftData.tokenURI
-            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+          const uri = nftData.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
+          if (parsedMetadata && typeof parsedMetadata === 'object') {
             updatedNFT = {
               ...nftData,
               tokenURI: parsedMetadata.image,
@@ -249,10 +240,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (
-            auction.assetContract.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
+          const uri = nftData.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
+
+          if (parsedMetadata && typeof parsedMetadata === 'object') {
             const uri = nftData.tokenURI
             const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
 
@@ -322,13 +313,10 @@ export function useGetGlobalListingOrAuctionQuery() {
 
           let updatedNFT = nftData
 
-          if (
-            auction.assetContract.toLowerCase() ===
-            '0x6af8860ba9eed41c3a3c69249da5ef8ac36d20de'.toLowerCase()
-          ) {
-            const uri = nftData.tokenURI
-            const parsedMetadata = typeof uri === 'string' ? JSON.parse(uri) : uri
+          const uri = nftData.tokenURI
+          const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
+          if (parsedMetadata && typeof parsedMetadata === 'object') {
             updatedNFT = {
               ...nftData,
               tokenURI: parsedMetadata.image,

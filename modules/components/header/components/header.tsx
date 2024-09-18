@@ -19,17 +19,17 @@ type FilterType =
   | 'All'
   | 'Collections'
   | 'Recently Listed'
+  | 'Recently Auctioned'
   | 'Recently Sold Listing'
   | 'Recently Sold Auction'
-  | 'Recently Auctioned'
 
 const filters: FilterType[] = [
   'All',
   'Collections',
   'Recently Listed',
+  'Recently Auctioned',
   'Recently Sold Listing',
   'Recently Sold Auction',
-  'Recently Auctioned',
 ]
 
 export function Header() {
@@ -180,20 +180,29 @@ export function Header() {
               {/* Recently Listed */}
               {renderSection({ title: 'Recently Listed', items: global?.allListing || [] })}
 
-              {/* Recently Sold */}
-              {renderSection({ title: 'Recently Sold', items: global?.recentlySold || [] })}
-
               {/* Recently Auctioned */}
               {renderSection({ title: 'Recently Auctioned', items: global?.allAuction || [] })}
+
+              {/* Recently Sold Listing */}
+              {renderSection({
+                title: 'Recently Sold Listing',
+                items: global?.recentlySoldListing || [],
+              })}
+
+              {/* Recently Sold Auction */}
+              {renderSection({
+                title: 'Recently Sold Auction',
+                items: global?.recentlySoldAuction || [],
+              })}
             </>
           )}
 
           {filter === 'Recently Listed' && renderSection({ items: global?.allListing || [] })}
+          {filter === 'Recently Auctioned' && renderSection({ items: global?.allAuction || [] })}
           {filter === 'Recently Sold Listing' &&
             renderSection({ items: global?.recentlySoldListing || [] })}
           {filter === 'Recently Sold Auction' &&
             renderSection({ items: global?.recentlySoldAuction || [] })}
-          {filter === 'Recently Auctioned' && renderSection({ items: global?.allAuction || [] })}
           {filter === 'Collections' && (
             <div className="flex gap-6 pb-4 flex-wrap">
               {collections?.map((item: CollectionData) => (

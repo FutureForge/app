@@ -5,11 +5,9 @@ import {
   getContractCustom,
 } from '@/modules/blockchain'
 import { getWinningBid } from '@/modules/blockchain/auction'
-import { SingleNFTResponse, StatusType } from '@/utils/lib/types'
+import { StatusType } from '@/utils/lib/types'
 import { useQuery } from '@tanstack/react-query'
 import { ensureSerializable, tryParseJSON } from '@/utils'
-import axios from 'axios'
-import { CROSSFI_API } from '@/utils/configs'
 import { getNFT } from 'thirdweb/extensions/erc721'
 import { includeNFTOwner } from '@/modules/blockchain/lib'
 import { useAbortController } from '..'
@@ -50,11 +48,16 @@ export function useGetGlobalListingOrAuctionQuery() {
 
       const updatedRecentlySoldOffers = await Promise.all(
         recentlySoldOffers.map(async (offer) => {
-          const response = await axios.get<SingleNFTResponse>(
-            `${CROSSFI_API}/token-inventory/${offer.assetContract}/${offer.tokenId}`,
-            { signal: abortController!.signal },
-          )
-          const nftData = response.data
+          const contract = getContractCustom({
+            contractAddress: offer.assetContract,
+          })
+          const tokenId = offer.tokenId
+
+          const nftData = await getNFT({
+            contract: contract,
+            tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
+          })
 
           let updatedNFT = nftData
 
@@ -71,48 +74,30 @@ export function useGetGlobalListingOrAuctionQuery() {
             }
           }
 
-          if (updatedNFT.metadata === undefined) {
-            const contract = getContractCustom({
-              contractAddress: nftData.contractAddress,
-            })
-            const tokenId = nftData.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            return ensureSerializable({
-              ...offer,
-              soldType: 'listing',
-              id: 'listing',
-              nft: {
-                ...newUpdatedNFTs,
-                type: 'CFC-721',
-              },
-            })
-          } else {
-            return ensureSerializable({
-              ...offer,
-              soldType: 'listing',
-              id: 'listing',
-              nft: {
-                ...updatedNFT,
-                type: 'CFC-721',
-              },
-            })
-          }
+          return ensureSerializable({
+            ...offer,
+            soldType: 'listing',
+            id: 'listing',
+            nft: {
+              ...updatedNFT,
+              type: 'CFC-721',
+            },
+          })
         }),
       )
 
       const updatedRecentlySoldListing = await Promise.all(
         recentlySoldListing.map(async (listing) => {
-          const response = await axios.get<SingleNFTResponse>(
-            `${CROSSFI_API}/token-inventory/${listing.assetContract}/${listing.tokenId}`,
-            { signal: abortController!.signal },
-          )
-          const nftData = response.data
+          const contract = getContractCustom({
+            contractAddress: listing.assetContract,
+          })
+          const tokenId = listing.tokenId
+
+          const nftData = await getNFT({
+            contract: contract,
+            tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
+          })
 
           let updatedNFT = nftData
 
@@ -129,48 +114,30 @@ export function useGetGlobalListingOrAuctionQuery() {
             }
           }
 
-          if (updatedNFT.metadata === undefined) {
-            const contract = getContractCustom({
-              contractAddress: nftData.contractAddress,
-            })
-            const tokenId = nftData.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            return ensureSerializable({
-              ...listing,
-              soldType: 'listing',
-              id: 'listing',
-              nft: {
-                ...newUpdatedNFTs,
-                type: 'CFC-721',
-              },
-            })
-          } else {
-            return ensureSerializable({
-              ...listing,
-              soldType: 'listing',
-              id: 'listing',
-              nft: {
-                ...updatedNFT,
-                type: 'CFC-721',
-              },
-            })
-          }
+          return ensureSerializable({
+            ...listing,
+            soldType: 'listing',
+            id: 'listing',
+            nft: {
+              ...updatedNFT,
+              type: 'CFC-721',
+            },
+          })
         }),
       )
 
       const newListingWithNFTs = await Promise.all(
         updatedListing.map(async (listing) => {
-          const response = await axios.get<SingleNFTResponse>(
-            `${CROSSFI_API}/token-inventory/${listing.assetContract}/${listing.tokenId}`,
-            { signal: abortController!.signal },
-          )
-          const nftData = response.data
+          const contract = getContractCustom({
+            contractAddress: listing.assetContract,
+          })
+          const tokenId = listing.tokenId
+
+          const nftData = await getNFT({
+            contract: contract,
+            tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
+          })
 
           let updatedNFT = nftData
 
@@ -187,36 +154,14 @@ export function useGetGlobalListingOrAuctionQuery() {
             }
           }
 
-          if (updatedNFT.metadata === undefined) {
-            const contract = getContractCustom({
-              contractAddress: nftData.contractAddress,
-            })
-            const tokenId = nftData.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            return ensureSerializable({
-              ...listing,
-              id: 'listing',
-              nft: {
-                ...newUpdatedNFTs,
-                type: 'CFC-721',
-              },
-            })
-          } else {
-            return ensureSerializable({
-              ...listing,
-              id: 'listing',
-              nft: {
-                ...updatedNFT,
-                type: 'CFC-721',
-              },
-            })
-          }
+          return ensureSerializable({
+            ...listing,
+            id: 'listing',
+            nft: {
+              ...updatedNFT,
+              type: 'CFC-721',
+            },
+          })
         }),
       )
 
@@ -232,11 +177,16 @@ export function useGetGlobalListingOrAuctionQuery() {
             bidAmount: winningBid[2],
           }
 
-          const response = await axios.get<SingleNFTResponse>(
-            `${CROSSFI_API}/token-inventory/${auction.assetContract}/${auction.tokenId}`,
-            { signal: abortController!.signal },
-          )
-          const nftData = response.data
+          const contract = getContractCustom({
+            contractAddress: auction.assetContract,
+          })
+          const tokenId = auction.tokenId
+
+          const nftData = await getNFT({
+            contract: contract,
+            tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
+          })
 
           let updatedNFT = nftData
 
@@ -256,40 +206,16 @@ export function useGetGlobalListingOrAuctionQuery() {
             }
           }
 
-          if (updatedNFT.metadata === undefined) {
-            const contract = getContractCustom({
-              contractAddress: nftData.contractAddress,
-            })
-            const tokenId = nftData.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            return ensureSerializable({
-              ...auction,
-              soldType: 'auction',
-              id: 'auction',
-              winningBid: winningBidBody,
-              nft: {
-                ...newUpdatedNFTs,
-                type: 'CFC-721',
-              },
-            })
-          } else {
-            return ensureSerializable({
-              ...auction,
-              soldType: 'auction',
-              id: 'auction',
-              winningBid: winningBidBody,
-              nft: {
-                ...updatedNFT,
-                type: 'CFC-721',
-              },
-            })
-          }
+          return ensureSerializable({
+            ...auction,
+            soldType: 'auction',
+            id: 'auction',
+            winningBid: winningBidBody,
+            nft: {
+              ...updatedNFT,
+              type: 'CFC-721',
+            },
+          })
         }),
       )
 
@@ -305,11 +231,16 @@ export function useGetGlobalListingOrAuctionQuery() {
             bidAmount: winningBid[2],
           }
 
-          const response = await axios.get<SingleNFTResponse>(
-            `${CROSSFI_API}/token-inventory/${auction.assetContract}/${auction.tokenId}`,
-            { signal: abortController!.signal },
-          )
-          const nftData = response.data
+          const contract = getContractCustom({
+            contractAddress: auction.assetContract,
+          })
+          const tokenId = auction.tokenId
+
+          const nftData = await getNFT({
+            contract: contract,
+            tokenId: BigInt(tokenId),
+            includeOwner: includeNFTOwner,
+          })
 
           let updatedNFT = nftData
 
@@ -326,38 +257,15 @@ export function useGetGlobalListingOrAuctionQuery() {
             }
           }
 
-          if (updatedNFT.metadata === undefined) {
-            const contract = getContractCustom({
-              contractAddress: nftData.contractAddress,
-            })
-            const tokenId = nftData.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            return ensureSerializable({
-              ...auction,
-              winningBid: winningBidBody,
-              nft: {
-                ...newUpdatedNFTs,
-                id: 'auction',
-                type: 'CFC-721',
-              },
-            })
-          } else {
-            return ensureSerializable({
-              ...auction,
-              winningBid: winningBidBody,
-              nft: {
-                ...updatedNFT,
-                id: 'auction',
-                type: 'CFC-721',
-              },
-            })
-          }
+          return ensureSerializable({
+            ...auction,
+            winningBid: winningBidBody,
+            nft: {
+              ...updatedNFT,
+              id: 'auction',
+              type: 'CFC-721',
+            },
+          })
         }),
       )
 

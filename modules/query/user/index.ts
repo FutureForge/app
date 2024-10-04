@@ -58,11 +58,15 @@ export function useUserNFTsQuery() {
 
           const tokenIdNFTs = await Promise.all(
             uniqueTokenIds.map(async (ids) => {
-              const response = await axios.get<SingleNFTResponse>(
-                `${CROSSFI_API}/token-inventory/${contractAddress}/${ids}`,
-                { signal: abortController!.signal },
-              )
-              const nft = response.data
+              const contract = getContractCustom({
+                contractAddress: contractAddress,
+              })
+
+              const nft = await getNFT({
+                contract: contract,
+                tokenId: BigInt(ids),
+                includeOwner: includeNFTOwner,
+              })
 
               let updatedNFT = nft
 
@@ -79,23 +83,7 @@ export function useUserNFTsQuery() {
                 }
               }
 
-              const metadata = updatedNFT?.metadata
-              if (metadata === undefined) {
-                const contract = getContractCustom({
-                  contractAddress: updatedNFT?.contractAddress,
-                })
-                const tokenId = updatedNFT?.tokenId
-
-                const newUpdatedNFTs = await getNFT({
-                  contract: contract,
-                  tokenId: BigInt(tokenId),
-                  includeOwner: includeNFTOwner,
-                })
-
-                return { ...nfts, nft: newUpdatedNFTs, type: 'NFTs' }
-              } else {
-                return { ...nfts, nft: updatedNFT, type: 'NFTs' }
-              }
+              return { ...nfts, nft: updatedNFT, type: 'NFTs' }
             }),
           )
 
@@ -156,11 +144,16 @@ export function useUserOffersMadeQuery() {
 
         const updatedUserOffers = await Promise.all(
           userOffers.map(async (ids) => {
-            const response = await axios.get<SingleNFTResponse>(
-              `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
-              { signal: abortController!.signal },
-            )
-            const nft = response.data
+            const contract = getContractCustom({
+              contractAddress: ids?.assetContract,
+            })
+            const tokenId = ids?.tokenId
+
+            const nft = await getNFT({
+              contract: contract,
+              tokenId: BigInt(tokenId),
+              includeOwner: includeNFTOwner,
+            })
             let updatedNFT = nft
 
             const uri = nft.tokenURI
@@ -176,22 +169,7 @@ export function useUserOffersMadeQuery() {
               }
             }
 
-            const metadata = updatedNFT?.metadata
-            if (metadata === undefined) {
-              const contract = getContractCustom({
-                contractAddress: updatedNFT?.contractAddress,
-              })
-              const tokenId = updatedNFT?.tokenId
-
-              const newUpdatedNFTs = await getNFT({
-                contract: contract,
-                tokenId: BigInt(tokenId),
-                includeOwner: includeNFTOwner,
-              })
-              return { ...ids, nft: newUpdatedNFTs }
-            } else {
-              return { ...ids, nft: updatedNFT }
-            }
+            return { ...ids, nft: updatedNFT }
           }),
         )
 
@@ -240,11 +218,16 @@ export function useUserListingQuery() {
 
         const updatedUserListings = await Promise.all(
           userListings.map(async (ids) => {
-            const response = await axios.get<SingleNFTResponse>(
-              `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
-              { signal: abortController!.signal },
-            )
-            const nft = response.data
+            const contract = getContractCustom({
+              contractAddress: ids?.assetContract,
+            })
+            const tokenId = ids?.tokenId
+
+            const nft = await getNFT({
+              contract: contract,
+              tokenId: BigInt(tokenId),
+              includeOwner: includeNFTOwner,
+            })
             let updatedNFT = nft
 
             const uri = nft.tokenURI
@@ -260,22 +243,7 @@ export function useUserListingQuery() {
               }
             }
 
-            const metadata = updatedNFT?.metadata
-            if (metadata === undefined) {
-              const contract = getContractCustom({
-                contractAddress: updatedNFT?.contractAddress,
-              })
-              const tokenId = updatedNFT?.tokenId
-
-              const newUpdatedNFTs = await getNFT({
-                contract: contract,
-                tokenId: BigInt(tokenId),
-                includeOwner: includeNFTOwner,
-              })
-              return { ...ids, nft: newUpdatedNFTs }
-            } else {
-              return { ...ids, nft: updatedNFT }
-            }
+            return { ...ids, nft: updatedNFT }
           }),
         )
 
@@ -329,11 +297,16 @@ export function useUserAuctionQuery() {
               bidAmount: winningBid[2].toString(), // Convert BigInt to string
             }
 
-            const response = await axios.get<SingleNFTResponse>(
-              `${CROSSFI_API}/token-inventory/${ids.assetContract}/${ids.tokenId}`,
-              { signal: abortController!.signal },
-            )
-            const nft = response.data
+            const contract = getContractCustom({
+              contractAddress: ids?.assetContract,
+            })
+            const tokenId = ids?.tokenId
+
+            const nft = await getNFT({
+              contract: contract,
+              tokenId: BigInt(tokenId),
+              includeOwner: includeNFTOwner,
+            })
             let updatedNFT = nft
 
             const uri = nft.tokenURI
@@ -349,31 +322,11 @@ export function useUserAuctionQuery() {
               }
             }
 
-            const metadata = updatedNFT?.metadata
-            if (metadata === undefined) {
-              const contract = getContractCustom({
-                contractAddress: updatedNFT?.contractAddress,
-              })
-              const tokenId = updatedNFT?.tokenId
-
-              const newUpdatedNFTs = await getNFT({
-                contract: contract,
-                tokenId: BigInt(tokenId),
-                includeOwner: includeNFTOwner,
-              })
-              return {
-                ...ids,
-                nft: newUpdatedNFTs,
-                isAuctionExpired,
-                winningBid: winningBidBody,
-              }
-            } else {
-              return {
-                ...ids,
-                nft: updatedNFT,
-                isAuctionExpired,
-                winningBid: winningBidBody,
-              }
+            return {
+              ...ids,
+              nft: updatedNFT,
+              isAuctionExpired,
+              winningBid: winningBidBody,
             }
           }),
         )

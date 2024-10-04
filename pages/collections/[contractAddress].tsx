@@ -146,20 +146,22 @@ export default function CollectionPage() {
         {filter === 'Items' && (
           <div className="w-full grid py-10 grid-cols-4 gap-6 2xl:grid-cols-6 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 max-xsm:grid-cols-1">
             {filteredNFTs && filteredNFTs.length > 0 ? (
-              filteredNFTs.map((item: SingleCollectionType) => (
-                <Card
-                  key={item.blockNumber}
-                  imageUrl={item.metadata.image}
-                  type={'CFC-721'}
-                  tokenId={item.tokenId}
-                  contractAddress={item.contractAddress}
-                  name={item.metadata.name}
-                  auction={item.auction}
-                  listing={item.listing}
-                  listingType={item?.auction ? 'auction' : item?.listing ? 'listing' : ''}
-                  owner={item.owner || item.ownerAddress}
-                />
-              ))
+              filteredNFTs.map((item: any) => {
+                return (
+                  <Card
+                    key={item.blockNumber}
+                    imageUrl={item.metadata.image}
+                    type={'CFC-721'}
+                    tokenId={item.id}
+                    contractAddress={contractAddress as string}
+                    name={item.metadata.name}
+                    auction={item.auction}
+                    listing={item.listing}
+                    listingType={item?.auction ? 'auction' : item?.listing ? 'listing' : ''}
+                    owner={item.owner || item.ownerAddress}
+                  />
+                )
+              })
             ) : (
               <EmptyState message="No items found in this collection." />
             )}

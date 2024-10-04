@@ -41,12 +41,14 @@ export function Header() {
   const isMobile = width && width < 640 // define mobile breakpoint
 
   const [filter, setFilter] = useState<FilterType>('All')
-  const { data: global, isLoading, isError } = useGetGlobalListingOrAuctionQuery()
+  const { data: global, isLoading, isError, error } = useGetGlobalListingOrAuctionQuery()
   const {
     data: collections,
     isLoading: collectionsLoading,
     isError: collectionsError,
   } = useGetMarketplaceCollectionsQuery()
+
+  console.log({ error })
 
   const renderNFTItems = (items: any) => {
     return items.map((item: any, index: number) => {

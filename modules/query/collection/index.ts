@@ -17,7 +17,7 @@ import { getIsAuctionExpired, getWinningBid } from '@/modules/blockchain/auction
 import { CROSSFI_API, CROSSFI_MARKETPLACE_CONTRACT, CROSSFI_MINTER_ADDRESS } from '@/utils/configs'
 import { ensureSerializable, to3DP, tryParseJSON } from '@/utils'
 import { useUserChainInfo } from '../user'
-import { getNFT } from 'thirdweb/extensions/erc721'
+import { getNFT, getNFTs } from 'thirdweb/extensions/erc721'
 import { NFT } from 'thirdweb'
 import { getPlatformFeeInfo } from '@/modules/blockchain/global'
 import { useAbortController } from '..'
@@ -219,13 +219,16 @@ export function useGetSingleNFTQuery({
 
         let nftList: SingleNFTResponse | NFT | null = null
 
-        const response = await axios.get<SingleNFTResponse>(
-          `${CROSSFI_API}/token-inventory/${contractAddress}/${tokenId}`,
-          { signal: abortController!.signal },
-        )
-        const nft = response.data
+        const contract = getContractCustom({
+          contractAddress: contractAddress,
+        })
 
-        const metadata = nft?.metadata
+        const nft = await getNFT({
+          contract: contract,
+          tokenId: BigInt(tokenId),
+          includeOwner: includeNFTOwner,
+        })
+
         const uri = nft.tokenURI
         const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
 
@@ -237,19 +240,6 @@ export function useGetSingleNFTQuery({
               ...parsedMetadata,
             },
           }
-        } else if (metadata === undefined || null) {
-          const contract = getContractCustom({
-            contractAddress: nft.contractAddress,
-          })
-          const tokenId = nft.tokenId
-
-          const newUpdatedNFTs = await getNFT({
-            contract: contract,
-            tokenId: BigInt(tokenId),
-            includeOwner: includeNFTOwner,
-          })
-
-          nftList = { ...nft, ...newUpdatedNFTs }
         } else {
           nftList = nft
         }
@@ -394,11 +384,14 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       })
       const tokenDetails = tokenResponse.data
 
-      const response = await axios.get<CollectionNFTResponse>(
-        `${CROSSFI_API}/token-inventory?contractAddress=${contractAddress}&page=1&limit=20000&sort=-blockNumber`,
-        { signal: abortController!.signal },
-      )
-      const nfts = response.data.docs
+      const contract = getContractCustom({
+        contractAddress: contractAddress,
+      })
+
+      const nfts = await getNFTs({
+        contract: contract,
+        includeOwners: includeNFTOwner,
+      })
 
       const tokenTransfersResponse = await axios.get<NFTActivityResponse>(
         `${CROSSFI_API}/token-transfers?contractAddress=${contractAddress}&tokenType=CFC-721&page=1&limit=20000&sort=-blockNumber`,
@@ -473,9 +466,8 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
       const updatedNFTs = await Promise.all(
         nfts.map(async (nft) => {
           let nftList: SingleNFTResponse | NFT | null = null
-          const listing = listingMap.get(nft.tokenId.toString())
-          const auction = auctionMap.get(nft.tokenId.toString())
-          const metadata = nft?.metadata
+          const listing = listingMap.get(nft.id.toString())
+          const auction = auctionMap.get(nft.id.toString())
 
           const uri = nft.tokenURI
           const parsedMetadata = typeof uri === 'string' ? tryParseJSON(uri) : uri
@@ -488,19 +480,6 @@ export function useGetSingleCollectionQuery({ contractAddress }: { contractAddre
                 ...parsedMetadata,
               },
             }
-          } else if (metadata === undefined || null) {
-            const contract = getContractCustom({
-              contractAddress: nft.contractAddress,
-            })
-            const tokenId = nft.tokenId
-
-            const newUpdatedNFTs = await getNFT({
-              contract: contract,
-              tokenId: BigInt(tokenId),
-              includeOwner: includeNFTOwner,
-            })
-
-            nftList = { ...nft, ...newUpdatedNFTs }
           } else {
             nftList = nft
           }

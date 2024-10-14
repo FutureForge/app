@@ -12,7 +12,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        defaultOptions: { queries: { retry: 0 } },
+        // defaultOptions: { queries: { retry: 0 } },
         mutationCache: new MutationCache({
           onMutate: () => {
             toast.loading('Transaction In Process...', { duration: 30000 })

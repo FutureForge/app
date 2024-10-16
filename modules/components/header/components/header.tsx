@@ -48,8 +48,6 @@ export function Header() {
     isError: collectionsError,
   } = useGetMarketplaceCollectionsQuery()
 
-  console.log({ error })
-
   const renderNFTItems = (items: any) => {
     return items.map((item: any, index: number) => {
       const nft = item?.nft
@@ -143,6 +141,7 @@ export function Header() {
       </div>
     )
   }
+
   const renderCollectionSection = (items: CollectionData[]) => {
     // Determine when to display the slider based on screen size and number of items
     const displayInSlider =

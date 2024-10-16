@@ -43,9 +43,17 @@ export function NFTCard(props: NFTCardProps) {
   const getSoldTypeTag = () => {
     switch (soldType) {
       case 'listing':
-        return <span className="px-2 py-1 bg-green-500 text-white rounded-full text-xs">Direct Sale</span>
+        return (
+          <span className="px-2 py-1 bg-green-500 text-white rounded-full text-xs">
+            Direct Sale
+          </span>
+        )
       case 'auction':
-        return <span className="px-2 py-1 bg-blue-500 text-white rounded-full text-xs">Auction Sale</span>
+        return (
+          <span className="px-2 py-1 bg-blue-500 text-white rounded-full text-xs">
+            Auction Sale
+          </span>
+        )
       default:
         return null
     }
@@ -80,7 +88,7 @@ export function NFTCard(props: NFTCardProps) {
               <span className="flex items-center gap-1">
                 <Icon iconType={'profile'} className="w-4 h-4 flex-shrink-0" />
                 <p className="text-foreground/75 text-sm truncate">
-                  Bought by: {getFormatAddress(nft?.ownerAddress!)}
+                  Bought by: {getFormatAddress(nft?.ownerAddress! || nft?.owner!)}
                 </p>
               </span>
             </div>

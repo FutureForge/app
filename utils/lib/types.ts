@@ -136,6 +136,7 @@ export type SingleNFTResponse = {
   blockNumber: number
   creatorAddress: string
   ownerAddress: string
+  owner: string
   timestamp: string
   tokenName: string
   tokenSymbol: string

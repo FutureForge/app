@@ -14,8 +14,11 @@ export function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         // defaultOptions: { queries: { retry: 0 } },
         mutationCache: new MutationCache({
-          onMutate: () => {
-            toast.loading('Transaction In Process...', { duration: 30000 })
+          onMutate: (variables, mutation) => {
+            toast.loading('Transaction In Process...', {
+              id: mutation.mutationId,
+              duration: Infinity,
+            })
           },
           onSuccess: (_data, _variables, _context, mutation) => {
             // console.log('query provider success', _data, _variables, _context, mutation)
@@ -28,13 +31,13 @@ export function QueryProvider({ children }: QueryProviderProps) {
             toast.success(
               successMessage ? successMessage.description : 'Transaction was Successful',
               {
+                id: mutation.mutationId,
                 duration: 5000,
               },
             )
           },
           onError: (error, _variables, _context, mutation) => {
             // console.log('query provider error: ', error)
-
             const errorMessage = mutation?.meta?.errorMessage as {
               title?: string
               description: string
@@ -45,6 +48,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
             toast.error(
               errorMessage ? `${errorMessage.description} ${error.message}` : error.message,
               {
+                id: mutation.mutationId,
                 duration: 5000,
               },
             )

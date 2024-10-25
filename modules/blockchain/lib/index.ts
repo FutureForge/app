@@ -4,6 +4,7 @@ import {
   rpcRequest,
   chainInfo,
   CROSSFI_MARKETPLACE_CONTRACT,
+  providerUrl,
 } from '@/utils/configs'
 import { ethers } from 'ethers'
 import { eth_blockNumber, getContract as getContractThirdweb, Hex, waitForReceipt } from 'thirdweb'
@@ -12,8 +13,6 @@ import MarketplaceABI from '@/utils/abi/marketplaceABI.json'
 export const includeNFTOwner = true
 export const fromBlock = 4880746
 export const nativeCurrency = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-
-const providerUrl = 'https://crossfi-testnet.g.alchemy.com/v2/LyMEMlI9ehqzPfajiDhvBXZ4MGjUQ6L-'
 
 export const provider = new ethers.providers.JsonRpcProvider(providerUrl)
 

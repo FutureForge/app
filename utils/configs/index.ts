@@ -20,13 +20,15 @@ export const CROSSFI_WRAPPED_TOKEN_CONTRACT = '0x10e6414ddea2e2be27e23584c651bc0
 
 // 0x55babEE194af5c59a5f17f9DeA47BE4a37DFB36d
 
+export const providerUrl = 'https://rpc.xfi.ms/archive/4157'
+
 export const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 })
 
 export const chainInfo = defineChain({
   id: 4157,
-  rpc: 'https://crossfi-testnet.g.alchemy.com/v2/LyMEMlI9ehqzPfajiDhvBXZ4MGjUQ6L-',
+  rpc: providerUrl,
   nativeCurrency: {
     decimals: 18,
     name: 'XFI',
@@ -36,6 +38,28 @@ export const chainInfo = defineChain({
   blockExplorers: [{ name: 'Testnet Explorer', url: 'https://test.xfiscan.com/' }],
 })
 
+export const mainnetProviderUrlMap = ['https://rpc.mainnet.ms/']
+
+export const crossfi = defineChain({
+  id: 4158,
+  name: 'CrossFi Mainnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'XFI',
+    symbol: 'XFI',
+  },
+  rpcUrls: {
+    default: {
+      // http: ['https://rpc.mainnet.ms/'],
+      http: mainnetProviderUrlMap,
+    },
+  },
+  blockExplorers: {
+    default: { name: 'Explorer', url: 'https://xfiscan.com/' },
+  },
+})
+
+// https://tendermint-rpc.testnet.ms/
 // https://rpc.testnet.ms
 // https://crossfi-testnet.public.blastapi.io
 // https://evmrpc-t.crossfi.nodestake.org/
